@@ -1,1 +1,0 @@
-Game made using the pygame module.
