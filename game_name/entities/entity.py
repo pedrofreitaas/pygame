@@ -26,6 +26,11 @@ class Entity():
 
         self.timers: list[Timer] = []
 
+        #booleans
+        self.isAttacking = False
+        self.isDefending = False
+        self.isCasting = False
+
     def isMoving(self) -> bool:
         '''Return true if the entity is moving.\n'''
         return self.speed != pg.math.Vector2()
@@ -62,6 +67,7 @@ class Entity():
 
         self.collisionUpdate()
         
+        self.controlAnimator()
         self.animator.update(Entity.dt)
 
         self.blit()

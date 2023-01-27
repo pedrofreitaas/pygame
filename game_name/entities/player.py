@@ -17,10 +17,34 @@ class Player( ent.Entity ):
 
         ent.Entity.player = self
 
+    def controlAnimator(self) -> None:
+        '''Changes sprite animation based in the entity's behavior.\n'''
+
+        super().controlAnimator()
+
+        if self.isAttacking:
+            self.animator.setRange([6,15])
+            return
+
+        if self.isMoving():
+            self.animator.setRange([16,23])
+            return
+        
+        #idle animation.
+        self.animator.setRange([0,5])
+
     def checkInputs(self, events: list[ent.pg.event.Event]) -> None:
         '''Check keyboard and mouse inputs.\n'''
 
         for ev in events:
+
+            if ev.type == ent.pg.MOUSEBUTTONDOWN:
+                if ev.button == 1:
+                    self.isAttacking = True
+
+            if ev.type == ent.pg.MOUSEBUTTONUP:
+                if ev.button == 1:
+                    self.isAttacking = False
 
             if ev.type == ent.pg.KEYDOWN:
                 
