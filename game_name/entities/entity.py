@@ -61,7 +61,7 @@ class Entity():
     def move(self) -> None:
         '''Moves the entity if movement isn't locked.\n'''
         
-        speed = self.speed * Entity.dt
+        speed = self.speed * Entity.dt * self.speed_value
 
         if not self.blockMove_H:
             self.pos[0] = self.pos[0] + speed[0]

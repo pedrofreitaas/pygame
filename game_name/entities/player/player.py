@@ -1,4 +1,5 @@
 import game_name.entities.entity as ent
+import game_name.entities.player.powers.meteor as meteor
 
 player_sprites_path = ['assets/entities/player/char_red_1.png', 'assets/entities/player/char_red_2.png' ]
 
@@ -16,6 +17,8 @@ class Player( ent.Entity ):
                                                           [8,2,8,4,8,8,2] )
 
         ent.Entity.player = self
+
+        self.meteor: meteor.Meteor = meteor.Meteor(ent.pg.math.Vector2(), self.layer, 100)
 
     def animationAction(self) -> None:
         '''Sets actions for the player according to the current animation stage.\n'''
@@ -40,7 +43,7 @@ class Player( ent.Entity ):
 
         if self.action == 3:
             if self.animator.range_image[1] - self.animator.index_image <= 0.3:
-                print('LAUNCH POWERRRRRRR!')
+                self.launchMeteor()
                 self.resetAction()
             
             return
@@ -121,7 +124,23 @@ class Player( ent.Entity ):
                 elif ev.key == 101: #ord('e')
                     self.resetAction()
 
+    def move(self) -> None:
+        '''Player's movement.\n'''
+        
+        speed = self.speed * ent.Entity.dt
+
+        if not self.blockMove_H:
+            self.pos[0] = self.pos[0] + speed[0]
+        if not self.blockMove_V:
+            self.pos[1] = self.pos[1] + speed[1]
+
     def update(self, events: list[ent.pg.event.Event]) -> None:
         self.checkInputs(events)
 
         super().update()
+
+        self.meteor.update()
+
+# power methods.
+    def launchMeteor(self) -> None:
+        self.meteor.activate()
