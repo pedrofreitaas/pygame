@@ -17,17 +17,41 @@ class Player( ent.Entity ):
 
         ent.Entity.player = self
 
+    def attack(self) -> None:
+        '''Toogles player's attack, if possible.\n'''
+        if self.combat_action == 0:
+            self.combat_action = 1
+
+    def defend(self) -> None:
+        '''Toggles player's defense, if possible.\n'''
+        if self.combat_action == 0:
+            self.combat_action = 2
+
+    def cast(self) -> None:
+        '''Toggles player's casting, if possible.\n'''
+        if self.combat_action == 0:
+            self.combat_action = 3
+
     def animationAction(self) -> None:
         '''Sets actions for the player according to the current animation stage.\n'''
 
-        # moving sprite in mouse dir when the player swifts the sword.
-        if self.isAttacking and int(self.animator.index_image) in [9,12,16]:
-            move_dir = (ent.pg.math.Vector2( ent.pg.mouse.get_pos() )-self.center())
-
-            if move_dir != ent.pg.math.Vector2(): move_dir = move_dir.normalize()
-            else: return
+        if self.combat_action == 1:
+            self.setLockMovement(True)
             
-            self.pos = self.pos + (move_dir*self.speed_value*ent.Entity.dt)
+            # moving player in mouse dir when it swifts the sword.
+            if int(self.animator.index_image) in [9,12,16]:
+                move_dir = (ent.pg.math.Vector2( ent.pg.mouse.get_pos() )-self.center())
+
+                if move_dir != ent.pg.math.Vector2(): move_dir = move_dir.normalize()
+                else: return
+
+                self.pos = self.pos + (move_dir*self.speed_value*ent.Entity.dt)
+
+            return
+
+        if self.combat_action == 2:
+            self.setLockMovement(True)            
+            return
 
     def controlAnimator(self) -> None:
         '''Changes sprite animation based in the entity's behavior.\n'''
@@ -35,8 +59,13 @@ class Player( ent.Entity ):
         super().controlAnimator()
         self.animationAction()
 
-        if self.isAttacking:
+        if self.combat_action == 1:
             self.animator.setRange([6,23])
+            return
+
+        if self.combat_action == 2:
+            self.animator.setRange([65,68])
+            self.animator.activateStopAtEnd()
             return
 
         if self.isMoving():
@@ -53,11 +82,17 @@ class Player( ent.Entity ):
 
             if ev.type == ent.pg.MOUSEBUTTONDOWN:
                 if ev.button == 1:
-                    self.isAttacking = True
+                    self.attack()
+
+                elif ev.button == 3:
+                    self.defend()
 
             if ev.type == ent.pg.MOUSEBUTTONUP:
                 if ev.button == 1:
-                    self.isAttacking = False
+                    self.resetCombatAction()
+
+                elif ev.button == 3:
+                    self.resetCombatAction()
 
             if ev.type == ent.pg.KEYDOWN:
                 
@@ -90,5 +125,7 @@ class Player( ent.Entity ):
     def update(self, events: list[ent.pg.event.Event]) -> None:
         
         self.checkInputs(events)
+
+        print(self.combat_action)
 
         super().update()

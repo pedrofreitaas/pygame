@@ -27,10 +27,11 @@ class Entity():
         self.timers: list[Timer] = []
 
         #booleans
-        self.isAttacking = False
-        self.isDefending = False
-        self.isCasting = False
-        self.isLookingRight = True
+        self.isLookingRight: bool = True
+        self.blockMove_H: bool = False
+        self.blockMove_V: bool = False
+
+        self.combat_action: int = 0
 
     def isMoving(self) -> bool:
         '''Return true if the entity is moving.\n'''
@@ -45,10 +46,27 @@ class Entity():
         image = blt.rotCenter(self.animator.image, self.blit_angle)
         Entity.blitter.addImageInLayer(self.layer, image, self.pos)
 
-    def move(self) -> None:
-        '''Moves the entity.\n'''
+    def setLockMovement(self, value: bool, flag: int=0) -> None:
+        '''Flag = 0 -> sets horizontal and vertical movement block with value.\n
+           Flag = 1 -> sets horizontal movement block with value.\n
+           Flag = 2 -> sets vertical movement block with value.\n'''
+        if type(value) != type(True):
+            raise ValueError
         
-        self.pos = self.pos + self.speed * Entity.dt
+        if flag in [0,1]:
+            self.blockMove_H = value
+        if flag in [0,2]:
+            self.blockMove_V = value
+
+    def move(self) -> None:
+        '''Moves the entity if movement isn't locked.\n'''
+        
+        speed = self.speed * Entity.dt
+
+        if not self.blockMove_H:
+            self.pos[0] = self.pos[0] + speed[0]
+        if not self.blockMove_V:
+            self.pos[1] = self.pos[1] + speed[1]
     
     def center(self) -> pg.math.Vector2:
         '''Returns the center of the current sprite.\n'''
@@ -74,16 +92,45 @@ class Entity():
         self.setLookingDir()
         if not self.isLookingRight: self.animator.flipHorizontally()
 
-    def update(self) -> None:
+    def loopReset(self) -> None:
+        '''Reset's variables of the instance for a new loop.\n'''
+        self.blockMove_H = False
+        self.blockMove_V = False
 
-        self.move()
+# combat procedures.
+    def resetCombatAction(self) -> None:
+        '''Resets entity combat action.\n'''
+        self.combat_action = 0
+
+    def attack(self) -> None:
+        '''Toogles player's attack, if possible.\n'''
+        if self.combat_action == 0:
+            self.combat_action = 1
+
+    def defend(self) -> None:
+        '''Toggles player's defense, if possible.\n'''
+        if self.combat_action == 0:
+            self.combat_action = 2
+
+    def cast(self) -> None:
+        '''Toggles player's casting, if possible.\n'''
+        if self.combat_action == 0:
+            self.combat_action = 3
+# ------------------------------------ #
+
+    def update(self) -> None:
+        '''Does the loop procedures of a regular entity. Call loop reset at the end of the loop.\n'''
 
         self.collisionUpdate()
         
         self.controlAnimator()
         self.animator.update(Entity.dt)
+        
+        self.move()
 
         self.blit()
+        
+        self.loopReset()
 
 def updateEnemies() -> None:
     '''Updates all the registered enemies.\n'''
