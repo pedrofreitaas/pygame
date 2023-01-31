@@ -84,12 +84,22 @@ class Animator():
         self.stopAtEnd = False
 
     def setRange(self, range: tuple[int,int]) -> None:
-        """Sets the range of the change in image. Automatically deactivates the stopAtEnd condition.
-           OBS: if the stopAtEnd condition is True, when the animation gets to the last sprite, it will
-           repeat the two last sprites until the codition is deactivated."""
+        """Sets the range of the change in image. Automatically deactivates the stopAtEnd condition.\n
+           OBS: 
+           ->if the stopAtEnd condition is True, when the animation gets to the last sprite, it will\n
+           repeat the two last sprites until the codition is deactivated.\n
+           ->Automatically sets the animation to the beggining of the new range.\n
+           ->Does nothing if the current range is equal to the paramater.\n
+           """
+
+        if self.range_image == range:
+            return
         
         self.range_image = range
         self.deactivateStopAtEnd()
+
+        if self.going_foward: self.index_image = self.range_image[0]
+        else: self.index_image = self.range_image[1]
 
     def resetAnimation(self) -> None:
         """Reset the animation back to the first sprite of the animation.\n"""

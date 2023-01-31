@@ -38,6 +38,13 @@ class Player( ent.Entity ):
             self.setLockMovement(True)            
             return
 
+        if self.action == 3:
+            if self.animator.range_image[1] - self.animator.index_image <= 0.3:
+                print('LAUNCH POWERRRRRRR!')
+                self.resetAction()
+            
+            return
+
     def controlAnimator(self) -> None:
         '''Changes sprite animation based in the entity's behavior.\n'''
 
@@ -54,8 +61,7 @@ class Player( ent.Entity ):
             return
 
         if self.action == 3:
-            self.animator.setRange([51,61])
-            self.animator.activateStopAtEnd()
+            self.animator.setRange([54,62])
             return
 
         if self.isMoving():
