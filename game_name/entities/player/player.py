@@ -17,17 +17,30 @@ class Player( ent.Entity ):
 
         ent.Entity.player = self
 
+    def animationAction(self) -> None:
+        '''Sets actions for the player according to the current animation stage.\n'''
+
+        # moving sprite in mouse dir when the player swifts the sword.
+        if self.isAttacking and int(self.animator.index_image) in [9,12,16]:
+            move_dir = (ent.pg.math.Vector2( ent.pg.mouse.get_pos() )-self.center())
+
+            if move_dir != ent.pg.math.Vector2(): move_dir = move_dir.normalize()
+            else: return
+            
+            self.pos = self.pos + (move_dir*self.speed_value*ent.Entity.dt)
+
     def controlAnimator(self) -> None:
         '''Changes sprite animation based in the entity's behavior.\n'''
 
         super().controlAnimator()
+        self.animationAction()
 
         if self.isAttacking:
-            self.animator.setRange([6,15])
+            self.animator.setRange([6,23])
             return
 
         if self.isMoving():
-            self.animator.setRange([16,23])
+            self.animator.setRange([38,42])
             return
         
         #idle animation.

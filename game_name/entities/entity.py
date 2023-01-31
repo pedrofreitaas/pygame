@@ -30,6 +30,7 @@ class Entity():
         self.isAttacking = False
         self.isDefending = False
         self.isCasting = False
+        self.isLookingRight = True
 
     def isMoving(self) -> bool:
         '''Return true if the entity is moving.\n'''
@@ -49,6 +50,10 @@ class Entity():
         
         self.pos = self.pos + self.speed * Entity.dt
     
+    def center(self) -> pg.math.Vector2:
+        '''Returns the center of the current sprite.\n'''
+        return self.pos + pg.math.Vector2(self.animator.currentSpriteSize())*0.5
+
     def collisionUpdate(self) -> None:
         '''Updates the collision handle variables.\n'''
         
@@ -57,9 +62,17 @@ class Entity():
         self.rect = image.get_rect().move(self.pos)
         self.mask = pg.mask.from_surface(image)
     
+    def setLookingDir(self) -> bool:
+        '''If self.speed[0] is different than zero, changes the looking dir'''
+        
+        if self.speed[0] > 0: self.isLookingRight = True
+        elif self.speed[0] < 0: self.isLookingRight = False
+
     def controlAnimator(self) -> None:
-        '''Controls what sprites will be animated based on the entity's behavior.\n'''
-        pass
+        '''Flips the image based in the looking dir of the entitys.\n'''
+
+        self.setLookingDir()
+        if not self.isLookingRight: self.animator.flipHorizontally()
 
     def update(self) -> None:
 

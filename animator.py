@@ -138,9 +138,13 @@ class Animator():
 
     def update(self, dt: float) -> None:
         """Moves the animation according to the motion of the animator.\n
-           The coeficient is updated to it's original value.\n"""
+           The coeficient is updated to it's original value.\n
+           The flips booleans are updated to false.\n"""
         
         self.updateImage(dt)
-        self.flipH = self.flipV = False
+
+        #reseting variables.
+        self.flipH = False
+        self.flipV = False
         self.upd_coeficient = 6
   

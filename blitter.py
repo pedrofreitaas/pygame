@@ -218,4 +218,3 @@ class Blitter():
         for layer in self.layers:
             layer.blitImages(self.camera)
             layer.reset()
-
