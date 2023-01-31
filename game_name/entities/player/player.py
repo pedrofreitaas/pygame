@@ -17,25 +17,10 @@ class Player( ent.Entity ):
 
         ent.Entity.player = self
 
-    def attack(self) -> None:
-        '''Toogles player's attack, if possible.\n'''
-        if self.combat_action == 0:
-            self.combat_action = 1
-
-    def defend(self) -> None:
-        '''Toggles player's defense, if possible.\n'''
-        if self.combat_action == 0:
-            self.combat_action = 2
-
-    def cast(self) -> None:
-        '''Toggles player's casting, if possible.\n'''
-        if self.combat_action == 0:
-            self.combat_action = 3
-
     def animationAction(self) -> None:
         '''Sets actions for the player according to the current animation stage.\n'''
 
-        if self.combat_action == 1:
+        if self.action == 1:
             self.setLockMovement(True)
             
             # moving player in mouse dir when it swifts the sword.
@@ -49,7 +34,7 @@ class Player( ent.Entity ):
 
             return
 
-        if self.combat_action == 2:
+        if self.action == 2:
             self.setLockMovement(True)            
             return
 
@@ -59,12 +44,17 @@ class Player( ent.Entity ):
         super().controlAnimator()
         self.animationAction()
 
-        if self.combat_action == 1:
+        if self.action == 1:
             self.animator.setRange([6,23])
             return
 
-        if self.combat_action == 2:
+        if self.action == 2:
             self.animator.setRange([65,68])
+            self.animator.activateStopAtEnd()
+            return
+
+        if self.action == 3:
+            self.animator.setRange([51,61])
             self.animator.activateStopAtEnd()
             return
 
@@ -88,11 +78,8 @@ class Player( ent.Entity ):
                     self.defend()
 
             if ev.type == ent.pg.MOUSEBUTTONUP:
-                if ev.button == 1:
-                    self.resetCombatAction()
-
-                elif ev.button == 3:
-                    self.resetCombatAction()
+                if ev.button in [1,3]:
+                    self.resetAction()
 
             if ev.type == ent.pg.KEYDOWN:
                 
@@ -107,6 +94,9 @@ class Player( ent.Entity ):
 
                 elif ev.key == 100: #ord('d')
                     self.speed[0] += self.speed_value
+
+                elif ev.key == 101: #ord('e')
+                    self.cast()
             
             if ev.type == ent.pg.KEYUP:
                 
@@ -122,10 +112,10 @@ class Player( ent.Entity ):
                 elif ev.key == 100: #ord('d')
                     self.speed[0] -= self.speed_value
 
-    def update(self, events: list[ent.pg.event.Event]) -> None:
-        
-        self.checkInputs(events)
+                elif ev.key == 101: #ord('e')
+                    self.resetAction()
 
-        print(self.combat_action)
+    def update(self, events: list[ent.pg.event.Event]) -> None:
+        self.checkInputs(events)
 
         super().update()

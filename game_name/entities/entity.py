@@ -31,7 +31,7 @@ class Entity():
         self.blockMove_H: bool = False
         self.blockMove_V: bool = False
 
-        self.combat_action: int = 0
+        self.action: int = 0
 
     def isMoving(self) -> bool:
         '''Return true if the entity is moving.\n'''
@@ -97,26 +97,24 @@ class Entity():
         self.blockMove_H = False
         self.blockMove_V = False
 
-# combat procedures.
-    def resetCombatAction(self) -> None:
+    def resetAction(self) -> None:
         '''Resets entity combat action.\n'''
-        self.combat_action = 0
+        self.action = 0
 
     def attack(self) -> None:
         '''Toogles player's attack, if possible.\n'''
-        if self.combat_action == 0:
-            self.combat_action = 1
+        if self.action == 0:
+            self.action = 1
 
     def defend(self) -> None:
         '''Toggles player's defense, if possible.\n'''
-        if self.combat_action == 0:
-            self.combat_action = 2
+        if self.action == 0:
+            self.action = 2
 
     def cast(self) -> None:
         '''Toggles player's casting, if possible.\n'''
-        if self.combat_action == 0:
-            self.combat_action = 3
-# ------------------------------------ #
+        if self.action == 0:
+            self.action = 3
 
     def update(self) -> None:
         '''Does the loop procedures of a regular entity. Call loop reset at the end of the loop.\n'''
