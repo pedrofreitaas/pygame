@@ -14,16 +14,16 @@ class Timer():
             return True
         return False
 
-    def __init__(self, howLong: float, procedure: callable, once: bool) -> None:
+    def __init__(self, howLong: float, procedure: callable, cycles: int = -1) -> None:
         '''Creates a timer instance.\n
            howLong: the amount of time for the timer.\n
            procedure: the method to be called after the timer completes a cycle.\n
-           once: bool to define if the timer is going to be repeatedly cycling or not.\n'''
+           cycles: defines how many cycles the timer will have, if it's -1, it won't stop cycling.\n'''
 
         self.trigger_time = tm()
         self.how_long = howLong
         self.procedure = procedure
-        self.once = once
+        self.cycles = cycles
 
         self.activated = True
         self.destroyed = False
@@ -41,10 +41,17 @@ class Timer():
 
         if reset:
             self.trigger_time = tm()
+    
+    def discountCycle(self) -> None:
+        '''Count's a cycle execution for the timer.\n'''
+        if self.cycles == -1: return
+
+        self.cycles = self.cycles - 1
+
+        if self.cycles <= 0: self.destroyTimer()
 
     def destroyTimer(self) -> None:
-        '''Timer will be destroyed and won't conclude any other time.\n'''
-
+        '''Timer will be destroyed and won't conclude any other cycle.\n'''
         self.destroyed = True
 
     def pause(self) -> None:
@@ -142,21 +149,22 @@ def pauseTimers(timers: list[Timer]) -> None:
 
 def updateTimers(timers: list[Timer]) -> None:
     '''Updates all the timers in the list.\n
-       If the timer is defined to work only once, deletes the timer from the list if it completes the first cycle.\n'''
+       If the timer is destroyed, deletes the timer from the list in the next cycle.\n
+       If it's paused or deactivated, does not complete any cycles.\n'''
     
-    for timer in timers:
+    for index, timer in enumerate(timers):
+
+        if timer.destroyed:
+            del timers[index]
+            continue
 
         if not timer.activated:
             continue
 
-        if timer.destroyed:
-            timers.remove(timer)
-            continue
-
         if tm() - timer.trigger_time >= timer.how_long:
 
-            timer.procedure()
+            timers[index].procedure()
             
-            if timer.once: timers.remove(timer)
+            timers[index].discountCycle()
 
-            timer.trigger_time = tm()
+            timers[index].trigger_time = tm()

@@ -128,6 +128,8 @@ class Entity():
 
         self.blit()
         
+        updateTimers(self.timers)
+
         self.loopReset()
 
 def updateEnemies() -> None:
