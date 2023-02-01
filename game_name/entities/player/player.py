@@ -42,10 +42,7 @@ class Player( ent.Entity ):
             return
 
         if self.action == 3:
-            if self.animator.range_image[1] - self.animator.index_image <= 0.3:
-                self.launchMeteor()
-                self.resetAction()
-            
+            self.animator.setEndAnimationProcedure(lambda: self.launchMeteor())
             return
 
     def controlAnimator(self) -> None:
@@ -144,3 +141,4 @@ class Player( ent.Entity ):
 # power methods.
     def launchMeteor(self) -> None:
         self.meteor.activate()
+        self.resetAction()

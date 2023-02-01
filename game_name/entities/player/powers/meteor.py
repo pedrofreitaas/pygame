@@ -15,53 +15,79 @@ class Meteor(pwr.Power):
         self.speed_value: float = 150
 
         self.hit_pos = pwr.ent.pg.math.Vector2()
+        
         self.hit_time: float = 2.25
+        self.explode_time = 0.75
 
         self.exploded: bool = False
+
+        # meteor hit/explode timers.
+        self.timers: list[pwr.ent.Timer] = [pwr.ent.Timer(self.hit_time, lambda: self.explode(), -1), pwr.ent.Timer(self.explode_time, lambda: self.deactive(), -1)]
+        
+        # instance begin's deactived.
+        self.deactive()
 
     def calculateSpeed(self) -> None:
         '''Calculates the meteor speed to hit the target in the \'exact\' given time.\n'''
 
         distance_vector = (self.hit_pos-self.center())
-        coeficient = self.hit_time / pwr.ent.Entity.dt
 
-        self.speed_value = distance_vector.length() / coeficient / pwr.ent.Entity.dt
-        self.speed: pwr.ent.pg.math.Vector2 = distance_vector.normalize()
+        total_loops = self.timers[0].timeLeft()/pwr.ent.Entity.dt
+
+        self.speed: pwr.ent.pg.math.Vector2 = distance_vector / total_loops
+
+    def move(self) -> None:
+        '''Recalculates the speed of the entity to reach the hit_pos according to hit time.\n
+           Don't move if instance has exploded.\n'''
+        if self.exploded: return
+
+        self.calculateSpeed()
+
+        if not self.blockMove_H: self.pos[0] = self.pos[0] + self.speed[0]
+        if not self.blockMove_V: self.pos[1] = self.pos[1] + self.speed[1]
     
     def activate(self) -> None:
-        '''Meteor power activation.\n'''
+        '''Meteor power activation.\n
+           Activates the meteor hit timer of the instance.\n'''
+        if self.activated: return
 
         self.animator.setRange([0,60])
-
         self.exploded = False
 
         self.pos: pwr.ent.pg.math.Vector2 = pwr.ent.pg.math.Vector2(randint(-100,pwr.ent.pg.display.get_window_size()[0]+100), randint(-300,-200))
         self.hit_pos: pwr.ent.pg.math.Vector2 = pwr.ent.pg.mouse.get_pos()
+
         self.calculateSpeed()
+        self.blit_angle: float = self.speed.angle_to(pwr.ent.pg.math.Vector2(0,-1))
+        if self.center()[0] < self.hit_pos[0]: self.blit_angle = self.blit_angle + 180
 
-        self.blit_angle = self.speed.angle_to(pwr.ent.pg.math.Vector2(0,1))
-
+        self.timers[0].activateTimer()
         super().activate()
 
-        # explosion timer.
-        self.timers.append(pwr.ent.Timer(self.hit_time, lambda: self.explode(), True))
+    def deactive(self) -> None:
+        '''Deactivates instance and it's timers.\n'''
+        self.timers[0].deactiveTimer()
+        self.timers[1].deactiveTimer()
+        super().deactive()
 
     def explode(self) -> None:
-        '''Triggers meteor explosion.\n'''
+        '''Triggers meteor explosion, if the instance didn't explode yet and is close enought to it's hit pos.\n'''
+
+        if self.exploded: return
+
         self.exploded = True
         self.animator.setRange([60, self.animator.getTotalImages()-1])
-        self.speed = pwr.ent.pg.math.Vector2()
 
-        self.timers.append(pwr.ent.Timer(0.75, lambda: self.deactive(), True))
+        self.timers[1].activateTimer()
 
     def center(self) -> pwr.ent.pg.math.Vector2:
         '''Returns a vector to the center of the meteor.\n'''
-        return self.pos + pwr.ent.pg.math.Vector2(53,53)
+        return self.pos + (pwr.ent.pg.math.Vector2(self.animator.currentSpriteSize())*0.5)
 
     def update(self) -> None:
         if not self.activated:
             return
-        
+
         if not self.exploded: self.animator.changeUpdateCoeficient(35)
 
         super().update()

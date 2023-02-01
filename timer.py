@@ -18,7 +18,7 @@ class Timer():
         '''Creates a timer instance.\n
            howLong: the amount of time for the timer.\n
            procedure: the method to be called after the timer completes a cycle.\n
-           cycles: defines how many cycles the timer will have, if it's -1, it won't stop cycling.\n'''
+           cycles: defines how many cycles the timer will have, if it's -1, timer won't stop cycling.\n'''
 
         self.trigger_time = tm()
         self.how_long = howLong
@@ -42,6 +42,9 @@ class Timer():
         if reset:
             self.trigger_time = tm()
     
+    def timeLeft(self) -> float:
+        return self.how_long - (tm() - self.trigger_time)
+
     def discountCycle(self) -> None:
         '''Count's a cycle execution for the timer.\n'''
         if self.cycles == -1: return

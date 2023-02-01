@@ -32,6 +32,12 @@ class Animator():
 
         self.upd_coeficient: float = 6
 
+        self.end_animation_procedure: callable = lambda: None 
+
+    def setEndAnimationProcedure(self, proc: callable) -> None:
+        '''Sets the animator to call the proc parameter in the end of the animation.\n'''
+        self.end_animation_procedure = proc
+
     def currentSpriteSize(self) -> tuple:
         # returns the rect size of the current sprite in the animation.
         return self.image.get_size()
@@ -46,6 +52,11 @@ class Animator():
     def getTotalImages(self):
         return len(self.sprites)
 
+    def checkCallEndAnimationProcedure(self) -> None:
+        '''Checks if the end of animation procedure needs to be called.\n'''
+        if self.index_image > self.range_image[1]: self.end_animation_procedure()
+        if self.index_image < self.range_image[0]: self.end_animation_procedure()
+
     def updateImage(self, dt: float) -> None:
         '''Updates the image variable of the instance to hold the next sprite of the animation, based on it's configs.\n
            The animation can go foward/backward and be cyclic/stopAtEnd.\n'''
@@ -53,13 +64,15 @@ class Animator():
         # updating the index image.
         if self.going_foward: self.index_image += self.upd_coeficient * dt
         else: self.index_image -= self.upd_coeficient * dt
+
+        self.checkCallEndAnimationProcedure()
         
         # moving the animation cycle according to the configs. (foward/backward and cyclic/stopAtEnd)
-        if self.index_image >= self.range_image[1] and not self.stopAtEnd: self.index_image = self.range_image[0]
+        if self.index_image > self.range_image[1] and not self.stopAtEnd: self.index_image = self.range_image[0]
         
         elif self.index_image < self.range_image[0] and not self.stopAtEnd: self.index_image = self.range_image[1]
         
-        elif self.index_image >= self.range_image[1] and self.stopAtEnd: self.index_image = self.range_image[1] -2
+        elif self.index_image > self.range_image[1] and self.stopAtEnd: self.index_image = self.range_image[1] -2
         
         elif self.index_image < self.range_image[0] and self.stopAtEnd: self.index_image = self.range_image[0] +2
         
@@ -92,8 +105,7 @@ class Animator():
            ->Does nothing if the current range is equal to the paramater.\n
            """
 
-        if self.range_image == range:
-            return
+        if self.range_image == range: return
         
         self.range_image = range
         self.deactivateStopAtEnd()
@@ -149,11 +161,13 @@ class Animator():
     def update(self, dt: float) -> None:
         """Moves the animation according to the motion of the animator.\n
            The coeficient is updated to it's original value.\n
-           The flips booleans are updated to false.\n"""
+           The flips booleans are updated to false.
+           Sets the end animation procedure to function that does nothing.\n"""
         
         self.updateImage(dt)
 
         #reseting variables.
+        self.end_animation_procedure = lambda: None
         self.flipH = False
         self.flipV = False
         self.upd_coeficient = 6
