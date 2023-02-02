@@ -94,6 +94,8 @@ class Game():
 
             self.blitter.update(pg.math.Vector2())
 
+        pl.ent.unpauseTimers(throw=False)
+
     def blitDt(self) -> None:
         dtSurface = self.fonts[2].render(str(round(self.dt,4)), 1, pg.Color("coral"))
         blitPOS = [self.blitter.displaySize()[0]-dtSurface.get_size()[0]-10,10]
@@ -101,8 +103,6 @@ class Game():
         self.blitter.addImageInLayer(self.blitter.lastLayer(), dtSurface, blitPOS)
 
     def gameloop(self) -> None:
-        pl.ent.unpauseTimers(throw=False)
-
         while self.playing:
 
             if self.paused:
