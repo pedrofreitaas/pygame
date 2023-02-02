@@ -1,7 +1,9 @@
 from time import time as tm
 
 class Timer():
+    timers: list['Timer'] = []
 
+# Exceptions.
     class pausedDeactivatedClock(AssertionError):
         def __init__(self, *args: object) -> None:
             super().__init__(*args)
@@ -11,6 +13,7 @@ class Timer():
     class requestingTimeFromNotWorkingClock(AssertionError):
         def __init__(self, *args: object) -> None:
             super().__init__(*args)
+# --------------- #
 
     def __eq__(self, __o: object) -> bool:
         if type(self) == type(__o) and self.id == __o.id:
@@ -35,6 +38,8 @@ class Timer():
         #aux.
         self.time_spent_before_pause = 0
 
+        Timer.timers.append(self)
+
     def changeCycleTime(self, cycleTime: float, reset: bool = True) -> None:
         '''Changes the cycle time to the new value.\n
            Reset is true -> The instance's cycle will restart with the new setted time.\n
@@ -47,7 +52,9 @@ class Timer():
     
     def timeLeft(self) -> float:
         '''Gets time to next cycle.\n
-           Throws if clock is deactivated or destroyed.\n
+           Throws if clock is destroyed.\n
+           If timer is deactived, returns the full cycle time.\n
+           If timer is paused, returns the timeLeft when the cycle was paused.\n
 
            OBS:
            As this clock is not continuous, the only way to check if the cycle is concluded is calling the it's update procedure.\n
@@ -55,8 +62,15 @@ class Timer():
            Because of that, the timer can get to the following situation: Cycle time has alredy passed, but the instance hasn't been\n
            updated. At this specific moment, the timeLeft value would be negative, but it can't happen, so the function would return 0.\n'''
         
-        if not self.activated or self.destroyed:
+        if self.destroyed:
             raise Timer.requestingTimeFromNotWorkingClock
+
+        if not self.activated: return self.how_long
+
+        if self.paused:
+            timeLeft = self.how_long - self.time_spent_before_pause
+            if timeLeft < 0: return 0
+            return timeLeft
 
         timeLeft = self.how_long - (tm() - self.trigger_time)
 
@@ -72,13 +86,14 @@ class Timer():
         if self.cycles <= 0: self.destroyTimer()
 
     def destroyTimer(self) -> None:
-        '''Timer will be destroyed and won't conclude any other cycle.\n'''
+        '''Timer will be destroyed and won't conclude any other cycle.\n
+           Pay attention when using this method, because the instance will be permanently useless after that.\n'''
         self.destroyed = True
 
     def pause(self) -> None:
         '''Pauses the instance.\n
            Different from deactivation, when paused, a clock has to be unpaused by the unpause function.\n
-           When unpaused, the timer will consider the time that past in the last cyle (before it was paused).\n
+           When unpaused, the timer will consider the time that past in the last cycle (before it was paused).\n
            Pausing a deactivated clock will throw.\n
            Pausing a paused clock will do nothing.\n'''
 
@@ -92,10 +107,10 @@ class Timer():
             return 
 
         self.paused = True
-        self.time_spent_before_pause = self.how_long - (tm() - self.trigger_time)
+        self.time_spent_before_pause = tm() - self.trigger_time
 
-        if self.time_spent_before_pause <= 0:
-            self.time_spent_before_pause = 0
+        if self.time_spent_before_pause <= 0: self.time_spent_before_pause = 0
+        if self.time_spent_before_pause >= self.how_long: self.time_spent_before_pause = self.how_long
 
     def unpause(self) -> None:
         '''Unpauses the instance.\n
@@ -116,7 +131,7 @@ class Timer():
         self.trigger_time = tm() - self.time_spent_before_pause
 
     def activateTimer(self) -> None:
-        '''Timer will cycle again, reseted.\n
+        '''Timer will cycle again, and will take it's full time to complete the comeback cycle.\n
            Cycles's start time is set to the moment of the call.\n
            If the instance is paused, won't do anything.\n
            If instance is alredy active, does nothing.\n'''
@@ -151,25 +166,29 @@ class Timer():
         self.activated = False
 
 # list of timers procedures.
-def unpauseTimers(timers: list[Timer]) -> None:
+def unpauseTimers(timers: list[Timer]=Timer.timers, throw: bool=True) -> None:
     '''Unpauses all the timers in the parameter.\n
-       Won't throw under any circunstance.\n'''
+       The default list parameter is the all the created timers united in a list.\n'''
 
     for timer in timers:
-        try: timer.unpause()
-        except Timer.unpausingNotPausedClock: pass
-        except Timer.unpausingNotPausedClock: pass
+        if throw: timer.unpause()
+        else:
+            try: timer.unpause()
+            except Timer.unpausedDeactivatedClock: pass
 
-def pauseTimers(timers: list[Timer]) -> None:
+def pauseTimers(timers: list[Timer]=Timer.timers, throw: bool=True) -> None:
     '''Pauses all the timers in the list.\n
-        Won't throw.\n'''
+       The default list parameter is the all the created timers united in a list.\n'''
 
     for timer in timers:
-        try: timer.pause()
-        except Timer.pausedDeactivatedClock: pass
+        if throw: timer.pause()
+        else:
+            try: timer.pause()
+            except Timer.pausedDeactivatedClock: pass
 
-def updateTimers(timers: list[Timer]) -> None:
+def updateTimers(timers: list[Timer]=Timer.timers) -> None:
     '''Updates all the timers in the list.\n
+       The default list parameter is the all the created timers united in a list.\n
        If the timer is destroyed, deletes the timer from the list in the next cycle.\n
        If it's paused or deactivated, does not complete any cycles.\n'''
     
@@ -177,10 +196,16 @@ def updateTimers(timers: list[Timer]) -> None:
 
         if timer.destroyed:
             del timers[index]
+
+            # deleting from global list.
+            try: del Timer.timers[Timer.timers.index(timer)]
+            except ValueError: pass
+
             continue
 
-        if not timer.activated:
-            continue
+        if not timer.activated: continue
+
+        if timer.paused: continue
 
         if tm() - timer.trigger_time >= timer.how_long:
 

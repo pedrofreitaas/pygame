@@ -80,7 +80,8 @@ class Game():
         pl.ent.Entity.dt = self.dt
 
     def pauseloop(self) -> None:
-
+        pl.ent.pauseTimers(throw=False)
+        
         unpauseButton = button.Button(pg.math.Vector2(500,500), lambda: self.UNpause(), 'unpause', Game.fonts[0], pg.color.Color('black'), True)
         
         while self.paused:
@@ -93,14 +94,15 @@ class Game():
 
             self.blitter.update(pg.math.Vector2())
 
-    def blitDt(self) -> None:  
+    def blitDt(self) -> None:
         dtSurface = self.fonts[2].render(str(round(self.dt,4)), 1, pg.Color("coral"))
         blitPOS = [self.blitter.displaySize()[0]-dtSurface.get_size()[0]-10,10]
 
         self.blitter.addImageInLayer(self.blitter.lastLayer(), dtSurface, blitPOS)
 
     def gameloop(self) -> None:
-        
+        pl.ent.unpauseTimers(throw=False)
+
         while self.playing:
 
             if self.paused:
