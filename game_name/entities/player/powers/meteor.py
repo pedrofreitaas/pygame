@@ -71,9 +71,7 @@ class Meteor(pwr.Power):
     def setAngle(self) -> None:
         '''Sets the angle to rotate the meteor when moving to the target.\n'''
         image_dir = pwr.ent.pg.math.Vector2(0,1)
-
-        if self.speed[0]>0: self.blit_angle = pwr.ent.angle(self.speed,image_dir,True)
-        else: self.blit_angle = -pwr.ent.angle(self.speed,image_dir,True)
+        self.blit_angle = self.speed.angle_to(image_dir)
 
     def explode(self) -> None:
         '''Triggers meteor explosion, if the instance didn't explode yet and is close enought to it's hit pos.\n'''
