@@ -24,6 +24,9 @@ class Player( ent.Entity ):
 
         self.meteor: meteor.Meteor = meteor.Meteor(ent.pg.math.Vector2(), self.layer, 100)
 
+    def isMoving(self) -> bool:
+        return self.speed != ent.pg.math.Vector2() and not (self.blockMove_H and self.blockMove_V)
+
     def animationAction(self) -> None:
         '''Sets actions for the player according to the current animation stage.\n'''
 
