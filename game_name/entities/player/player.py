@@ -2,8 +2,12 @@ import game_name.entities.entity as ent
 import game_name.entities.player.powers.meteor as meteor
 
 player_sprites_path = ['assets/entities/player/char_red_1.png', 'assets/entities/player/char_red_2.png' ]
+player_sounds_path = ['assets/entities/player/sounds/footsteps.ogg']
 
 class Player( ent.Entity ):
+
+    footstep_sound = ent.pg.mixer.Sound(player_sounds_path[0])
+    footstep_sound.set_volume(0.01)
     
     def __init__(self, pos: ent.pg.math.Vector2, layer: int=1, speed_value: float=120) -> None:
         super().__init__(pos, layer, speed_value)
@@ -22,6 +26,9 @@ class Player( ent.Entity ):
 
     def animationAction(self) -> None:
         '''Sets actions for the player according to the current animation stage.\n'''
+
+        if self.isMoving(): Player.footstep_sound.play(-1)
+        else: Player.footstep_sound.stop()
 
         if self.action == 1:
             self.setLockMovement(True)

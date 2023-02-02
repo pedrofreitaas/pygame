@@ -2,12 +2,13 @@ import pygame as pg
 import blitter as blt
 import widget.button as button
 from timer import *
-import game_name.entities.player.player as pl
 from time import time as tm
 
 pg.init()
 pg.font.init()
-pg.mixer.init()
+pg.mixer.init(44100, -16, 2, 4096)
+
+import game_name.entities.player.player as pl
 
 #Display
 sizeDisplay = [1120, 630]

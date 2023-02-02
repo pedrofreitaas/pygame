@@ -4,7 +4,16 @@ from random import randint
 meteor_sprite_path = 'assets/entities/player/powers/meteor.png'
 explosion_sprite_path = 'assets/entities/player/powers/explosion.png'
 
+meteor_sound_path = 'assets/entities/player/powers/sounds/flamethrower.ogg'
+explosion_sound_path = 'assets/entities/player/powers/sounds/explode.ogg'
+
 class Meteor(pwr.Power):
+
+    meteor_sound = pwr.ent.pg.mixer.Sound(meteor_sound_path)
+    meteor_sound.set_volume(0.3)
+    
+    explosion_sound = pwr.ent.pg.mixer.Sound(explosion_sound_path)
+    explosion_sound.set_volume(0.2)
 
     def __init__(self, pos: pwr.ent.pg.math.Vector2, layer: int, speed_value: float) -> None:
         super().__init__(pos, layer, speed_value)
@@ -42,6 +51,8 @@ class Meteor(pwr.Power):
         self.calculateSpeed()
         self.setAngle()
 
+        Meteor.meteor_sound.play(-1)
+
     def deactive(self) -> None:
         '''Deactivates instance and it's timers.\n'''
         self.timers[0].deactiveTimer()
@@ -77,6 +88,9 @@ class Meteor(pwr.Power):
         '''Triggers meteor explosion, if the instance didn't explode yet and is close enought to it's hit pos.\n'''
 
         if self.exploded: return
+
+        Meteor.meteor_sound.stop()
+        Meteor.explosion_sound.play()
 
         self.exploded = True
         self.animator.setRange([60, self.animator.getTotalImages()-1])
