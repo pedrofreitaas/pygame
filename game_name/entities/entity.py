@@ -34,9 +34,13 @@ class Entity():
 
         self.action: int = 0
 
-    def isMoving(self) -> bool:
-        '''Return true if the entity is moving.\n'''
+    def tryingToMove(self) -> bool:
+        '''Returns true is speed is different than 0 vector.\n'''
         return self.speed != pg.math.Vector2()
+
+    def isMoving(self) -> bool:
+        '''Returns true if entity's speed isn't 0 vector, and it's been blocked to move.\n'''
+        return self.speed != pg.math.Vector2() and not (self.blockMove_H and self.blockMove_V)
 
     def blit(self) -> None:
         '''Blits the instance's animator image using a blitter instance.\n'''
@@ -86,6 +90,9 @@ class Entity():
         
         if self.speed[0] > 0: self.isLookingRight = True
         elif self.speed[0] < 0: self.isLookingRight = False
+    
+    def animationAction(self) -> None:
+        '''Controls the entity's behavior based on the current action.\n'''
 
     def controlAnimator(self) -> None:
         '''Flips the image based in the looking dir of the entitys.\n'''

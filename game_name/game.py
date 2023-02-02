@@ -6,7 +6,7 @@ from time import time as tm
 
 pg.init()
 pg.font.init()
-pg.mixer.init(44100, -16, 2, 4096)
+pg.mixer.init(1000, 0, 16, 2048)
 
 import game_name.entities.player.player as pl
 

@@ -2,12 +2,14 @@ import game_name.entities.entity as ent
 import game_name.entities.player.powers.meteor as meteor
 
 player_sprites_path = ['assets/entities/player/char_red_1.png', 'assets/entities/player/char_red_2.png' ]
-player_sounds_path = ['assets/entities/player/sounds/footsteps.ogg']
+player_sounds_path = ['assets/entities/player/sounds/footsteps.ogg', 'assets/entities/player/sounds/hit.wav']
 
 class Player( ent.Entity ):
-
     footstep_sound = ent.pg.mixer.Sound(player_sounds_path[0])
-    footstep_sound.set_volume(0.01)
+    footstep_sound.set_volume(0.0125)
+
+    hit_sound = ent.pg.mixer.Sound(player_sounds_path[1])
+    hit_sound.set_volume(0.08)
     
     def __init__(self, pos: ent.pg.math.Vector2, layer: int=1, speed_value: float=120) -> None:
         super().__init__(pos, layer, speed_value)
@@ -24,42 +26,37 @@ class Player( ent.Entity ):
 
         self.meteor: meteor.Meteor = meteor.Meteor(ent.pg.math.Vector2(), self.layer, 100)
 
-    def isMoving(self) -> bool:
-        return self.speed != ent.pg.math.Vector2() and not (self.blockMove_H and self.blockMove_V)
-
     def animationAction(self) -> None:
         '''Sets actions for the player according to the current animation stage.\n'''
-
-        if self.isMoving(): Player.footstep_sound.play(-1)
-        else: Player.footstep_sound.stop()
-
-        if self.action == 1:
+        if self.action == 1: # attacking
             self.setLockMovement(True)
             
-            # moving player in mouse dir when it swifts the sword.
             if int(self.animator.index_image) in [9,12,16]:
-                move_dir = (ent.pg.math.Vector2( ent.pg.mouse.get_pos() )-self.center())
+                # attack sound.
+                Player.hit_sound.play()
 
-                if move_dir != ent.pg.math.Vector2(): move_dir = move_dir.normalize()
-                else: return
+                # attack movement.
+                move_dir: ent.pg.math.Vector2 = self.speed
 
-                self.pos = self.pos + (move_dir*self.speed_value*ent.Entity.dt)
+                if move_dir != ent.pg.math.Vector2():
+                    move_dir = move_dir.normalize()
+                    self.pos = self.pos + (move_dir*self.speed_value*ent.Entity.dt)
+            else: Player.hit_sound.stop()
 
-            return
-
-        if self.action == 2:
+        elif self.action == 2: # deffending
             self.setLockMovement(True)            
-            return
 
-        if self.action == 3:
+        elif self.action == 3: # casting
+            self.setLockMovement(True)
             self.animator.setEAP(lambda: self.launchMeteor())
-            return
+        
+        if self.isMoving(): self.footstep_sound.play()
+        else: self.footstep_sound.stop()
 
     def controlAnimator(self) -> None:
         '''Changes sprite animation based in the entity's behavior.\n'''
 
         super().controlAnimator()
-        self.animationAction()
 
         if self.action == 1:
             self.animator.setRange([6,23])
@@ -143,6 +140,8 @@ class Player( ent.Entity ):
 
     def update(self, events: list[ent.pg.event.Event]) -> None:
         self.checkInputs(events)
+
+        self.animationAction()
 
         super().update()
 

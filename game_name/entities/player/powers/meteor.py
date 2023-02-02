@@ -5,7 +5,7 @@ meteor_sprite_path = 'assets/entities/player/powers/meteor.png'
 explosion_sprite_path = 'assets/entities/player/powers/explosion.png'
 
 meteor_sound_path = 'assets/entities/player/powers/sounds/flamethrower.ogg'
-explosion_sound_path = 'assets/entities/player/powers/sounds/explode.ogg'
+explosion_sound_path = 'assets/entities/player/powers/sounds/explode1.wav'
 
 class Meteor(pwr.Power):
 
