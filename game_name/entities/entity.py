@@ -2,6 +2,7 @@ import pygame as pg
 import blitter as blt
 import animator as an
 from timer import *
+from game_name.extra import *
 
 class Entity():
 
@@ -43,7 +44,7 @@ class Entity():
         if Entity.blitter == 0:
             return
 
-        image = blt.rotCenter(self.animator.image, self.blit_angle)
+        image = rotCenter(self.animator.image, self.blit_angle)
         Entity.blitter.addImageInLayer(self.layer, image, self.pos)
 
     def setLockMovement(self, value: bool, flag: int=0) -> None:
@@ -75,7 +76,7 @@ class Entity():
     def collisionUpdate(self) -> None:
         '''Updates the collision handle variables.\n'''
         
-        image = blt.rotCenter(self.animator.image, self.blit_angle)
+        image = rotCenter(self.animator.image, self.blit_angle)
 
         self.rect = image.get_rect().move(self.pos)
         self.mask = pg.mask.from_surface(image)

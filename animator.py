@@ -2,6 +2,8 @@ import pygame as pg
 from math import floor
 
 class Animator():
+    '''EAP -> End Animation Procedure. It's a procedure that will be called at the end of the current animation.'''
+
     def __init__(self, sprites: pg.surface.Surface, imageSize: tuple[float,float], imagesPerLine: list[int]) -> None:
         """Initializes the animator.\n
            ImagesPerLine is a list that element correspond to the amount of sprites per line of the sprites(spritesheet).\n
@@ -32,11 +34,11 @@ class Animator():
 
         self.upd_coeficient: float = 6
 
-        self.end_animation_procedure: callable = lambda: None 
+        self.EAP: callable = lambda: None 
 
-    def setEndAnimationProcedure(self, proc: callable) -> None:
+    def setEAP(self, proc: callable) -> None:
         '''Sets the animator to call the proc parameter in the end of the animation.\n'''
-        self.end_animation_procedure = proc
+        self.EAP = proc
 
     def currentSpriteSize(self) -> tuple:
         # returns the rect size of the current sprite in the animation.
@@ -52,10 +54,10 @@ class Animator():
     def getTotalImages(self):
         return len(self.sprites)
 
-    def checkCallEndAnimationProcedure(self) -> None:
+    def checkCallEAP(self) -> None:
         '''Checks if the end of animation procedure needs to be called.\n'''
-        if self.index_image > self.range_image[1]: self.end_animation_procedure()
-        if self.index_image < self.range_image[0]: self.end_animation_procedure()
+        if self.index_image > self.range_image[1]: self.EAP()
+        if self.index_image < self.range_image[0]: self.EAP()
 
     def updateImage(self, dt: float) -> None:
         '''Updates the image variable of the instance to hold the next sprite of the animation, based on it's configs.\n
@@ -65,7 +67,7 @@ class Animator():
         if self.going_foward: self.index_image += self.upd_coeficient * dt
         else: self.index_image -= self.upd_coeficient * dt
 
-        self.checkCallEndAnimationProcedure()
+        self.checkCallEAP()
         
         # moving the animation cycle according to the configs. (foward/backward and cyclic/stopAtEnd)
         if self.index_image > self.range_image[1] and not self.stopAtEnd: self.index_image = self.range_image[0]
@@ -167,7 +169,7 @@ class Animator():
         self.updateImage(dt)
 
         #reseting variables.
-        self.end_animation_procedure = lambda: None
+        self.EAP = lambda: None
         self.flipH = False
         self.flipV = False
         self.upd_coeficient = 6

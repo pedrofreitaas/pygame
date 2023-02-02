@@ -8,7 +8,10 @@ class Timer():
     class unpausedDeactivatedClock(AssertionError):
         def __init__(self, *args: object) -> None:
             super().__init__(*args)
-    
+    class requestingTimeFromNotWorkingClock(AssertionError):
+        def __init__(self, *args: object) -> None:
+            super().__init__(*args)
+
     def __eq__(self, __o: object) -> bool:
         if type(self) == type(__o) and self.id == __o.id:
             return True
@@ -43,7 +46,22 @@ class Timer():
             self.trigger_time = tm()
     
     def timeLeft(self) -> float:
-        return self.how_long - (tm() - self.trigger_time)
+        '''Gets time to next cycle.\n
+           Throws if clock is deactivated or destroyed.\n
+
+           OBS:
+           As this clock is not continuous, the only way to check if the cycle is concluded is calling the it's update procedure.\n
+           But, because of perfomance limitations, it happens after distinct amount times that don't respect the timer cycle's time.\n
+           Because of that, the timer can get to the following situation: Cycle time has alredy passed, but the instance hasn't been\n
+           updated. At this specific moment, the timeLeft value would be negative, but it can't happen, so the function would return 0.\n'''
+        
+        if not self.activated or self.destroyed:
+            raise Timer.requestingTimeFromNotWorkingClock
+
+        timeLeft = self.how_long - (tm() - self.trigger_time)
+
+        if timeLeft < 0: return 0
+        return timeLeft
 
     def discountCycle(self) -> None:
         '''Count's a cycle execution for the timer.\n'''

@@ -42,7 +42,7 @@ class Player( ent.Entity ):
             return
 
         if self.action == 3:
-            self.animator.setEndAnimationProcedure(lambda: self.launchMeteor())
+            self.animator.setEAP(lambda: self.launchMeteor())
             return
 
     def controlAnimator(self) -> None:

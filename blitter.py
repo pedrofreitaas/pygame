@@ -1,21 +1,5 @@
 import pygame as pg
 from random import randint
-from time import time as tm
-
-def rotCenter(image: pg.surface.Surface, angle: float):
-    """Rotate an image while keeping its center and size and returns the rotated image.\n"""
-
-    origRect = image.get_rect()
-    rotatedImage = pg.transform.rotate(image, angle)
-
-    # centering the rotated rect.
-    rotatedRect = origRect.copy()
-    rotatedRect.center = rotatedImage.get_rect().center
-
-    # cutting the rotated image.
-    rotatedImage = rotatedImage.subsurface(rotatedRect).copy()
-
-    return rotatedImage
 
 class Camera():
     def __init__(self, display_size: tuple[float,float]) -> None:
