@@ -26,28 +26,24 @@ class Player( ent.Entity ):
 
         self.meteor: meteor.Meteor = meteor.Meteor(ent.pg.math.Vector2(), self.layer, 100)
 
+        self.rect_adjust: tuple = [-20,-20]
+
     def animationAction(self) -> None:
         '''Sets actions for the player according to the current animation stage.\n'''
-        if self.action == 1: # attacking
-            self.setLockMovement(True)
-            
+        if self.action == 1: # attacking            
             if int(self.animator.index_image) in [9,12,16]:
                 # attack sound.
                 Player.hit_sound.play()
 
                 # attack movement.
-                move_dir: ent.pg.math.Vector2 = self.speed
-
-                if move_dir != ent.pg.math.Vector2():
-                    move_dir = move_dir.normalize()
-                    self.pos = self.pos + (move_dir*self.speed_value*ent.Entity.dt)
+                self.complementSpeed(self.speed_dir*100)
+                    
             else: Player.hit_sound.stop()
 
         elif self.action == 2: # deffending
-            self.setLockMovement(True)            
+            pass       
 
         elif self.action == 3: # casting
-            self.setLockMovement(True)
             self.animator.setEAP(lambda: self.launchMeteor())
         
         if self.isMoving(): Player.footstep_sound.play()
@@ -97,16 +93,16 @@ class Player( ent.Entity ):
             if ev.type == ent.pg.KEYDOWN:
                 
                 if ev.key == 119: #ord('w')
-                    self.speed[1] -= self.speed_value
+                    self.speed_dir[1] -= 1
 
                 elif ev.key == 115: #ord('s')
-                    self.speed[1] += self.speed_value
+                    self.speed_dir[1] += 1
 
                 elif ev.key == 97: #ord('a')
-                    self.speed[0] -= self.speed_value
+                    self.speed_dir[0] -= 1
 
                 elif ev.key == 100: #ord('d')
-                    self.speed[0] += self.speed_value
+                    self.speed_dir[0] += 1
 
                 elif ev.key == 101: #ord('e')
                     self.cast()
@@ -114,38 +110,28 @@ class Player( ent.Entity ):
             if ev.type == ent.pg.KEYUP:
                 
                 if ev.key == 119: #ord('w')
-                    self.speed[1] += self.speed_value
+                    self.speed_dir[1] += 1
 
                 elif ev.key == 115: #ord('s')
-                    self.speed[1] -= self.speed_value
+                    self.speed_dir[1] -= 1
 
                 elif ev.key == 97: #ord('a')
-                    self.speed[0] += self.speed_value
+                    self.speed_dir[0] += 1
 
                 elif ev.key == 100: #ord('d')
-                    self.speed[0] -= self.speed_value
+                    self.speed_dir[0] -= 1
 
                 elif ev.key == 101: #ord('e')
                     self.resetAction()
-
-    def move(self) -> None:
-        '''Player's movement.\n'''
-        
-        speed = self.speed * ent.Entity.dt
-
-        if not self.blockMove_H:
-            self.pos[0] = self.pos[0] + speed[0]
-        if not self.blockMove_V:
-            self.pos[1] = self.pos[1] + speed[1]
-
+       
     def update(self, events: list[ent.pg.event.Event]) -> None:
         self.checkInputs(events)
 
         self.animationAction()
 
-        super().update()
-
         self.meteor.update()
+
+        super().update()
 
 # power methods.
     def launchMeteor(self) -> None:

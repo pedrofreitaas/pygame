@@ -3,16 +3,18 @@ import blitter as blt
 import widget.button as button
 from timer import *
 from time import time as tm
-import game_name.entities.enemies.water_priestess.water_priestess as wtr_priest
 
 pg.init()
 pg.font.init()
 pg.mixer.init(1000, 0, 16, 2048)
 
-import game_name.entities.player.player as pl
-
-#Display
+#Display.
 sizeDisplay = [1120, 630]
+screen = pg.display.set_mode( (sizeDisplay[0],sizeDisplay[1]) )
+
+#importing entities.
+import game_name.entities.player.player as pl
+import game_name.entities.enemies.water_priestess.water_priestess as wtr_priest
 
 previous = tm()
 def getDt() -> float:
@@ -25,8 +27,7 @@ def getDt() -> float:
     return dt
 
 class Game():
-
-    display = pg.display.set_mode( (sizeDisplay[0],sizeDisplay[1]) )
+    display = screen
     fonts: list[pg.font.Font] = [pg.font.Font('assets/font/PeaberryBase.ttf', 12),
                                  pg.font.Font('assets/font/PeaberryBase.ttf', 16),
                                  pg.font.Font('assets/font/PeaberryBase.ttf', 20),

@@ -14,7 +14,7 @@ class Meteor(pwr.Power):
     explosion_sound = pwr.ent.pg.mixer.Sound(explosion_sound_path)
     explosion_sound.set_volume(0.2)
 
-    def __init__(self, pos: pwr.ent.pg.math.Vector2, layer: int, speed_value: float) -> None:
+    def __init__(self, pos: pwr.ent.pg.math.Vector2, layer: int, speed_value: float=1) -> None:
         super().__init__(pos, layer, speed_value)
 
         self.animator = pwr.ent.an.Animator(pwr.ent.pg.image.load(meteor_sprite_path).convert_alpha(), [100,100], [8,8,8,8,8,8,8,5])
@@ -47,7 +47,6 @@ class Meteor(pwr.Power):
         self.timers[0].activateTimer()
         super().activate()
 
-        self.calculateSpeed()
         self.setAngle()
 
         Meteor.meteor_sound.play(-1)
@@ -58,30 +57,30 @@ class Meteor(pwr.Power):
         self.timers[1].deactiveTimer()
         super().deactive()
 
-    def calculateSpeed(self) -> None:
+    def getLockMovement(self) -> bool:
+        return False
+
+    def getMovementSpeed(self) -> pwr.ent.pg.math.Vector2:
         '''Calculates the meteor speed to hit the target in the \'exact\' self.hit_time time.\n'''
         distance_vector = (self.hit_pos-self.center())
 
         total_loops = self.timers[0].timeLeft()/pwr.ent.Entity.dt
         
-        if total_loops == 0: return # prevent zeroDivisionError.
+        if total_loops != 0: self.complementSpeed(distance_vector / total_loops)
 
-        self.speed: pwr.ent.pg.math.Vector2 = distance_vector / total_loops
+        return super().getMovementSpeed()
 
     def move(self) -> None:
         '''Recalculates the speed of the entity to reach the hit_pos according to hit time.\n
            Don't move if instance has exploded.\n'''
         if self.exploded: return
 
-        self.calculateSpeed()
-
-        if not self.blockMove_H: self.pos[0] = self.pos[0] + self.speed[0]
-        if not self.blockMove_V: self.pos[1] = self.pos[1] + self.speed[1]
+        self.pos = self.pos + self.getMovementSpeed()
     
     def setAngle(self) -> None:
         '''Sets the angle to rotate the meteor when moving to the target.\n'''
         image_dir = pwr.ent.pg.math.Vector2(0,1)
-        self.blit_angle = self.speed.angle_to(image_dir)
+        self.blit_angle = self.getMovementSpeed().angle_to(image_dir)
 
     def explode(self) -> None:
         '''Triggers meteor explosion, if the instance didn't explode yet and is close enought to it's hit pos.\n'''

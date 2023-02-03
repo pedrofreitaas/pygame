@@ -11,36 +11,63 @@ class Entity():
     player: 'Entity' = 0
 
     blitter: blt.Blitter = 0
+    display_rect: pg.rect.Rect = pg.display.get_surface().get_rect()
     
     def __init__(self, pos: pg.math.Vector2, layer: int, speed_value: float) -> None:
         
-        self.pos: pg.math.Vector2() = pos
-        self.speed: pg.math.Vector2() = pg.math.Vector2()
-        self.speed_value = speed_value
+        self.pos: pg.math.Vector2 = pos
+        self.speed_dir: pg.math.Vector2 = pg.math.Vector2()
+        self.speed_complement: pg.math.Vector2 = pg.math.Vector2()
+        self.speed_value: float = speed_value
 
-        self.layer = layer
+        self.layer: int = layer
 
         self.animator: an.Animator = an.Animator(pg.image.load('assets/entities/empty.png').convert_alpha(), [5,5], [1])
-        self.blit_angle = 0
+        self.blit_angle: float = 0
         self.rect = self.animator.image.get_rect().move(self.pos)
         self.mask = pg.mask.from_surface(self.animator.image)
+        self.rect_adjust: tuple = [0,0]
 
         self.timers: list[Timer] = []
 
         #booleans
         self.isLookingRight: bool = True
-        self.blockMove_H: bool = False
-        self.blockMove_V: bool = False
 
         self.action: int = 0
 
+    def complementSpeed(self, complement: pg.math.Vector2) -> None:
+        '''Complement parameter is going to sum in entity's movement.\n
+           This isn't affected by loop's delta time.\n
+           This isn't affected by movement lock.\n'''
+        self.speed_complement = self.speed_complement + complement
+
     def tryingToMove(self) -> bool:
         '''Returns true is speed is different than 0 vector.\n'''
-        return self.speed != pg.math.Vector2()
+        return self.speed_dir != pg.math.Vector2()
+
+    def getMovementSpeed(self) -> pg.math.Vector2:
+        '''Returns the speed the entity will move in the next loop conclusion.\n
+           Considering movement locks at the moment of the call.\n
+           Considering the speed_complement value of the loop.\n'''
+
+        speed = pg.math.Vector2()
+
+        if self.speed_dir == pg.math.Vector2(): speed = self.speed_dir
+        else: speed = self.speed_dir.normalize() * Entity.dt * self.speed_value
+
+        if self.getLockMovement(): speed = pg.math.Vector2()
+
+        speed = speed + self.speed_complement
+
+        # reseting variables for nxt loop.
+        self.speed_complement: pg.math.Vector2 = pg.math.Vector2()
+
+        return speed
 
     def isMoving(self) -> bool:
-        '''Returns true if entity's speed isn't 0 vector, and it's been blocked to move.\n'''
-        return self.speed != pg.math.Vector2() and not (self.blockMove_H and self.blockMove_V)
+        '''Returns true if entity's speed is going to change it's position in the next loop movement.\n
+           Considers movement lock variables in the moment of the call.\n'''
+        return (self.getMovementSpeed() != pg.math.Vector2())
 
     def blit(self) -> None:
         '''Blits the instance's animator image using a blitter instance.\n'''
@@ -51,27 +78,17 @@ class Entity():
         image = rotCenter(self.animator.image, self.blit_angle)
         Entity.blitter.addImageInLayer(self.layer, image, self.pos)
 
-    def setLockMovement(self, value: bool, flag: int=0) -> None:
-        '''Flag = 0 -> sets horizontal and vertical movement block with value.\n
-           Flag = 1 -> sets horizontal movement block with value.\n
-           Flag = 2 -> sets vertical movement block with value.\n'''
-        if type(value) != type(True):
-            raise ValueError
-        
-        if flag in [0,1]:
-            self.blockMove_H = value
-        if flag in [0,2]:
-            self.blockMove_V = value
+    def getLockMovement(self) -> bool:
+        '''Returns a tuple that checks entity's current action adn returns if it's moving or not.\n'''
+        return bool(self.action)
 
     def move(self) -> None:
         '''Moves the entity if movement isn't locked.\n'''
-        
-        speed = self.speed * Entity.dt * self.speed_value
+        speed = self.getMovementSpeed()
 
-        if not self.blockMove_H:
-            self.pos[0] = self.pos[0] + speed[0]
-        if not self.blockMove_V:
-            self.pos[1] = self.pos[1] + speed[1]
+        self.pos = self.pos + speed
+
+        if self.isGoingOutOfBounds(): self.fitInDisplayBounds()
     
     def center(self) -> pg.math.Vector2:
         '''Returns the center of the current sprite.\n'''
@@ -80,16 +97,18 @@ class Entity():
     def collisionUpdate(self) -> None:
         '''Updates the collision handle variables.\n'''
         
-        image = rotCenter(self.animator.image, self.blit_angle)
+        image: pg.surface.Surface = rotCenter(self.animator.image, self.blit_angle)
 
-        self.rect = image.get_rect().move(self.pos)
-        self.mask = pg.mask.from_surface(image)
+        self.rect: pg.rect.Rect = image.get_rect().move(self.pos)
+        self.rect = self.rect.inflate(self.rect_adjust[0],self.rect_adjust[1])
+
+        self.mask: pg.mask.Mask = pg.mask.from_surface(image)
     
     def setLookingDir(self) -> bool:
-        '''If self.speed[0] is different than zero, changes the looking dir'''
+        '''If self.speed_dir[0] is different than zero, changes the looking dir'''
         
-        if self.speed[0] > 0: self.isLookingRight = True
-        elif self.speed[0] < 0: self.isLookingRight = False
+        if self.speed_dir[0] > 0: self.isLookingRight = True
+        elif self.speed_dir[0] < 0: self.isLookingRight = False
     
     def animationAction(self) -> None:
         '''Controls the entity's behavior based on the current action.\n'''
@@ -99,11 +118,6 @@ class Entity():
 
         self.setLookingDir()
         if not self.isLookingRight: self.animator.flipHorizontally()
-
-    def loopReset(self) -> None:
-        '''Reset's variables of the instance for a new loop.\n'''
-        self.blockMove_H = False
-        self.blockMove_V = False
 
     def resetAction(self) -> None:
         '''Resets entity combat action.\n'''
@@ -124,6 +138,32 @@ class Entity():
         if self.action == 0:
             self.action = 3
 
+    def isGoingOutOfBounds(self) -> bool:
+        '''Returns true if the entity is going out of display, according\n
+           to entity's speed and current state of movement locking.\n'''
+        
+        if not Entity.display_rect.contains(self.rect.move(self.getMovementSpeed())):
+            return True
+        return False
+
+    def fitInDisplayBounds(self) -> None:
+        '''Checks where entity has escaped from display, and fits it back.\n'''
+        fitVector = pg.math.Vector2()
+
+        top_escape = self.rect.top - Entity.display_rect.top
+        if top_escape > 0: fitVector[1] = fitVector[1]+top_escape
+
+        bottom_escape = self.rect.bottom - Entity.display_rect.bottom
+        if bottom_escape > 0: fitVector[1] = fitVector[1]-bottom_escape
+
+        left_escape = self.rect.left - Entity.display_rect.left
+        if left_escape > 0: fitVector[0] = fitVector[0]-left_escape
+
+        right_escape = self.rect.right - Entity.display_rect.right
+        if right_escape > 0: fitVector[0] = fitVector[0]+right_escape
+            
+        self.complementSpeed(fitVector)
+
     def update(self) -> None:
         '''Does the loop procedures of a regular entity. Call loop reset at the end of the loop.\n'''
 
@@ -137,8 +177,6 @@ class Entity():
         self.blit()
         
         updateTimers(self.timers)
-
-        self.loopReset()
 
 def updateEnemies() -> None:
     '''Updates all the registered enemies.\n'''
