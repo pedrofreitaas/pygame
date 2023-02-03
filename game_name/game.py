@@ -3,6 +3,7 @@ import blitter as blt
 import widget.button as button
 from timer import *
 from time import time as tm
+import game_name.entities.enemies.water_priestess.water_priestess as wtr_priest
 
 pg.init()
 pg.font.init()
@@ -51,6 +52,8 @@ class Game():
         self.game_timers: list[Timer] = []
         self.player = pl.Player(pg.math.Vector2(20,20))
 
+        self.enemy = wtr_priest.WaterPriestess(pg.math.Vector2(200,400), 1)
+
     def getEvents(self) -> None:
         '''Gets the loop events and save them in a self.variable.\n'''
 
@@ -78,6 +81,8 @@ class Game():
 
         self.dt = getDt()
         pl.ent.Entity.dt = self.dt
+
+        if self.dt > 0.2: print('dt problem.\n')
 
     def pauseloop(self) -> None:
         pl.ent.pauseTimers(throw=False)
@@ -120,5 +125,3 @@ class Game():
             self.blitter.update(pg.math.Vector2())
             
             self.clock.tick(500)
-
-            

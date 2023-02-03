@@ -50,8 +50,8 @@ class Player( ent.Entity ):
             self.setLockMovement(True)
             self.animator.setEAP(lambda: self.launchMeteor())
         
-        if self.isMoving(): self.footstep_sound.play()
-        else: self.footstep_sound.stop()
+        if self.isMoving(): Player.footstep_sound.play()
+        else: Player.footstep_sound.stop()
 
     def controlAnimator(self) -> None:
         '''Changes sprite animation based in the entity's behavior.\n'''

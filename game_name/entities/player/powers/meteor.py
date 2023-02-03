@@ -8,7 +8,6 @@ meteor_sound_path = 'assets/entities/player/powers/sounds/flamethrower.ogg'
 explosion_sound_path = 'assets/entities/player/powers/sounds/explode1.wav'
 
 class Meteor(pwr.Power):
-
     meteor_sound = pwr.ent.pg.mixer.Sound(meteor_sound_path)
     meteor_sound.set_volume(0.3)
     
