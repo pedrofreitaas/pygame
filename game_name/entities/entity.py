@@ -84,11 +84,11 @@ class Entity():
 
     def move(self) -> None:
         '''Moves the entity if movement isn't locked.\n'''
+        if self.isGoingOutOfBounds(): self.fitInDisplayBounds()
+
         speed = self.getMovementSpeed()
 
         self.pos = self.pos + speed
-
-        if self.isGoingOutOfBounds(): self.fitInDisplayBounds()
     
     def center(self) -> pg.math.Vector2:
         '''Returns the center of the current sprite.\n'''
@@ -148,19 +148,19 @@ class Entity():
 
     def fitInDisplayBounds(self) -> None:
         '''Checks where entity has escaped from display, and fits it back.\n'''
-        fitVector = pg.math.Vector2()
+        fitVector = pg.math.Vector2(0,0)
 
         top_escape = self.rect.top - Entity.display_rect.top
-        if top_escape > 0: fitVector[1] = fitVector[1]+top_escape
+        if top_escape < 0: fitVector[1] = fitVector[1]-top_escape
 
         bottom_escape = self.rect.bottom - Entity.display_rect.bottom
         if bottom_escape > 0: fitVector[1] = fitVector[1]-bottom_escape
 
         left_escape = self.rect.left - Entity.display_rect.left
-        if left_escape > 0: fitVector[0] = fitVector[0]-left_escape
+        if left_escape < 0: fitVector[0] = fitVector[0]-left_escape
 
         right_escape = self.rect.right - Entity.display_rect.right
-        if right_escape > 0: fitVector[0] = fitVector[0]+right_escape
+        if right_escape > 0: fitVector[0] = fitVector[0]-right_escape
             
         self.complementSpeed(fitVector)
 
