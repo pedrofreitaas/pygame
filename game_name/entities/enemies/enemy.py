@@ -49,7 +49,7 @@ class Enemy(ent.Entity):
 
     def setRandomSpeed(self) -> None:
         '''Sets the enemy speed randomly.\n'''
-        if self.randomizer.randint(1,10000) > 20: return
+        if self.randomizer.randint(1,50000) >= 80: return
 
         self.speed_dir: ent.pg.math.Vector2 = ent.pg.math.Vector2(self.randomizer.random()*self.randomizer.randint(-1,1), self.randomizer.random()*self.randomizer.randint(-1,1))
         if self.speed_dir != ent.pg.math.Vector2(): self.speed_dir = self.speed_dir.normalize()

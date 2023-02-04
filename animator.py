@@ -74,9 +74,9 @@ class Animator():
         
         elif self.index_image < self.range_image[0] and not self.stopAtEnd: self.index_image = self.range_image[1]
         
-        elif self.index_image > self.range_image[1] and self.stopAtEnd: self.index_image = self.range_image[1] -2
+        elif self.index_image > self.range_image[1] and self.stopAtEnd: self.index_image = int(self.range_image[1]*0.8)
         
-        elif self.index_image < self.range_image[0] and self.stopAtEnd: self.index_image = self.range_image[0] +2
+        elif self.index_image < self.range_image[0] and self.stopAtEnd: self.index_image = int(self.range_image[1]*0.2)
         
         self.image = pg.transform.flip(self.sprites[floor(self.index_image)], self.flipH, self.flipV)
 
@@ -90,7 +90,7 @@ class Animator():
 
     def activateStopAtEnd(self) -> None:
         """Activates stopAtEnd condition.\n
-           OBS: stopAtEnd if activated will stop the animation when the animation reaches the last two sprites.\n"""
+           OBS: stopAtEnd if activated will stop the animation when the animation reaches the last 20% sprites.\n"""
         
         self.stopAtEnd = True
 

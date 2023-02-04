@@ -123,7 +123,7 @@ class Player( ent.Entity ):
 
                 elif ev.key == 101: #ord('e')
                     self.resetAction()
-       
+
     def update(self, events: list[ent.pg.event.Event]) -> None:
         self.checkInputs(events)
 

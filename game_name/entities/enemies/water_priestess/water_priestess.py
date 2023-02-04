@@ -8,6 +8,21 @@ class WaterPriestess(en.Enemy):
 
         self.animator = en.ent.an.Animator(en.ent.pg.image.load(spritesheet_path[0]).convert_alpha(),
                                            [288,128], [8,10,8,3,3,8,6,7,21,27,32,12,12,7,16])
+        
+        self.rect_adjust = [-250,-85]
 
-    def update(self) -> None:
-        return super().update()
+        self.random_move_interval = [0,30]
+        self.seek_player_interval = [30,80]
+        self.distance_player_interval = [80,85]
+        self.idle_interval = [85,100]
+
+    def controlAnimator(self) -> None:
+        super().controlAnimator()
+        
+        if self.isMoving():
+            self.animator.setRange([15,23])
+            self.animator.activateStopAtEnd()
+            return
+        
+
+        self.animator.setRange([0,7])
