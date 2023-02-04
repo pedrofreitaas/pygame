@@ -38,7 +38,8 @@ class Entity():
     def complementSpeed(self, complement: pg.math.Vector2) -> None:
         '''Complement parameter is going to sum in entity's movement.\n
            This isn't affected by loop's delta time.\n
-           This isn't affected by movement lock.\n'''
+           This isn't affected by movement lock.\n
+           Complemented speeds can still be complemented.\n'''
         self.speed_complement = self.speed_complement + complement
 
     def tryingToMove(self) -> bool:
@@ -58,9 +59,6 @@ class Entity():
         if self.getLockMovement(): speed = pg.math.Vector2()
 
         speed = speed + self.speed_complement
-
-        # reseting variables for nxt loop.
-        self.speed_complement: pg.math.Vector2 = pg.math.Vector2()
 
         return speed
 
@@ -87,6 +85,9 @@ class Entity():
         if self.isGoingOutOfBounds(): self.fitInDisplayBounds()
 
         speed = self.getMovementSpeed()
+
+        # reseting variables for nxt loop.
+        self.speed_complement: pg.math.Vector2 = pg.math.Vector2()
 
         self.pos = self.pos + speed
     
@@ -169,8 +170,8 @@ class Entity():
 
         self.collisionUpdate()
         
-        self.controlAnimator()
         self.animator.update(Entity.dt)
+        self.controlAnimator()
         
         self.move()
 

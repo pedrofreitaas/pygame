@@ -36,7 +36,7 @@ class Player( ent.Entity ):
                 Player.hit_sound.play()
 
                 # attack movement.
-                self.complementSpeed(self.speed_dir*100)
+                self.complementSpeed(self.speed_dir*self.speed_value*ent.Entity.dt)
                     
             else: Player.hit_sound.stop()
 
