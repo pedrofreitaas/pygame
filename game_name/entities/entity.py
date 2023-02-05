@@ -38,6 +38,8 @@ class Entity():
 
         self.stats = Stats(max_life, max_mana, max_stamina)
 
+        self.is_dead = False
+
     def complementSpeed(self, complement: pg.math.Vector2) -> None:
         '''Complement parameter is going to sum in entity's movement.\n
            This isn't affected by loop's delta time.\n
@@ -122,6 +124,9 @@ class Entity():
     def animationAction(self) -> None:
         '''Controls the entity's behavior based on the current action.\n'''
 
+        if self.action == -1:
+            self.animator.setEAP(lambda: self.die())
+
     def controlAnimator(self) -> None:
         '''Flips the image based in the looking dir of the entitys.\n'''
 
@@ -177,11 +182,21 @@ class Entity():
             
         self.complementSpeed(fitVector)
 
+    def kill(self) -> None:
+        '''Sets the entity death animation.\n'''
+        self.action = -1
+    
+    def die(self) -> None:
+        '''Makes the entity stop updating.\n'''
+        self.is_dead = True
+
     def update(self) -> None:
         '''Does the loop procedures of a regular entity. Call loop reset at the end of the loop.\n'''
+        if self.is_dead: return
 
         self.collisionUpdate()
-        self.stats.update(Entity.dt)
+
+        if self.stats.update(Entity.dt): self.kill()
         
         self.animator.update(Entity.dt)
         self.controlAnimator()

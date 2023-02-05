@@ -59,7 +59,11 @@ class Stats():
 
             return
 
-    def update(self, dt: float) -> None:
+    def update(self, dt: float) -> bool:
+        '''Regenerates the atributes.\n
+           Returns false if the instance is dead.\n'''
+        
         self.regen(dt)
-
         self.is_taking_damage = False
+
+        return self.is_dead

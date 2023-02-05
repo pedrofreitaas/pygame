@@ -30,6 +30,8 @@ class Player( ent.Entity ):
 
     def animationAction(self) -> None:
         '''Sets actions for the player according to the current animation stage.\n'''
+        super().animationAction()
+
         if self.action == 1: # attacking            
             if int(self.animator.index_image) in [9,12,16]:
                 # attack sound.

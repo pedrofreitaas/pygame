@@ -53,6 +53,8 @@ class WaterPriestess(en.Enemy):
 
     def animationAction(self) -> None:
         '''Controls water_priestess animation behavior.\n'''
+        super().animationAction()
+
         if self.action == 1:
             if int(self.animator.index_image) == 36:
                 self.complementSpeed(self.speed_dir*self.speed_value*10*en.ent.Entity.dt)
@@ -81,6 +83,11 @@ class WaterPriestess(en.Enemy):
     def controlAnimator(self) -> None:
         super().controlAnimator()
         self.animationAction()
+
+        if self.action == -1:
+            total = self.animator.getTotalImages()
+            self.animator.setRange([total -17, total -1])
+            return
 
         if self.action == 1:
             self.animator.setRange([32,40])
