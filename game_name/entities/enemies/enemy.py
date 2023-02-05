@@ -2,8 +2,8 @@ import game_name.entities.entity as ent
 from random import randint, SystemRandom
 
 class Enemy(ent.Entity):
-    def __init__(self, pos: ent.pg.math.Vector2, layer: int, speed_value: float) -> None:
-        super().__init__(pos, layer, speed_value)
+    def __init__(self, pos: ent.pg.math.Vector2, layer: int, speed_value: float, max_life: float, max_mana: float, max_stamina: float) -> None:
+        super().__init__(pos, layer, speed_value, max_life, max_mana, max_stamina)
 
         self.randomizer = SystemRandom(randint(1,1000))
         
@@ -77,6 +77,17 @@ class Enemy(ent.Entity):
     def distancePlayerSquared(self) -> float:
         '''Returns the enemy's distance squared to the player.\n'''
         return (self.center() - ent.Entity.player.center()).length_squared()
+
+    def blitStats(self) -> None:
+        '''Blits enemy's stats\n.'''
+        width, heigth = 80,3
+
+        life_rect = ent.pg.surface.Surface((width*self.stats.life/self.stats.max_life, heigth))
+        life_rect.fill((50,200,0))
+
+        coordinates = self.pos + ent.pg.math.Vector2(self.animator.image.get_width()/2,0) - ent.pg.math.Vector2(life_rect.get_size())*0.5
+        
+        ent.Entity.blitter.addImageInLayer(self.layer, life_rect, coordinates)
 
     def update(self) -> None:
         self.controlMovement()

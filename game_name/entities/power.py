@@ -2,7 +2,7 @@ import game_name.entities.entity as ent
 
 class Power(ent.Entity):
     def __init__(self, pos: ent.pg.math.Vector2, layer: int, speed_value: float) -> None:
-        super().__init__(pos, layer, speed_value)
+        super().__init__(pos, layer, speed_value,0,0,0)
 
         self.activated = False
 

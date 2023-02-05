@@ -12,7 +12,7 @@ class Player( ent.Entity ):
     hit_sound.set_volume(0.08)
     
     def __init__(self, pos: ent.pg.math.Vector2, layer: int=1, speed_value: float=120) -> None:
-        super().__init__(pos, layer, speed_value)
+        super().__init__(pos, layer, speed_value, 80, 40, 120)
 
         self.animator: ent.an.Animator = ent.an.Animator( ent.pg.image.load(player_sprites_path[0]).convert_alpha(),
                                                           [56,56],

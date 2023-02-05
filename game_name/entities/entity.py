@@ -3,6 +3,7 @@ import blitter as blt
 import animator as an
 from timer import *
 from game_name.extra import *
+from game_name.entities.stats import *
 
 class Entity():
 
@@ -13,7 +14,7 @@ class Entity():
     blitter: blt.Blitter = 0
     display_rect: pg.rect.Rect = pg.display.get_surface().get_rect()
     
-    def __init__(self, pos: pg.math.Vector2, layer: int, speed_value: float) -> None:
+    def __init__(self, pos: pg.math.Vector2, layer: int, speed_value: float, max_life: float, max_mana: float, max_stamina: float) -> None:
         
         self.pos: pg.math.Vector2 = pos
         self.speed_dir: pg.math.Vector2 = pg.math.Vector2()
@@ -34,6 +35,8 @@ class Entity():
         self.isLookingRight: bool = True
 
         self.action: int = 0
+
+        self.stats = Stats(max_life, max_mana, max_stamina)
 
     def complementSpeed(self, complement: pg.math.Vector2) -> None:
         '''Complement parameter is going to sum in entity's movement.\n
@@ -75,6 +78,11 @@ class Entity():
 
         image = rotCenter(self.animator.image, self.blit_angle)
         Entity.blitter.addImageInLayer(self.layer, image, self.pos)
+
+        self.blitStats()
+
+    def blitStats(self) -> None:
+        '''Abstract function to blit entity's stats.\n'''
 
     def getLockMovement(self) -> bool:
         '''Returns a tuple that checks entity's current action adn returns if it's moving or not.\n'''
@@ -139,6 +147,10 @@ class Entity():
         if self.action == 0:
             self.action = 3
 
+    def damageSelf(self, value: float) -> None:
+        '''Procedure to damage entity.\n'''
+        self.stats.spend(Entity.dt, value, 1)
+
     def isGoingOutOfBounds(self) -> bool:
         '''Returns true if the entity is going out of display, according\n
            to entity's speed and current state of movement locking.\n'''
@@ -169,6 +181,7 @@ class Entity():
         '''Does the loop procedures of a regular entity. Call loop reset at the end of the loop.\n'''
 
         self.collisionUpdate()
+        self.stats.update(Entity.dt)
         
         self.animator.update(Entity.dt)
         self.controlAnimator()
