@@ -14,9 +14,38 @@ class WaterPriestess(en.Enemy):
         self.seek_player_interval = [0,65]
         self.random_move_interval = [65,80]
         self.distance_player_interval = [80,85]
-        self.idle_interval = [85,100]
+        self.idle_interval = [85,100]        
 
-    def controlAttack(self) -> None:
+    def collisionUpdate(self) -> None:
+        super().collisionUpdate()
+
+        if self.action == 0:
+            return
+
+        if self.mask.overlap(en.ent.Entity.player.mask, en.ent.Entity.player.pos-self.pos) == None:
+            return
+
+        if self.action == 1:
+            en.ent.Entity.player.damageSelf(10)
+            return
+
+        if self.action == 2:
+            en.ent.Entity.player.damageSelf(10)
+            return
+
+        if self.action == 3:
+            en.ent.Entity.player.damageSelf(10)
+            return
+
+        if self.action == 4:
+            en.ent.Entity.player.damageSelf(10)
+            return
+
+        if self.action == 5:
+            en.ent.Entity.player.damageSelf(10)
+            return
+
+    def controlCombat(self) -> None:
         '''Controls the water_priestess attack.\n'''
 
         # alredy taking action.
@@ -85,8 +114,11 @@ class WaterPriestess(en.Enemy):
         self.animationAction()
 
         if self.action == -1:
-            total = self.animator.getTotalImages()
-            self.animator.setRange([total -17, total -1])
+            self.animator.setRange([162, 179])
+            return
+
+        if self.stats.is_taking_damage:
+            self.animator.setRange([177, 162])
             return
 
         if self.action == 1:
@@ -116,7 +148,7 @@ class WaterPriestess(en.Enemy):
 
         if self.isMoving():
             self.animator.setRange([15,23])
-            self.animator.activateStopAtEnd()
+            self.animator.activateStopAt(0.8)
             return
 
         self.animator.setRange([0,7])

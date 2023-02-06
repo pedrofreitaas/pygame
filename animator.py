@@ -30,7 +30,9 @@ class Animator():
         #booleans
         self.flipH: bool = False
         self.flipV: bool = False
-        self.stopAtEnd: bool = False
+
+        self.stopAt: bool = False
+        self.stop_percentage: float = 1
 
         self.upd_coeficient: float = 6
 
@@ -66,7 +68,7 @@ class Animator():
 
     def updateImage(self, dt: float) -> None:
         '''Updates the image variable of the instance to hold the next sprite of the animation, based on it's configs.\n
-           The animation can go foward/backward and be cyclic/stopAtEnd.\n'''
+           The animation can go foward/backward and be cyclic/stopAt.\n'''
 
         # updating the index image.
         if self.going_foward: self.index_image += self.upd_coeficient * dt
@@ -74,14 +76,14 @@ class Animator():
 
         self.checkCallEAP()
         
-        # moving the animation cycle according to the configs. (foward/backward and cyclic/stopAtEnd)
-        if self.index_image > self.range_image[1] and not self.stopAtEnd: self.index_image = self.range_image[0]
+        # moving the animation cycle according to the configs. (foward/backward and cyclic/stopAt)
+        if self.index_image > self.range_image[1] and not self.stopAt: self.index_image = self.range_image[0]
         
-        elif self.index_image < self.range_image[0] and not self.stopAtEnd: self.index_image = self.range_image[1]
+        elif self.index_image < self.range_image[0] and not self.stopAt: self.index_image = self.range_image[1]
         
-        elif self.index_image > self.range_image[1] and self.stopAtEnd: self.index_image = int(self.range_image[1]*0.8)
+        elif self.index_image > self.range_image[1] and self.stopAt: self.index_image = int(self.range_image[0]+ ((self.range_image[1]-self.range_image[0])*self.stop_percentage) )
         
-        elif self.index_image < self.range_image[0] and self.stopAtEnd: self.index_image = int(self.range_image[1]*0.2)
+        elif self.index_image < self.range_image[0] and self.stopAt: self.index_image = int(self.range_image[0]+ ((self.range_image[1]-self.range_image[0])*self.stop_percentage))
         
         self.image = pg.transform.flip(self.sprites[floor(self.index_image)], self.flipH, self.flipV)
 
@@ -93,21 +95,26 @@ class Animator():
         """Sets the flipV boolean.\n"""
         self.flipV = True
 
-    def activateStopAtEnd(self) -> None:
-        """Activates stopAtEnd condition.\n
-           OBS: stopAtEnd if activated will stop the animation when the animation reaches the last 20% sprites.\n"""
+    def activateStopAt(self, percentage: float) -> None:
+        """Activates stopAt condition.\n
+           OBS: stopAt if activated will stop the animation when the animation reaches the percentage in the parameter.\n
+           Throws ValueError if the percentage is smaller than 0 or bigger than one.\n"""
+        if percentage < 0 or percentage > 1:
+            raise ValueError
         
-        self.stopAtEnd = True
+        self.stopAt = True
+        if self.going_foward: self.stop_percentage = percentage
+        else: self.stop_percentage = 1 - percentage
 
-    def deactivateStopAtEnd(self) -> None:
-        """Deactivates stopAtEnd condition.\n"""
-        self.stopAtEnd = False
+    def deactivateStopAt(self) -> None:
+        """Deactivates stopAt condition.\n"""
+        self.stopAt = False
 
     def setRange(self, range: tuple[int,int]) -> None:
-        """Sets the range of the change in image. Automatically deactivates the stopAtEnd condition.\n
+        """Sets the range of the change in image. Automatically deactivates the stopAt condition.\n
            OBS: 
-           ->if the stopAtEnd condition is True, when the animation gets to the last sprite, it will\n
-           repeat the two last sprites until the codition is deactivated.\n
+           ->if the stopAt condition is True, when the animation gets to where it was set, it will\n
+           repeat the last sprites until the codition is deactivated.\n
            ->Automatically sets the animation to the beggining of the new range.\n
            ->Does nothing if the current range is equal to the paramater.\n
            """
@@ -115,7 +122,7 @@ class Animator():
         if self.range_image == range: return
         
         self.range_image = range
-        self.deactivateStopAtEnd()
+        self.deactivateStopAt()
 
         if self.going_foward: self.index_image = self.range_image[0]
         else: self.index_image = self.range_image[1]

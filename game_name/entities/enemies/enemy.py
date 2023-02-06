@@ -26,8 +26,8 @@ class Enemy(ent.Entity):
         if self.movement_behavior >= 100: self.movement_behavior = 0
         if self.movement_behavior < 0: self.movement_behavior = 0
 
-    def controlAttack(self) -> None:
-        '''Abstract function to control the enemy attack.\n'''
+    def controlCombat(self) -> None:
+        '''Abstract function to control the enemy's combat.\n'''
         return
 
     def controlMovement(self) -> None:
@@ -89,8 +89,18 @@ class Enemy(ent.Entity):
         
         ent.Entity.blitter.addImageInLayer(self.layer, life_rect, coordinates)
 
+    def die(self) -> None:
+        '''Makes the enemy stop updating.\n'''
+        
+        try: ent.Entity.enemies.remove(self)
+        except ValueError: pass
+
+        return super().die()
+
     def update(self) -> None:
+        if self.is_dead: return
+
         self.controlMovement()
-        self.controlAttack()
+        self.controlCombat()
         
         return super().update()

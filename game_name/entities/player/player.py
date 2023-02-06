@@ -11,7 +11,7 @@ class Player( ent.Entity ):
     hit_sound = ent.pg.mixer.Sound(player_sounds_path[1])
     hit_sound.set_volume(0.08)
     
-    def __init__(self, pos: ent.pg.math.Vector2, layer: int=1, speed_value: float=120) -> None:
+    def __init__(self, pos: ent.pg.math.Vector2, layer: int=1, speed_value: float=160) -> None:
         super().__init__(pos, layer, speed_value, 80, 40, 120)
 
         self.animator: ent.an.Animator = ent.an.Animator( ent.pg.image.load(player_sprites_path[0]).convert_alpha(),
@@ -27,6 +27,22 @@ class Player( ent.Entity ):
         self.meteor: meteor.Meteor = meteor.Meteor(ent.pg.math.Vector2(), self.layer, 100)
 
         self.rect_adjust: tuple = [-20,-20]
+
+        self.attack_damage = 40
+
+        self.setStatsSurfaces()
+
+    def setStatsSurfaces(self) -> None:
+        '''Sets the surface that represents the player's stats.\n'''
+
+        self.life_surface: ent.pg.surface.Surface = ent.pg.surface.Surface((self.stats.max_life,10))
+        self.life_surface.fill((200,0,0))
+
+        self.mana_surface: ent.pg.surface.Surface = ent.pg.surface.Surface((self.stats.max_mana, 6))
+        self.mana_surface.fill((0,0,180))
+
+        self.stamina_surface: ent.pg.surface.Surface = ent.pg.surface.Surface((self.stats.max_stamina, 8))
+        self.stamina_surface.fill((0,200,0))
 
     def animationAction(self) -> None:
         '''Sets actions for the player according to the current animation stage.\n'''
@@ -56,13 +72,21 @@ class Player( ent.Entity ):
 
         super().controlAnimator()
 
+        if self.action == -1:
+            self.animator.setRange([43,54])
+            return
+
+        if self.stats.is_taking_damage:
+            self.animator.setRange([93,107])
+            return
+
         if self.action == 1:
             self.animator.setRange([6,23])
             return
 
         if self.action == 2:
             self.animator.setRange([65,68])
-            self.animator.activateStopAtEnd()
+            self.animator.activateStopAt(0.5)
             return
 
         if self.action == 3:
@@ -126,7 +150,72 @@ class Player( ent.Entity ):
                 elif ev.key == 101: #ord('e')
                     self.resetAction()
 
+    def attack(self) -> None:
+        '''Toogles player's attack, if possible.\n'''
+        if self.action == 0 and not self.stats.is_taking_damage:
+            self.action = 1
+
+    def defend(self) -> None:
+        '''Toggles player's defense, if possible.\n'''
+        if self.action == 0 and not self.stats.is_taking_damage:
+            self.action = 2
+
+    def cast(self) -> None:
+        '''Toggles player's casting, if possible.\n'''
+        if self.action == 0 and not self.stats.is_taking_damage:
+            self.action = 3
+
+    def getLifeSurfacePos(self) -> ent.pg.math.Vector2:
+        return ent.pg.math.Vector2(5,10)
+
+    def getManaSurfacePos(self) -> ent.pg.math.Vector2:
+        return ent.pg.math.Vector2(5,21)
+
+    def getStaminaSurfacePos(self) -> ent.pg.math.Vector2:
+        return ent.pg.math.Vector2(5,28)
+
+    def blitStats(self) -> None:
+
+        ent.Entity.blitter.addImageInLayer(self.layer,
+                                           self.life_surface.subsurface((0,0), (self.stats.life, 10)),
+                                           self.getLifeSurfacePos())
+
+        ent.Entity.blitter.addImageInLayer(self.layer, 
+                                           self.mana_surface.subsurface((0,0), (self.stats.mana, 6)),
+                                           self.getManaSurfacePos())
+
+        ent.Entity.blitter.addImageInLayer(self.layer, 
+                                           self.stamina_surface.subsurface((0,0), (self.stats.stamina, 8)),
+                                           self.getStaminaSurfacePos())
+
+    def damageSelf(self, value: float, instant=False) -> None:
+        '''Damages the player.\n
+           If defending inflicts reduced damage to life, but damages stamina.\n'''
+
+        if instant: dt = 1
+        else: dt = ent.Entity.dt
+        
+        if self.action == 2: # defending.
+            self.stats.spend(dt, value*0.2, 1)
+            self.stats.spend(dt, value*0.6, 3)
+
+            return
+
+        self.stats.spend(dt, value, 1)
+        self.stats.spend(dt, value*0.2, 3)
+
+    def collisionUpdate(self) -> None:
+        super().collisionUpdate()
+
+        if self.action != 1: return
+
+        for en in ent.Entity.enemies:
+            if self.rect.colliderect(en.rect):
+                en.damageSelf(self.attack_damage)
+
     def update(self, events: list[ent.pg.event.Event]) -> None:
+        if self.is_dead: return
+
         self.checkInputs(events)
 
         self.animationAction()

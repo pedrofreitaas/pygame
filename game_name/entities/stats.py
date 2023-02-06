@@ -14,7 +14,7 @@ class Stats():
 
         # booleans.
         self.is_taking_damage = False
-        self.is_dead = False
+        self.is_dying = False
 
     def setRegenFactor(self, value: float) -> None:
         self.regen_factor = value
@@ -37,10 +37,10 @@ class Stats():
            
         if which == 1:
             self.is_taking_damage = True
-            self.life -= qnt*dt
+            self.life -= (qnt*dt)
 
             if self.life <= 0:
-                self.is_dead = True
+                self.is_dying = True
                 self.life = 0
             
             return
@@ -62,8 +62,9 @@ class Stats():
     def update(self, dt: float) -> bool:
         '''Regenerates the atributes.\n
            Returns false if the instance is dead.\n'''
+        if self.is_dying: return True
         
         self.regen(dt)
         self.is_taking_damage = False
 
-        return self.is_dead
+        return False

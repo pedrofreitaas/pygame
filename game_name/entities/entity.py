@@ -63,6 +63,8 @@ class Entity():
 
         if self.getLockMovement(): speed = pg.math.Vector2()
 
+        if self.stats.is_taking_damage: speed = speed * 0.4
+
         speed = speed + self.speed_complement
 
         return speed
@@ -134,27 +136,31 @@ class Entity():
         if not self.isLookingRight: self.animator.flipHorizontally()
 
     def resetAction(self) -> None:
-        '''Resets entity combat action.\n'''
+        '''Resets entity action.\n'''
         self.action = 0
 
-    def attack(self) -> None:
-        '''Toogles player's attack, if possible.\n'''
-        if self.action == 0:
-            self.action = 1
+# stats spend functions.
+    def damageSelf(self, value: float, instant=False) -> None:
+        '''Procedure to damage entity.\n
+           Instant flag true, to be used if the damage will be done in one single call.\n
+           Instant flag false, to be used if the damage will tick many times.\n'''
+        if not instant: self.stats.spend(Entity.dt, value, 1)
+        else: self.stats.spend(1, value, 1)
 
-    def defend(self) -> None:
-        '''Toggles player's defense, if possible.\n'''
-        if self.action == 0:
-            self.action = 2
+    def useMana(self, value: float, instant=False) -> None:
+        '''Procedure to use entity's Mana.\n
+           Instant flag true, to be used if the damage will be done in one single call.\n
+           Instant flag false, to be used if the damage will tick many times.\n'''
+        if not instant: self.stats.spend(Entity.dt, value, 2)
+        else: self.stats.spend(1, value, 2)
 
-    def cast(self) -> None:
-        '''Toggles player's casting, if possible.\n'''
-        if self.action == 0:
-            self.action = 3
-
-    def damageSelf(self, value: float) -> None:
-        '''Procedure to damage entity.\n'''
-        self.stats.spend(Entity.dt, value, 1)
+    def useStamina(self, value: float, instant=False) -> None:
+        '''Procedure to use entity's stamina.\n
+           Instant flag true, to be used if the damage will be done in one single call.\n
+           Instant flag false, to be used if the damage will tick many times.\n'''
+        if not instant: self.stats.spend(Entity.dt, value, 3)
+        else: self.stats.spend(1, value, 3)
+# ---------------------- #
 
     def isGoingOutOfBounds(self) -> bool:
         '''Returns true if the entity is going out of display, according\n

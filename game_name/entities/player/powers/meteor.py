@@ -21,11 +21,17 @@ class Meteor(pwr.Power):
         self.animator.loadSprites(pwr.ent.pg.image.load(explosion_sprite_path).convert_alpha(), [100,100], [8,8,8,8,8,8,8,5])
 
         self.hit_pos = pwr.ent.pg.math.Vector2()
+
+        self.layer: int = 2
         
-        self.hit_time: float = 2.25
+        self.hit_time: float = 1.5
         self.explode_time = 0.75
 
         self.exploded: bool = False
+
+        self.meteor_damage: float = 70
+
+        self.rect_adjust = [-50,-50]
 
         # meteor hit/explode timers.
         self.timers: list[pwr.ent.Timer] = [pwr.ent.Timer(self.hit_time, lambda: self.explode(), -1), pwr.ent.Timer(self.explode_time, lambda: self.deactive(), -1)]
@@ -71,11 +77,16 @@ class Meteor(pwr.Power):
         return super().getMovementSpeed()
 
     def move(self) -> None:
-        '''Recalculates the speed of the entity to reach the hit_pos according to hit time.\n
+        '''Recalculates the speed of the meteor to reach the hit_pos according to hit time.\n
            Don't move if instance has exploded.\n'''
         if self.exploded: return
 
-        self.pos = self.pos + self.getMovementSpeed()
+        speed = self.getMovementSpeed()
+
+        # reseting variables for nxt loop.
+        self.speed_complement: pwr.ent.pg.math.Vector2 = pwr.ent.pg.math.Vector2()
+
+        self.pos = self.pos + speed
     
     def setAngle(self) -> None:
         '''Sets the angle to rotate the meteor when moving to the target.\n'''
@@ -94,6 +105,15 @@ class Meteor(pwr.Power):
         self.animator.setRange([60, self.animator.getTotalImages()-1])
 
         self.timers[1].activateTimer()
+
+    def collisionUpdate(self) -> None:
+        super().collisionUpdate()
+
+        if not self.exploded: return
+
+        for en in pwr.ent.Entity.enemies:
+            if self.rect.colliderect(en.rect):
+                en.damageSelf(self.meteor_damage)
 
     def update(self) -> None:
         if not self.activated:
