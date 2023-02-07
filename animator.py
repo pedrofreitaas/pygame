@@ -48,7 +48,7 @@ class Animator():
 
     def animationPercentage(self) -> float:
         '''Returns a float number from zero to one, that represents the total sprites that have passed in the current animation.\n'''
-        total_sprites = self.range_image[1] - self.range_image[0] + 1
+        total_sprites = self.range_image[1] - self.range_image[0]
         return (self.index_image - self.range_image[0]) / total_sprites
         
     def loadSprites(self, spritesheet: pg.surface.Surface, imageSize: tuple[float,float], imagesPerLine: list[int]) -> None:

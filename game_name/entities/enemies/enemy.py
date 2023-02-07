@@ -19,6 +19,9 @@ class Enemy(ent.Entity):
 
         self.randommizer_coeficient = 5
 
+        self.attack_damage: float = 0
+        self.attack_knockback: ent.pg.math.Vector2 = ent.pg.math.Vector2(0,0)
+
     def updateMoveBehavior(self, coeficient: float) -> None:
         '''Updates the variable that controls the movement behavior.\n'''
         self.movement_behavior += coeficient * ent.Entity.dt
@@ -56,8 +59,8 @@ class Enemy(ent.Entity):
             return
 
     def setRandomSpeed(self) -> None:
-        '''Sets the enemy speed randomly.\n'''
-        if self.randomizer.randint(1,50000) >= 80: return
+        '''Sets the enemy speed_dir randomly.\n'''
+        if self.randomizer.randint(1,50000) >= 150: return
 
         self.speed_dir: ent.pg.math.Vector2 = ent.pg.math.Vector2(self.randomizer.random()*self.randomizer.randint(-1,1), self.randomizer.random()*self.randomizer.randint(-1,1))
         if self.speed_dir != ent.pg.math.Vector2(): self.speed_dir = self.speed_dir.normalize()
@@ -88,6 +91,22 @@ class Enemy(ent.Entity):
         coordinates = self.pos + ent.pg.math.Vector2(self.animator.image.get_width()/2,0) - ent.pg.math.Vector2(life_rect.get_size())*0.5
         
         ent.Entity.blitter.addImageInLayer(self.layer, life_rect, coordinates)
+
+    def collisionUpdate(self) -> None:
+        '''Checks for collision between enemy and player.\n
+           Uses mask collision.\n
+           Inflicts the current value of attack_damage and attack_knockback if collide, and reset's this values.\n'''
+        super().collisionUpdate()
+
+        if self.action == 0:
+            return
+
+        if self.mask.overlap(ent.Entity.player.mask, ent.Entity.player.pos-self.pos) != None:
+            ent.Entity.player.damageSelf(self.attack_damage)
+            ent.Entity.player.complementSpeed(self.attack_knockback)
+
+        self.attack_damage = 0
+        self.attack_knockback: ent.pg.math.Vector2 = ent.pg.math.Vector2(0,0)
 
     def die(self) -> None:
         '''Makes the enemy stop updating.\n'''

@@ -14,36 +14,7 @@ class WaterPriestess(en.Enemy):
         self.seek_player_interval = [0,65]
         self.random_move_interval = [65,80]
         self.distance_player_interval = [80,85]
-        self.idle_interval = [85,100]        
-
-    def collisionUpdate(self) -> None:
-        super().collisionUpdate()
-
-        if self.action == 0:
-            return
-
-        if self.mask.overlap(en.ent.Entity.player.mask, en.ent.Entity.player.pos-self.pos) == None:
-            return
-
-        if self.action == 1:
-            en.ent.Entity.player.damageSelf(10)
-            return
-
-        if self.action == 2:
-            en.ent.Entity.player.damageSelf(10)
-            return
-
-        if self.action == 3:
-            en.ent.Entity.player.damageSelf(10)
-            return
-
-        if self.action == 4:
-            en.ent.Entity.player.damageSelf(10)
-            return
-
-        if self.action == 5:
-            en.ent.Entity.player.damageSelf(10)
-            return
+        self.idle_interval = [85,100]     
 
     def controlCombat(self) -> None:
         '''Controls the water_priestess attack.\n'''
@@ -60,11 +31,11 @@ class WaterPriestess(en.Enemy):
 
         attack_decider = self.randomizer.randint(1,5000)
 
-        if attack_decider <= 3: # attack 1
+        if attack_decider <= 5: # attack 1
             self.action = 1
             return
 
-        if attack_decider <= 5 and distance <= 3500: # attack 5
+        if attack_decider <= 10 and distance <= 3500: # attack 5
             self.action = 5
             return
 
@@ -76,7 +47,7 @@ class WaterPriestess(en.Enemy):
             self.action = 3
             return
 
-        if attack_decider <= 60 and distance <= 1000: # attack 2
+        if attack_decider <= 50 and distance <= 1000: # attack 2
             self.action = 2
             return
 
@@ -84,29 +55,61 @@ class WaterPriestess(en.Enemy):
         '''Controls water_priestess animation behavior.\n'''
         super().animationAction()
 
+        percentage = self.animator.animationPercentage()
+
         if self.action == 1:
-            if int(self.animator.index_image) == 36:
+            if en.ent.inInterval([0.4, 0.5], percentage):
                 self.complementSpeed(self.speed_dir*self.speed_value*10*en.ent.Entity.dt)
+
+            if self.getMovementSpeed() != en.ent.pg.math.Vector2(): self.attack_damage = 400
             
             return
         
         if self.action == 2: # attack 2.
-            percentage = self.animator.animationPercentage()
+            self.animator.changeUpdateCoeficient(self.animator.upd_coeficient*1.125)
+
             if en.ent.inInterval([0.4, 0.6], percentage):
                 self.complementSpeed(self.speed_dir*self.speed_value*2*en.ent.Entity.dt)
+
+            if self.getMovementSpeed() != en.ent.pg.math.Vector2(): self.attack_damage = 70
 
             return
 
         if self.action == 3: # attack 3.
+            self.animator.changeUpdateCoeficient(self.animator.upd_coeficient*1.4)
+            
+            if en.ent.inInterval([0.1,0.2], percentage): self.attack_damage = 5
+            if en.ent.inInterval([0.3,0.45], percentage): self.attack_damage = 20
+            if en.ent.inInterval([0.65,0.75], percentage): self.attack_damage = 40
+
             return
         
-        if self.action == 4: # attack 4.
-            percentage = self.animator.animationPercentage()
-            if en.ent.inInterval([0.6, 0.8], percentage):
-                self.complementSpeed(self.speed_dir*self.speed_value*0.125*en.ent.Entity.dt*-1)
+        if self.action == 4: # attack 4.               
+            if percentage <= 0.2: 
+                self.complementSpeed(self.speed_dir*self.speed_value*0.25*en.ent.Entity.dt)
+                self.setSeekPlayerSpeed()
+                self.attack_damage = 20
+                
+            elif en.ent.inInterval([0.65,0.8], percentage): 
+                self.animator.changeUpdateCoeficient(self.animator.upd_coeficient*1.6)
+                self.complementSpeed(self.speed_dir*self.speed_value*0.5*en.ent.Entity.dt*-1)
+                self.attack_damage = 30
+
+            elif en.ent.inInterval([0.8,0.85], percentage): 
+                self.attack_knockback = self.attack_knockback + (self.speed_dir*self.speed_value*2*en.ent.Entity.dt)
+                self.attack_damage = 40
+
             return
 
         if self.action == 5: # attack 5.
+            self.animator.changeUpdateCoeficient(self.animator.upd_coeficient*1.75)
+
+            if percentage < 0.4:
+                self.setSeekPlayerSpeed()
+
+            else:
+                self.attack_damage = 80 * percentage
+
             return
 
     def controlAnimator(self) -> None:
@@ -118,7 +121,7 @@ class WaterPriestess(en.Enemy):
             return
 
         if self.stats.is_taking_damage:
-            self.animator.setRange([177, 162])
+            self.animator.setRange([156, 162])
             return
 
         if self.action == 1:

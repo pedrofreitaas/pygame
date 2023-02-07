@@ -202,7 +202,7 @@ class Entity():
 
         self.collisionUpdate()
 
-        if self.stats.update(Entity.dt): self.kill()
+        if not self.stats.update(Entity.dt): self.kill()
         
         self.animator.update(Entity.dt)
         self.controlAnimator()

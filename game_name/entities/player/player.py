@@ -20,7 +20,7 @@ class Player( ent.Entity ):
 
         self.animator.loadSprites( ent.pg.image.load(player_sprites_path[1]).convert_alpha(),
                                                           [56,56],
-                                                          [8,2,8,4,8,8,2] )
+                                                          [8,2,8,4,4,8,2] )
 
         ent.Entity.player = self
 
@@ -77,7 +77,8 @@ class Player( ent.Entity ):
             return
 
         if self.stats.is_taking_damage:
-            self.animator.setRange([93,107])
+            self.animator.setRange([90,93])
+            self.animator.activateStopAt(0.8)
             return
 
         if self.action == 1:

@@ -3,17 +3,22 @@ class Stats():
 
         self.max_life = max_life
         self.life = self.max_life
+        self.previous_life = self.life
 
         self.max_mana = max_mana
         self.mana = self.max_mana
+        self.previous_mana = self.mana
 
         self.max_stamina = max_stamina
         self.stamina = self.max_stamina
+        self.previous_stamina = self.stamina
 
         self.regen_factor = 2
 
         # booleans.
         self.is_taking_damage = False
+        self.is_using_mana = False
+        self.is_using_stamina = False
         self.is_dying = False
 
     def setRegenFactor(self, value: float) -> None:
@@ -22,21 +27,22 @@ class Stats():
     def regen(self, dt: float) -> None:
         '''Regens all the atributes with regen_factor base.\n'''
         if not self.is_taking_damage:
-            if self.life + (self.regen_factor*dt) <= self.max_life: self.life += self.regen_factor*dt
-            else: self.life = self.max_life
+            self.life += self.regen_factor*dt
+            if self.life > self.max_life: self.life = self.max_life
 
-        if self.mana + (self.regen_factor*1.4*dt) <= self.max_mana: self.max_mana += self.regen_factor*1.4*dt
-        else: self.mana = self.max_mana
+        if not self.is_using_mana:
+            self.max_mana += self.regen_factor*1.4*dt
+            if self.mana > self.max_mana: self.mana = self.max_mana
 
-        if self.stamina + (self.regen_factor*2*dt) <= self.max_stamina: self.stamina += self.regen_factor*2*dt
-        else: self.stamina = self.max_stamina
+        if not self.is_using_stamina:
+            self.stamina += self.regen_factor*2*dt
+            if self.stamina > self.max_stamina: self.stamina = self.max_stamina
 
     def spend(self, dt: float, qnt: float, which: int) -> None:
         '''Spends the instance atributte by the given quantity according to delta time.\n
            1->life, 2->mana, 3->stamina.\n'''
            
         if which == 1:
-            self.is_taking_damage = True
             self.life -= (qnt*dt)
 
             if self.life <= 0:
@@ -59,12 +65,32 @@ class Stats():
 
             return
 
+    def checkStats(self) -> bool:
+        '''Checks if the entity is taking damage.\n'''
+        #life
+        if self.life < self.previous_life: self.is_taking_damage = True
+        else: self.is_taking_damage = False
+
+        self.previous_life = self.life
+
+        #mana
+        if self.mana < self.previous_mana: self.is_using_mana = True
+        else: self.is_using_mana = False
+
+        self.previous_mana = self.mana
+        
+        #stamina
+        if self.stamina < self.previous_stamina: self.is_using_stamina = True
+        else: self.is_using_stamina = False
+
+        self.previous_stamina = self.stamina
+
     def update(self, dt: float) -> bool:
         '''Regenerates the atributes.\n
            Returns false if the instance is dead.\n'''
-        if self.is_dying: return True
+        if self.is_dying: return False
         
+        self.checkStats()
         self.regen(dt)
-        self.is_taking_damage = False
 
-        return False
+        return True
