@@ -3,6 +3,7 @@ import blitter as blt
 import widget.button as button
 from timer import *
 from time import time as tm
+from game_name.game_map.map import *
 
 pg.init()
 pg.font.init()
@@ -49,6 +50,8 @@ class Game():
         pl.ent.Entity.blitter = self.blitter
 
         self.clock: pg.time.Clock = pg.time.Clock()
+
+        self.map: Map = Map(self.blitter)
 
         self.game_timers: list[Timer] = []
         self.player = pl.Player(pg.math.Vector2(20,20))
@@ -127,6 +130,8 @@ class Game():
 
             self.player.update(self.events)
             pl.ent.updateEnemies()
+
+            self.map.update()
 
             self.blitter.update(pg.math.Vector2())
 
