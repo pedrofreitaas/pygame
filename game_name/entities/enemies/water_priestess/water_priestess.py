@@ -14,13 +14,17 @@ class WaterPriestess(en.Enemy):
         self.seek_player_interval = [0,65]
         self.random_move_interval = [65,80]
         self.distance_player_interval = [80,85]
-        self.idle_interval = [85,100]     
+        self.idle_interval = [85,100]
+
+        self.upd_mov_behavior_coeficient = 5
 
     def controlCombat(self) -> None:
         '''Controls the water_priestess attack.\n'''
 
         # alredy taking action.
         if self.action != 0: return
+
+        if self.stats.is_taking_damage: return
 
         # if not seeking player.
         if not en.ent.inInterval(self.seek_player_interval, self.movement_behavior): return

@@ -55,6 +55,14 @@ class Game():
 
         self.enemy = wtr_priest.WaterPriestess(pg.math.Vector2(200,400), 1)
 
+        self.dtSurface = self.fonts[2].render(str(round(self.dt,4)), 1, pg.Color("black"))
+        self.dtSurface_blitPOS = [self.blitter.displaySize()[0]-self.dtSurface.get_size()[0]-20,10]
+        self.game_timers.append(Timer(1, lambda: self.updateDtSurface(),-1))
+
+    def updateDtSurface(self) -> None:
+        '''Updates the dt surface with the most recent value.\n'''
+        self.dtSurface = self.fonts[2].render(str(round(self.dt,4)), 1, pg.Color("black"))
+
     def getEvents(self) -> None:
         '''Gets the loop events and save them in a self.variable.\n'''
 
@@ -103,10 +111,7 @@ class Game():
         pl.ent.unpauseTimers(throw=False)
 
     def blitDt(self) -> None:
-        dtSurface = self.fonts[2].render(str(round(self.dt,4)), 1, pg.Color("coral"))
-        blitPOS = [self.blitter.displaySize()[0]-dtSurface.get_size()[0]-10,10]
-
-        self.blitter.addImageInLayer(self.blitter.lastLayer(), dtSurface, blitPOS)
+        self.blitter.addImageInLayer(self.blitter.lastLayer(), self.dtSurface, self.dtSurface_blitPOS)
 
     def gameloop(self) -> None:
         while self.playing:
@@ -124,5 +129,7 @@ class Game():
             pl.ent.updateEnemies()
 
             self.blitter.update(pg.math.Vector2())
+
+            updateTimers(self.game_timers)
             
             self.clock.tick(500)

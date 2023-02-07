@@ -28,7 +28,9 @@ class Player( ent.Entity ):
 
         self.rect_adjust: tuple = [-20,-20]
 
-        self.attack_damage = 40
+        self.attack_damage: float = 40
+
+        self.slide_speed: ent.pg.math.Vector2 = ent.pg.math.Vector2(0,0)
 
         self.setStatsSurfaces()
 
@@ -64,6 +66,11 @@ class Player( ent.Entity ):
         elif self.action == 3: # casting
             self.animator.setEAP(lambda: self.launchMeteor())
         
+        elif self.action == 4: # sliding
+            self.complementSpeed(self.slide_speed*ent.Entity.dt)
+            self.animator.changeUpdateCoeficient(self.animator.upd_coeficient*2)
+            self.animator.setEAP(lambda: self.resetAction())
+        
         if self.isMoving(): Player.footstep_sound.play()
         else: Player.footstep_sound.stop()
 
@@ -92,6 +99,10 @@ class Player( ent.Entity ):
 
         if self.action == 3:
             self.animator.setRange([54,62])
+            return
+
+        if self.action == 4:
+            self.animator.setRange([78,86])
             return
 
         if self.isMoving():
@@ -133,6 +144,9 @@ class Player( ent.Entity ):
 
                 elif ev.key == 101: #ord('e')
                     self.cast()
+
+                elif ev.key == ent.pg.K_SPACE:
+                    self.slide()
             
             if ev.type == ent.pg.KEYUP:
                 
@@ -163,8 +177,19 @@ class Player( ent.Entity ):
 
     def cast(self) -> None:
         '''Toggles player's casting, if possible.\n'''
-        if self.action == 0 and not self.stats.is_taking_damage:
+        if self.action == 0 and not self.stats.is_taking_damage and self.stats.hasEnough(40, 2):
             self.action = 3
+            self.stats.spend(1, 40, 2)
+
+    def slide(self) -> None:
+        '''Make the player slide.\n'''
+        if self.action == 0 and not self.stats.is_taking_damage and self.stats.hasEnough(30, 3):
+            self.action = 4
+            self.stats.spend(1, 20, 3)
+
+            if self.speed_dir == ent.pg.math.Vector2(): self.slide_speed = self.speed_dir
+
+            else: self.slide_speed = self.speed_dir.normalize()*self.speed_value*1.2
 
     def getLifeSurfacePos(self) -> ent.pg.math.Vector2:
         return ent.pg.math.Vector2(5,10)

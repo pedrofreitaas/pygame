@@ -31,12 +31,28 @@ class Stats():
             if self.life > self.max_life: self.life = self.max_life
 
         if not self.is_using_mana:
-            self.max_mana += self.regen_factor*1.4*dt
+            self.mana += self.regen_factor*1.4*dt
             if self.mana > self.max_mana: self.mana = self.max_mana
 
         if not self.is_using_stamina:
             self.stamina += self.regen_factor*2*dt
             if self.stamina > self.max_stamina: self.stamina = self.max_stamina
+
+    def hasEnough(self, qnt: float, which: int) -> bool:
+        '''Returns true if the instance has the according stat in the parameter quantity.\n
+           1->life, 2->mana, 3->stamina.\n'''
+
+        if which == 1:
+            if self.life >= qnt: return True
+            return False
+
+        if which == 2:
+            if self.mana >= qnt: return True
+            return False
+
+        if which == 3:
+            if self.stamina >= qnt: return True
+            return False
 
     def spend(self, dt: float, qnt: float, which: int) -> None:
         '''Spends the instance atributte by the given quantity according to delta time.\n
@@ -54,14 +70,14 @@ class Stats():
         if which == 2:
             self.mana -= qnt*dt
 
-            if self.mana <= 0: self.mana = 0
+            if self.mana < 0: self.mana = 0
             
             return
 
         if which == 3:
             self.stamina -= qnt*dt
 
-            if self.stamina <= 0: self.stamina = 0
+            if self.stamina < 0: self.stamina = 0
 
             return
 
