@@ -52,11 +52,12 @@ class Game():
         self.clock: pg.time.Clock = pg.time.Clock()
 
         self.map: Map = Map(self.blitter)
+        pl.ent.Entity.map: Map = self.map
 
         self.game_timers: list[Timer] = []
         self.player = pl.Player(pg.math.Vector2(20,20))
 
-        self.enemy = wtr_priest.WaterPriestess(pg.math.Vector2(200,400), 1)
+        #self.enemy = wtr_priest.WaterPriestess(pg.math.Vector2(200,400), 1)
 
         self.dtSurface = self.fonts[2].render(str(round(self.dt,4)), 1, pg.Color("black"))
         self.dtSurface_blitPOS = [self.blitter.displaySize()[0]-self.dtSurface.get_size()[0]-20,10]
@@ -133,7 +134,7 @@ class Game():
 
             self.map.update()
 
-            self.blitter.update(pg.math.Vector2())
+            self.blitter.update(pg.math.Vector2(0,0))
 
             updateTimers(self.game_timers)
             

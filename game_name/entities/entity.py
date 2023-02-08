@@ -4,8 +4,10 @@ import animator as an
 from timer import *
 from game_name.extra import *
 from game_name.entities.stats import *
+from game_name.game_map.map import *
 
 class Entity():
+    map: Map = 0
 
     dt = 0
     enemies: list['Entity'] = []
@@ -95,6 +97,8 @@ class Entity():
     def move(self) -> None:
         '''Moves the entity if movement isn't locked.\n'''
         if self.isGoingOutOfBounds(): self.fitInDisplayBounds()
+        
+        self.fitOutOfStructures()
 
         speed = self.getMovementSpeed()
 
@@ -162,6 +166,7 @@ class Entity():
         else: self.stats.spend(1, value, 3)
 # ---------------------- #
 
+# Movement collision.
     def isGoingOutOfBounds(self) -> bool:
         '''Returns true if the entity is going out of display, according\n
            to entity's speed and current state of movement locking.\n'''
@@ -187,6 +192,19 @@ class Entity():
         if right_escape > 0: fitVector[0] = fitVector[0]-right_escape
             
         self.complementSpeed(fitVector)
+
+    def fitOutOfStructures(self) -> None:
+        '''Makes sures the entity is out of structures.\n'''
+        structs: list[Structure] = Entity.map.getStructuresInRect(self.layer, self.rect.copy())
+
+        for struct in structs:
+            if not self.rect.colliderect(struct.rect): continue
+
+            distance = self.center()-pg.math.Vector2(struct.rect.center)
+            if distance != pg.math.Vector2(): distance = distance.normalize()
+
+            self.complementSpeed( distance )
+# ----------------------- #
 
     def kill(self) -> None:
         '''Sets the entity death animation.\n'''

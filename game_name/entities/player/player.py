@@ -26,7 +26,7 @@ class Player( ent.Entity ):
 
         self.meteor: meteor.Meteor = meteor.Meteor(ent.pg.math.Vector2(), self.layer, 100)
 
-        self.rect_adjust: tuple = [-20,-20]
+        self.rect_adjust: tuple = [-30,-20]
 
         self.attack_damage: float = 40
 
