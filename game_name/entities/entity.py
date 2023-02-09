@@ -42,6 +42,7 @@ class Entity():
 
         self.is_dead = False
 
+# movement.
     def complementSpeed(self, complement: pg.math.Vector2) -> None:
         '''Complement parameter is going to sum in entity's movement.\n
            This isn't affected by loop's delta time.\n
@@ -76,6 +77,21 @@ class Entity():
            Considers movement lock variables in the moment of the call.\n'''
         return (self.getMovementSpeed() != pg.math.Vector2())
 
+    def getLockMovement(self) -> bool:
+        '''Returns a tuple that checks entity's current action adn returns if it's moving or not.\n'''
+        return bool(self.action)
+
+    def move(self) -> None:
+        '''Moves the entity if movement isn't locked.\n'''
+        self.pos = self.pos + self.getMovementSpeed()
+
+        if self.isGoingOutOfBounds(): self.fitInDisplayBounds()
+        self.fitOutOfStructures()
+
+        # reseting variables for nxt loop.
+        self.speed_complement: pg.math.Vector2 = pg.math.Vector2()
+# ------------------- #
+
     def blit(self) -> None:
         '''Blits the instance's animator image using a blitter instance.\n'''
 
@@ -90,20 +106,6 @@ class Entity():
     def blitStats(self) -> None:
         '''Abstract function to blit entity's stats.\n'''
 
-    def getLockMovement(self) -> bool:
-        '''Returns a tuple that checks entity's current action adn returns if it's moving or not.\n'''
-        return bool(self.action)
-
-    def move(self) -> None:
-        '''Moves the entity if movement isn't locked.\n'''
-        self.pos = self.pos + self.getMovementSpeed()
-
-        if self.isGoingOutOfBounds(): self.fitInDisplayBounds()
-        self.fitOutOfStructures()
-
-        # reseting variables for nxt loop.
-        self.speed_complement: pg.math.Vector2 = pg.math.Vector2()
-    
     def center(self) -> pg.math.Vector2:
         '''Returns the center of the current sprite.\n'''
         return self.pos + pg.math.Vector2(self.animator.currentSpriteSize())*0.5
