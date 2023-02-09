@@ -96,16 +96,13 @@ class Entity():
 
     def move(self) -> None:
         '''Moves the entity if movement isn't locked.\n'''
-        if self.isGoingOutOfBounds(): self.fitInDisplayBounds()
-        
-        self.fitOutOfStructures()
+        self.pos = self.pos + self.getMovementSpeed()
 
-        speed = self.getMovementSpeed()
+        if self.isGoingOutOfBounds(): self.fitInDisplayBounds()
+        self.fitOutOfStructures()
 
         # reseting variables for nxt loop.
         self.speed_complement: pg.math.Vector2 = pg.math.Vector2()
-
-        self.pos = self.pos + speed
     
     def center(self) -> pg.math.Vector2:
         '''Returns the center of the current sprite.\n'''
@@ -179,19 +176,21 @@ class Entity():
         '''Checks where entity has escaped from display, and fits it back.\n'''
         fitVector = pg.math.Vector2(0,0)
 
-        top_escape = self.rect.top - Entity.display_rect.top
+        displayRect = Entity.blitter.camera.captureRect()
+
+        top_escape = self.rect.top - displayRect.top
         if top_escape < 0: fitVector[1] = fitVector[1]-top_escape
 
-        bottom_escape = self.rect.bottom - Entity.display_rect.bottom
+        bottom_escape = self.rect.bottom - displayRect.bottom
         if bottom_escape > 0: fitVector[1] = fitVector[1]-bottom_escape
 
-        left_escape = self.rect.left - Entity.display_rect.left
+        left_escape = self.rect.left - displayRect.left
         if left_escape < 0: fitVector[0] = fitVector[0]-left_escape
 
-        right_escape = self.rect.right - Entity.display_rect.right
+        right_escape = self.rect.right - displayRect.right
         if right_escape > 0: fitVector[0] = fitVector[0]-right_escape
             
-        self.complementSpeed(fitVector)
+        self.pos = self.pos + fitVector
 
     def fitOutOfStructures(self) -> None:
         '''Makes sures the entity is out of structures.\n'''
@@ -200,10 +199,13 @@ class Entity():
         for struct in structs:
             if not self.rect.colliderect(struct.rect): continue
 
-            distance = self.center()-pg.math.Vector2(struct.rect.center)
-            if distance != pg.math.Vector2(): distance = distance.normalize()
+            if not struct.hasExclusiveHitbox:
+                if self.mask.overlap_area(struct.mask, struct.getPos()-self.pos) == 0: continue
 
-            self.complementSpeed( distance )
+            distance = self.center()-pg.math.Vector2(struct.rect.center)
+            if distance != pg.math.Vector2(): distance = distance.normalize()*self.speed_value*Entity.dt
+
+            self.pos = self.pos + distance
 # ----------------------- #
 
     def kill(self) -> None:

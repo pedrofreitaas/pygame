@@ -177,9 +177,8 @@ class Player( ent.Entity ):
 
     def cast(self) -> None:
         '''Toggles player's casting, if possible.\n'''
-        if self.action == 0 and not self.stats.is_taking_damage and self.stats.hasEnough(40, 2):
+        if self.action == 0 and not self.stats.is_taking_damage:
             self.action = 3
-            self.stats.spend(1, 40, 2)
 
     def slide(self) -> None:
         '''Make the player slide.\n'''
@@ -201,16 +200,18 @@ class Player( ent.Entity ):
         return ent.pg.math.Vector2(5,28)
 
     def blitStats(self) -> None:
+        '''Blits player stats.\n
+           Life+Mana+Stamina.\n'''
 
-        ent.Entity.blitter.addImageInLayer(self.layer,
+        ent.Entity.blitter.addImageInLayer(ent.Entity.blitter.lastLayer(),
                                            self.life_surface.subsurface((0,0), (self.stats.life, 10)),
                                            self.getLifeSurfacePos())
 
-        ent.Entity.blitter.addImageInLayer(self.layer, 
+        ent.Entity.blitter.addImageInLayer(ent.Entity.blitter.lastLayer(), 
                                            self.mana_surface.subsurface((0,0), (self.stats.mana, 6)),
                                            self.getManaSurfacePos())
 
-        ent.Entity.blitter.addImageInLayer(self.layer, 
+        ent.Entity.blitter.addImageInLayer(ent.Entity.blitter.lastLayer(), 
                                            self.stamina_surface.subsurface((0,0), (self.stats.stamina, 8)),
                                            self.getStaminaSurfacePos())
 
@@ -252,5 +253,7 @@ class Player( ent.Entity ):
 
 # power methods.
     def launchMeteor(self) -> None:
-        self.meteor.activate()
+        if self.stats.hasEnough(40, 2):
+            self.meteor.activate()
+            self.useMana(40,True)
         self.resetAction()

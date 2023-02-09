@@ -2,124 +2,82 @@ import pygame as pg
 from random import randint
 
 class Camera():
-    def __init__(self, display_size: tuple[float,float]) -> None:
-        #REAL offset
-        self.offset: pg.math.Vector2 = pg.math.Vector2()
-        self.delta_pos: pg.math.Vector2 = pg.math.Vector2()
+    def __init__(self) -> None:
+        self.dt: float = 0
+        self.previous_player_center: pg.math.Vector2 = pg.math.Vector2(0,0)
 
-        #binarys
-        self.locked: bool = False
-        self.shaking: bool = False
-        self.zooming: bool = False
+        self.pos: pg.math.Vector2 = pg.math.Vector2(0,0)
+        self.speed_dir: pg.math.Vector2 = pg.math.Vector2(0,0)
+
+        self.speed_value: float = 80
+
+        self.display_size: pg.math.Vector2 = pg.math.Vector2(pg.display.get_window_size())
+
+        self.center_rect: pg.rect.Rect = self.captureRect().inflate(-400,-400)
 
         #map infos
-        self.map_size: tuple[float,float] = [0,0]
-
-        #display_infos
-        self.display_size: tuple[float,float]= display_size
+        self.map_size: tuple[float,float] = self.display_size
     
     def setMapSize(self, map_size : tuple[float,float]) -> None:
         '''Sets the instance's map size with the given parameter.\n'''
         self.map_size = map_size
-
-    def lock(self) -> None:
-        '''Looks camera offset.\n'''
-        if not self.shaking:
-            self.locked = True
     
-    def unlock(self) -> None:
-        '''Unlocks camera offset.\n'''
-        if not self.shaking:
-            self.locked = False
+    def getMovementSpeed(self) -> pg.math.Vector2:
+        '''Gets the camera move speed.\n'''
+        speed = self.speed_dir*self.dt*self.speed_value
 
-    def shake(self) -> None:
-        '''Triggers a continuous change in the offeset to simulate a shake.\n'''
-        if not self.shaking:
-            self.shaking = True
-            self.offset_befor_shaking = self.offset.copy()
-        else:
-            self.shaking = False
-            self.offset = self.offset_befor_shaking.copy()
+        outXRigth = self.map_size[0] + self.pos[0]-self.display_size[0]
+        outYBottom = self.map_size[1] + self.pos[1]-self.display_size[1]
+
+        if self.pos[0] > 0: speed[0]=-self.pos[0]
+        elif outXRigth < 0: speed[0]=-outXRigth
+        
+        if self.pos[1] > 0: speed[1]=-self.pos[1]
+        elif outYBottom < 0: speed[1]=-outYBottom
+
+        if not self.center_rect.collidepoint(self.previous_player_center+self.pos):
+            fitVector = self.previous_player_center-pg.math.Vector2(self.center_rect.center)+self.pos
+            self.pos -= fitVector.normalize()*self.dt*self.speed_value*3
+
+        return speed
+
+    def move(self) -> None:
+        """Moves the instance.\n"""
+        self.pos = self.pos + self.getMovementSpeed()
     
-    def zoom(self) -> None:
-        '''Trigers zoom.\n'''
-        self.zooming = not self.zooming
+    def captureRect(self) -> pg.rect.Rect:
+        '''Returns the rect that the camera is displaying.\n'''
+        return pg.rect.Rect(-self.pos, self.display_size)
 
-    def yGoingOutLimit(self, camera_delta: pg.math.Vector2) -> bool:
-        '''Check if the camera y is going out the map limits.\n'''
-        future_y = self.offset[1] - camera_delta[1]
-        if future_y > 0 or abs(future_y) + self.display_size[1] >= self.map_size[1]:
-            return True
+    def getPlayerDP(self, player_center: pg.math.Vector2) -> pg.math.Vector2:
+        '''Returns player delta pos.\n'''
+        dp = player_center - self.previous_player_center
+        self.previous_player_center = player_center
 
-        return False
+        return dp
 
-    def xGoingOutLimit(self, camera_delta: pg.math.Vector2) -> bool:
-        '''Check if the camera x is going out the map limits.\n'''
-        future_x = self.offset[0] - camera_delta[0]
-        if future_x > 0 or abs(future_x) + self.display_size[0] >= self.map_size[0]:
-            return True
-        return False
+    def update(self, dt: float, player_center: pg.math.Vector2) -> None:
+        """Moves the camera, based on the speed/delta given.\n"""
 
-    def move(self, camera_delta : pg.math.Vector2) -> None:
-        """Moves the instance if not locked.
-           Shakes if it is shaking."""
-
-        if self.locked:
-            self.delta_pos = pg.math.Vector2()
-            return
-
-        if self.shaking:
-            random_shake = pg.math.Vector2(randint(-5,5), randint(-5,5))
-            self.offset = self.offset + random_shake
-            self.delta_pos = self.delta_pos + random_shake
+        playerDP = self.getPlayerDP(player_center) 
         
-        #Setting real offset
-        self.delta_pos = pg.math.Vector2()
+        if playerDP != pg.math.Vector2(0,0): self.speed_dir = playerDP.normalize()
+        else: self.speed_dir = playerDP
 
-        if not self.xGoingOutLimit(camera_delta):
-            self.offset[0] = self.offset[0] - camera_delta[0]
-            self.delta_pos[0] = camera_delta[0]
-        if not self.yGoingOutLimit(camera_delta):
-            self.offset[1] = self.offset[1] - camera_delta[1]
-            self.delta_pos[1] = camera_delta[1]
-        
-    def update(self, camera_delta: pg.math.Vector2) -> None:
-        """Moves the camera, based on the speed/delta given."""
-        self.move(camera_delta)
+        self.dt = dt
+        self.move()
 
 class Layer():
     def __init__(self, display: pg.surface.Surface) -> None:
         #list with {images <-> cordinates}
-        self.images: list[pg.surface.Surface] = []
+        self.images: list[pg.surface.Surface, pg.math.Vector2] = []
+        self.is_camera_sensible: bool = True
 
         self.display: pg.surface.Surface = display
-        self.camera_sensible: bool = True
 
     def imageTotal(self) -> int:
         """Returns the amount of images of the instance."""
         return len(self.images)
-
-    def blitImages(self, Camera: Camera) -> None:
-        """Blits all the images of the instance. 
-           If the layer is sensible to OFFSET, subtracts the cords stored by the OFFSET.
-           IF "" isn't "", blits the image in the given cords.
-           OBS: Prints with zoom, or shakes it according to the booleans of the instance"""
-
-        if not self.camera_sensible:
-            for image in self.images:
-                if Camera.zooming:
-                    self.display.blit(pg.transform.scale2x(image[0]), image[1])
-                else:
-                    self.display.blit(image[0], image[1])
-            return
-
-        for image in self.images:
-            pos = image[1] + Camera.offset
-
-            if Camera.zooming:
-                self.display.blit(pg.transform.scale2x(image[0]), pos)
-            else:
-                self.display.blit(image[0], pos)
 
     def addImage(self, image: pg.surface.Surface, image_cord : pg.math.Vector2) -> None:
         """Appends the image with the cords info given, in this layer."""
@@ -132,7 +90,8 @@ class Layer():
 class Blitter():
     def __init__(self, display: pg.surface.Surface, total_layers: int) -> None:
         self.display: pg.surface.Surface = display
-        self.camera: Camera = Camera(self.display.get_size())
+        self.display_rect: pg.rect.Rect = display.get_rect()
+        self.camera: Camera = Camera()
 
         #higher layers are blitted on top of the lowers
         self.layers: list[Layer] = []
@@ -144,18 +103,14 @@ class Blitter():
     def setCameraMapSize(self, map_size: tuple[float,float]) -> None:
         """ Sets the map size inside the blitter camera instance.\n"""
         self.camera.setMapSize(map_size)
+    
+    def changeLayerCameraSensibility(self, layer_idx: int, sens: bool) -> None:
+        '''Makes the layer sensible to camera, or not.\n'''
+        self.layers[layer_idx].is_camera_sensible = sens
 
     def lastLayer(self) -> Layer:
         """ Returns the last layer of the blitter instance.\n"""
         return len(self.layers) - 1
-
-    def UNlockCamera(self) -> None:
-        """If the instance is unlocked, locks it, and does the oposite otherwise.\n"""
-        self.camera.locked = not self.camera.locked
-
-    def changeCameraSensibility(self, layerIndex: int) -> None:
-        """Changes the 'sensible' atribute of the given layer index.\n"""
-        self.layers[layerIndex].changeCameraSensibility()
 
     def createLayer(self) -> None:
         """Creates a new layer in the last position.\n"""
@@ -178,10 +133,6 @@ class Blitter():
         """Returns the amount of existing layers.\n"""
         return len(self.layers)
 
-    def cameraOffset(self) -> pg.math.Vector2:
-        """Returns the OFFSET of the camera of this instance.\n"""
-        return self.camera.offset
-
     def totalImages(self) -> int:
         """Returns the amount of images stored in all the layers of this instance.\n"""
         image_total = 0
@@ -191,14 +142,23 @@ class Blitter():
 
         return image_total
 
-    def update(self, camera_speed: pg.math.Vector2) -> None:
-        """Updates the instance every call.\n"""
+    def blit(self) -> None:
+        '''Blits all the images in the layers.\n'''
+        for layer in self.layers:
+            offset = pg.math.Vector2()
 
-        pg.display.flip()
+            if layer.is_camera_sensible: offset = self.camera.pos
+
+            for image in layer.images:
+                self.display.blit(image[0], offset+image[1])
+    
+    def update(self, dt: float, player_center: pg.math.Vector2) -> None:
         self.display.fill( (120,120,120) )
         
-        self.camera.update(camera_speed)
+        self.camera.update(dt, player_center)
 
-        for layer in self.layers:
-            layer.blitImages(self.camera)
-            layer.reset()
+        self.blit()
+
+        self.reset()
+
+        pg.display.flip()

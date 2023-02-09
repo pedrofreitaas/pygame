@@ -90,7 +90,7 @@ class Enemy(ent.Entity):
 
         coordinates = self.pos + ent.pg.math.Vector2(self.animator.image.get_width()/2,0) - ent.pg.math.Vector2(life_rect.get_size())*0.5
         
-        ent.Entity.blitter.addImageInLayer(self.layer, life_rect, coordinates)
+        ent.Entity.blitter.addImageInLayer(ent.Entity.blitter.lastLayer(), life_rect, coordinates)
 
     def collisionUpdate(self) -> None:
         '''Checks for collision between enemy and player.\n

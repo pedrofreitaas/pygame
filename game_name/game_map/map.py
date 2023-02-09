@@ -2,6 +2,7 @@ from pytmx import load_pygame, TiledMap
 import pygame as pg
 from game_name.game_map.structure import *
 import blitter as blt
+from time import time as tm
 
 class Map():
     blitter: blt.Blitter = 0
@@ -12,6 +13,7 @@ class Map():
         Map.blitter = blitter
 
         tmx: TiledMap = load_pygame('assets/map/map.tmx')
+        Map.blitter.setCameraMapSize( [tmx.width*tmx.tilewidth, tmx.height*tmx.tileheight] )
 
         self.layers: list[list[Structure]] = []
         self.table: dict[str, Structure] = {}
@@ -57,12 +59,14 @@ class Map():
 
         structs = []
 
-        gridStart = Map.blitter.cameraOffset() / 32
-        gridEnd = gridStart + pg.math.Vector2(35, 20)
+        gridStart = -Map.blitter.camera.pos / 32
+        gridStart = gridStart - pg.math.Vector2(2,2)
+
+        gridEnd = gridStart + pg.math.Vector2(39, 24)
 
         count=0         
         for struct in self.layers[layer_idx]:
-                if count > 751: break
+                if count > 950: break
                 
                 if struct.grid[0] < gridStart[0]: continue
                 elif struct.grid[0] > gridEnd[0]: continue
@@ -79,7 +83,7 @@ class Map():
         '''Blits all the structures.\n'''
 
         for layer_idx in range(0, len(self.layers)-1):  
-            structs: list[Structure] = self.getStructuresInLayerDisplay(layer_idx)   
+            structs: list[Structure] = self.getStructuresInLayerDisplay(layer_idx)
             
             for struct in structs:
                 # surf = pg.surface.Surface((struct.getRect().width, struct.getRect().height))

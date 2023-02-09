@@ -47,6 +47,7 @@ class Game():
         self.events: list[pg.event.Event] = []
 
         self.blitter: blt.Blitter = blt.Blitter(Game.display, 5)
+        self.blitter.changeLayerCameraSensibility(self.blitter.lastLayer(), False)
         pl.ent.Entity.blitter = self.blitter
 
         self.clock: pg.time.Clock = pg.time.Clock()
@@ -56,6 +57,7 @@ class Game():
 
         self.game_timers: list[Timer] = []
         self.player = pl.Player(pg.math.Vector2(20,20))
+        self.previous_player_pos = self.player.pos
 
         #self.enemy = wtr_priest.WaterPriestess(pg.math.Vector2(200,400), 1)
 
@@ -134,7 +136,7 @@ class Game():
 
             self.map.update()
 
-            self.blitter.update(pg.math.Vector2(0,0))
+            self.blitter.update(self.dt, self.player.center())
 
             updateTimers(self.game_timers)
             
