@@ -29,15 +29,15 @@ class Camera():
         outXRigth = self.map_size[0] + self.pos[0]-self.display_size[0]
         outYBottom = self.map_size[1] + self.pos[1]-self.display_size[1]
 
+        if not self.center_rect.collidepoint(self.previous_player_center+self.pos):
+            fitVector = self.previous_player_center-pg.math.Vector2(self.center_rect.center)+self.pos
+            self.pos -= fitVector.normalize()*self.dt*self.speed_value*3
+        
         if self.pos[0] > 0: speed[0]=-self.pos[0]
         elif outXRigth < 0: speed[0]=-outXRigth
         
         if self.pos[1] > 0: speed[1]=-self.pos[1]
         elif outYBottom < 0: speed[1]=-outYBottom
-
-        if not self.center_rect.collidepoint(self.previous_player_center+self.pos):
-            fitVector = self.previous_player_center-pg.math.Vector2(self.center_rect.center)+self.pos
-            self.pos -= fitVector.normalize()*self.dt*self.speed_value*3
 
         return speed
 

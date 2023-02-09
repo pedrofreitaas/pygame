@@ -29,7 +29,19 @@ class Map():
                 # list.
                 self.layers[idx].append( self.table[key] )
 
-            self.layers[idx].sort(key= lambda x: x.grid.length_squared() )
+            self.layers[idx].sort(key= lambda x: max(x.grid) )
+
+        self.map_layer_matrices: list[list[list[Structure]]] = []
+        
+        for layer_idx in range(len(tmx.layers)):
+            self.map_layer_matrices.append([])
+
+            for i in range(tmx.width):
+                self.map_layer_matrices[layer_idx].append([])
+            
+            for x,y, surf in layer.tiles():
+                self.map_layer_matrices[layer_idx][x].append(Structure(pg.math.Vector2(0,0), surf, tmx.get_tile_properties(x,y,layer_idx)))
+                    
 
     def getStructuresInRect(self, layer_idx: int, rect: pg.rect.Rect, radius=[50,50] ) -> list[Structure]:
         '''Returns all the structures that are in the rect and in the layer.\n
@@ -56,7 +68,6 @@ class Map():
     def getStructuresInLayerDisplay(self, layer_idx: int) -> None:
         '''Fills the parameter list with all the structures than are contained in the display according to camera offeset.\n
            It helps by disconsidering structures that are not in the display, and must not impact in the game.\n'''
-
         structs = []
 
         gridStart = -Map.blitter.camera.pos / 32
@@ -66,7 +77,7 @@ class Map():
 
         count=0         
         for struct in self.layers[layer_idx]:
-                if count > 950: break
+                if count > 936: break
                 
                 if struct.grid[0] < gridStart[0]: continue
                 elif struct.grid[0] > gridEnd[0]: continue
@@ -93,3 +104,5 @@ class Map():
     
     def update(self) -> None:
         self.blit()
+
+        self.previous_offset = -Map.blitter.camera.pos
