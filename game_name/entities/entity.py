@@ -14,7 +14,6 @@ class Entity():
     player: 'Entity' = 0
 
     blitter: blt.Blitter = 0
-    display_rect: pg.rect.Rect = pg.display.get_surface().get_rect()
     
     def __init__(self, pos: pg.math.Vector2, layer: int, speed_value: float, max_life: float, max_mana: float, max_stamina: float) -> None:
         
@@ -45,8 +44,8 @@ class Entity():
 # movement.
     def complementSpeed(self, complement: pg.math.Vector2) -> None:
         '''Complement parameter is going to sum in entity's movement.\n
-           This isn't affected by loop's delta time.\n
            This isn't affected by movement lock.\n
+           This isnt't affect by entity's speed value, only by delta time.\n
            Complemented speeds can still be complemented.\n'''
         self.speed_complement = self.speed_complement + complement
 
@@ -68,7 +67,7 @@ class Entity():
 
         if self.stats.is_taking_damage: speed = speed * 0.4
 
-        speed = speed + self.speed_complement
+        speed = speed + self.speed_complement*Entity.dt
 
         return speed
 
@@ -170,7 +169,9 @@ class Entity():
         '''Returns true if the entity is going out of display, according\n
            to entity's speed and current state of movement locking.\n'''
         
-        if not Entity.display_rect.contains(self.rect.move(self.getMovementSpeed())):
+        displayRect = Entity.blitter.camera.captureRect()
+
+        if not displayRect.contains(self.rect.move(self.getMovementSpeed())):
             return True
         return False
 

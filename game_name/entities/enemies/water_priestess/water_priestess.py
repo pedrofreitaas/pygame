@@ -61,9 +61,9 @@ class WaterPriestess(en.Enemy):
 
         percentage = self.animator.animationPercentage()
 
-        if self.action == 1:
+        if self.action == 1: # attack 1
             if en.ent.inInterval([0.4, 0.5], percentage):
-                self.complementSpeed(self.speed_dir*self.speed_value*10*en.ent.Entity.dt)
+                self.complementSpeed(self.speed_dir*self.speed_value*10)
 
             if self.getMovementSpeed() != en.ent.pg.math.Vector2(): self.attack_damage = 400
             
@@ -73,7 +73,7 @@ class WaterPriestess(en.Enemy):
             self.animator.changeUpdateCoeficient(self.animator.upd_coeficient*1.125)
 
             if en.ent.inInterval([0.4, 0.6], percentage):
-                self.complementSpeed(self.speed_dir*self.speed_value*2*en.ent.Entity.dt)
+                self.complementSpeed(self.speed_dir*self.speed_value*2)
 
             if self.getMovementSpeed() != en.ent.pg.math.Vector2(): self.attack_damage = 70
 
@@ -90,17 +90,17 @@ class WaterPriestess(en.Enemy):
         
         if self.action == 4: # attack 4.               
             if percentage <= 0.2: 
-                self.complementSpeed(self.speed_dir*self.speed_value*0.25*en.ent.Entity.dt)
+                self.complementSpeed(self.speed_dir*self.speed_value*0.25)
                 self.setSeekPlayerSpeed()
                 self.attack_damage = 20
                 
             elif en.ent.inInterval([0.65,0.8], percentage): 
                 self.animator.changeUpdateCoeficient(self.animator.upd_coeficient*1.6)
-                self.complementSpeed(self.speed_dir*self.speed_value*0.5*en.ent.Entity.dt*-1)
+                self.complementSpeed(self.speed_dir*self.speed_value*0.5*-1)
                 self.attack_damage = 30
 
             elif en.ent.inInterval([0.8,0.85], percentage): 
-                self.attack_knockback = self.attack_knockback + (self.speed_dir*self.speed_value*2*en.ent.Entity.dt)
+                self.attack_knockback = self.attack_knockback + (self.speed_dir*self.speed_value*2)
                 self.attack_damage = 40
 
             return

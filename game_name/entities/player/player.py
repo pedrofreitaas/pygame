@@ -56,7 +56,7 @@ class Player( ent.Entity ):
                 Player.hit_sound.play()
 
                 # attack movement.
-                self.complementSpeed(self.speed_dir*self.speed_value*ent.Entity.dt)
+                self.complementSpeed(self.speed_dir*self.speed_value)
                     
             else: Player.hit_sound.stop()
 
@@ -67,7 +67,7 @@ class Player( ent.Entity ):
             self.animator.setEAP(lambda: self.launchMeteor())
         
         elif self.action == 4: # sliding
-            self.complementSpeed(self.slide_speed*ent.Entity.dt)
+            self.complementSpeed(self.slide_speed)
             self.animator.changeUpdateCoeficient(self.animator.upd_coeficient*2)
             self.animator.setEAP(lambda: self.resetAction())
         

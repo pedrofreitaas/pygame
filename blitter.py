@@ -9,7 +9,7 @@ class Camera():
         self.pos: pg.math.Vector2 = pg.math.Vector2(0,0)
         self.speed_dir: pg.math.Vector2 = pg.math.Vector2(0,0)
 
-        self.speed_value: float = 80
+        self.speed_value: float = 20
 
         self.display_size: pg.math.Vector2 = pg.math.Vector2(pg.display.get_window_size())
 
@@ -24,14 +24,15 @@ class Camera():
     
     def getMovementSpeed(self) -> pg.math.Vector2:
         '''Gets the camera move speed.\n'''
+
+        if not self.center_rect.collidepoint(self.previous_player_center+self.pos):
+            fitVector = self.previous_player_center-pg.math.Vector2(self.center_rect.center)+self.pos
+            self.pos -= fitVector.normalize()*self.dt*self.speed_value*10
+
         speed = self.speed_dir*self.dt*self.speed_value
 
         outXRigth = self.map_size[0] + self.pos[0]-self.display_size[0]
         outYBottom = self.map_size[1] + self.pos[1]-self.display_size[1]
-
-        if not self.center_rect.collidepoint(self.previous_player_center+self.pos):
-            fitVector = self.previous_player_center-pg.math.Vector2(self.center_rect.center)+self.pos
-            self.pos -= fitVector.normalize()*self.dt*self.speed_value*3
         
         if self.pos[0] > 0: speed[0]=-self.pos[0]
         elif outXRigth < 0: speed[0]=-outXRigth

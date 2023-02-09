@@ -90,7 +90,7 @@ class Enemy(ent.Entity):
 
         coordinates = self.pos + ent.pg.math.Vector2(self.animator.image.get_width()/2,0) - ent.pg.math.Vector2(life_rect.get_size())*0.5
         
-        ent.Entity.blitter.addImageInLayer(ent.Entity.blitter.lastLayer(), life_rect, coordinates)
+        ent.Entity.blitter.addImageInLayer(self.layer, life_rect, coordinates)
 
     def collisionUpdate(self) -> None:
         '''Checks for collision between enemy and player.\n
@@ -116,8 +116,20 @@ class Enemy(ent.Entity):
 
         return super().die()
 
+    def move(self) -> None:
+        '''Moves the enemy if movement isn't locked.\n'''
+        self.pos = self.pos + self.getMovementSpeed()
+
+        # if self.isGoingOutOfBounds(): self.fitInDisplayBounds()
+
+        self.fitOutOfStructures()
+
+        # reseting variables for nxt loop.
+        self.speed_complement: ent.pg.math.Vector2 = ent.pg.math.Vector2()
+
     def update(self) -> None:
         if self.is_dead: return
+        if self.isGoingOutOfBounds(): return
 
         self.controlMovement()
         self.controlCombat()

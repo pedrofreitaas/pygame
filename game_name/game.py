@@ -59,7 +59,7 @@ class Game():
         self.player = pl.Player(pg.math.Vector2(20,20))
         self.previous_player_pos = self.player.pos
 
-        #self.enemy = wtr_priest.WaterPriestess(pg.math.Vector2(200,400), 1)
+        self.enemy = wtr_priest.WaterPriestess(pg.math.Vector2(200,400), 1)
 
         self.dtSurface = self.fonts[2].render(str(round(self.dt,4)), 1, pg.Color("black"))
         self.dtSurface_blitPOS = [self.blitter.displaySize()[0]-self.dtSurface.get_size()[0]-20,10]
