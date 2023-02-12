@@ -80,10 +80,18 @@ class Layer():
         """Returns the amount of images of the instance."""
         return len(self.images)
 
-    def addImage(self, image: pg.surface.Surface, image_cord : pg.math.Vector2) -> None:
+    def addImage(self, image: pg.surface.Surface, image_cord : pg.math.Vector2, blit_ID: float=0) -> None:
         """Appends the image with the cords info given, in this layer."""
         self.images.append([image,image_cord])
 
+    def blit(self, camera: Camera) -> None:
+        offset = pg.math.Vector2()
+
+        if self.is_camera_sensible: offset = camera.pos
+
+        for image in self.images:
+            self.display.blit(image[0], offset+image[1])
+    
     def reset(self) -> None:
         """Resets the instance."""
         self.images.clear()
@@ -117,9 +125,10 @@ class Blitter():
         """Creates a new layer in the last position.\n"""
         self.layers.append(Layer(self.display))
 
-    def addImageInLayer(self, layerIndex: int, image: pg.surface.Surface, image_cord: pg.math.Vector2) -> None:
-        """ adds the image in the chosen layer, with the coordinates of the parameter.\n"""
-        self.layers[layerIndex].addImage(image,image_cord)
+    def addImageInLayer(self, layerIndex: int, image: pg.surface.Surface, image_cord: pg.math.Vector2, blit_ID: float=0) -> None:
+        """Adds the image in the chosen layer, with the coordinates of the parameter.\n
+           The blit_ID parameter is the differentiation pattern for images in the instance.\n"""
+        self.layers[layerIndex].addImage(image,image_cord, blit_ID)
 
     def displaySize(self) -> pg.math.Vector2:
         """Returns the size of the display of this instance.\n"""
@@ -146,16 +155,9 @@ class Blitter():
     def blit(self) -> None:
         '''Blits all the images in the layers.\n'''
         for layer in self.layers:
-            offset = pg.math.Vector2()
-
-            if layer.is_camera_sensible: offset = self.camera.pos
-
-            for image in layer.images:
-                self.display.blit(image[0], offset+image[1])
+            layer.blit(self.camera)
     
-    def update(self, dt: float, player_center: pg.math.Vector2) -> None:
-        self.display.fill( (120,120,120) )
-        
+    def update(self, dt: float, player_center: pg.math.Vector2) -> None:        
         self.camera.update(dt, player_center)
 
         self.blit()

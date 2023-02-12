@@ -14,7 +14,7 @@ class Layer():
                 self.matrix[i].append(None)
 
         for x, y, surf in tmx_layer.tiles():
-            self.matrix[x][y] = Structure(pg.math.Vector2(x,y), surf)
+            self.matrix[x][y] = Structure(pg.math.Vector2(x,y), surf, tmx_layer.data[x][y])
 
     def getStructuresInRect(self, rect: pg.rect.Rect, radius=[50,50] ) -> list[Structure]:
         '''Returns all the structures that are in the rect and in the layer.\n
@@ -56,7 +56,7 @@ class Map():
 
         for idx, layer in enumerate(self.layers): 
             for struct in layer.getStructuresInRect(displayRect, radius=[64,64]):
-                    blitter.addImageInLayer(idx, struct.image, struct.getPos())
+                    blitter.addImageInLayer(idx, struct.image, struct.getPos(), struct.id)
 
     def update(self, blitter: blt.Blitter) -> None:
         self.blit(blitter)
