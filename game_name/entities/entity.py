@@ -197,13 +197,12 @@ class Entity():
 
     def fitOutOfStructures(self) -> None:
         '''Makes sures the entity is out of structures.\n'''
-        structs: list[Structure] = Entity.map.getStructuresInRect(self.layer, self.rect.copy())
+        structs: list[Structure] = Entity.map.getStructuresInRectInLayer(self.layer, self.rect.copy())
 
         for struct in structs:
             if not self.rect.colliderect(struct.rect): continue
 
-            if not struct.hasExclusiveHitbox:
-                if self.mask.overlap_area(struct.mask, struct.getPos()-self.pos) == 0: continue
+            if self.mask.overlap_area(struct.mask, struct.getPos()-self.pos) == 0: continue
 
             distance = self.center()-pg.math.Vector2(struct.rect.center)
             if distance != pg.math.Vector2(): distance = distance.normalize()*self.speed_value*Entity.dt

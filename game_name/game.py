@@ -1,5 +1,6 @@
 import pygame as pg
 import blitter as blt
+import win32api
 import widget.button as button
 from timer import *
 from time import time as tm
@@ -10,8 +11,8 @@ pg.font.init()
 pg.mixer.init(1000, 0, 16, 2048)
 
 #Display.
-sizeDisplay = [1120, 630]
-screen = pg.display.set_mode( (sizeDisplay[0],sizeDisplay[1]) )
+sizeDisplay = [1120, 630]#[win32api.GetSystemMetrics(0), win32api.GetSystemMetrics(1)]
+screen = pg.display.set_mode( (sizeDisplay[0],sizeDisplay[1]), pg.SCALED )
 
 #importing entities.
 import game_name.entities.player.player as pl
@@ -62,12 +63,17 @@ class Game():
         self.enemy = wtr_priest.WaterPriestess(pg.math.Vector2(200,400), 1)
 
         self.dtSurface = self.fonts[2].render(str(round(self.dt,4)), 1, pg.Color("black"))
+        self.fpsSurface = self.fonts[2].render(str(round(0)), 1, (0,0,0))
+    
         self.dtSurface_blitPOS = [self.blitter.displaySize()[0]-self.dtSurface.get_size()[0]-20,10]
+        self.fpsSurface_blit_pos = [self.blitter.displaySize()[0]-self.dtSurface.get_size()[0]-20,10+self.dtSurface.get_size()[1]+10]
+
         self.game_timers.append(Timer(1, lambda: self.updateDtSurface(),-1))
 
     def updateDtSurface(self) -> None:
         '''Updates the dt surface with the most recent value.\n'''
-        self.dtSurface = self.fonts[2].render(str(round(self.dt,4)), 1, pg.Color("black"))
+        self.dtSurface = self.fonts[2].render(str(round(self.dt,4)), 1, (0,0,0))
+        self.fpsSurface = self.fonts[2].render(str(self.clock.get_fps()), 1, (0,0,0))
 
     def getEvents(self) -> None:
         '''Gets the loop events and save them in a self.variable.\n'''
@@ -84,8 +90,12 @@ class Game():
             if event.type == pg.QUIT:
                 self.playing = False
 
-            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
-                self.paused = not self.paused
+            if event.type == pg.KEYDOWN: 
+                if event.key == pg.K_ESCAPE:
+                    self.paused = not self.paused
+
+                if event.key == pg.K_F11:
+                    pg.display.toggle_fullscreen()
 
     def UNpause(self) -> None:
         '''Pauses or unpauses the game, depending on the current value of self.paused.\n'''
@@ -97,47 +107,48 @@ class Game():
         self.dt = getDt()
         pl.ent.Entity.dt = self.dt
 
-        if self.dt > 0.2: print('dt problem.\n')
+        if self.dt > 0.05: print('dt problem.\n')
 
     def pauseloop(self) -> None:
         pl.ent.pauseTimers(throw=False)
         
         unpauseButton = button.Button(pg.math.Vector2(500,500), lambda: self.UNpause(), 'unpause', Game.fonts[0], pg.color.Color('black'), True)
         
-        while self.paused:
-            
+        while self.paused:            
             self.treatEvents()
 
             unpauseButton.update(self.events)
 
-            unpauseButton.blit(self.blitter, 1)
+            unpauseButton.blit(self.blitter, self.blitter.lastLayer())
 
-            self.blitter.update(pg.math.Vector2())
+            self.blitter.update(0, pg.math.Vector2())
 
         pl.ent.unpauseTimers(throw=False)
+        self.updateDt()
 
     def blitDt(self) -> None:
+        '''Updates and blits delta time.\n'''
+        self.updateDt()
         self.blitter.addImageInLayer(self.blitter.lastLayer(), self.dtSurface, self.dtSurface_blitPOS)
+        self.blitter.addImageInLayer(self.blitter.lastLayer(), self.fpsSurface, self.fpsSurface_blit_pos)
 
     def gameloop(self) -> None:
         while self.playing:
 
             if self.paused:
                 self.pauseloop()
-
-            self.updateDt()
             
             self.blitDt()
             
             self.treatEvents()
-
+            
             self.player.update(self.events)
             pl.ent.updateEnemies()
 
-            self.map.update()
-
+            self.map.update(self.blitter)
+            
             self.blitter.update(self.dt, self.player.center())
 
             updateTimers(self.game_timers)
             
-            self.clock.tick(500)
+            #self.clock.tick(120)
