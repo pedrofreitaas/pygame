@@ -36,6 +36,10 @@ class Enemy(ent.Entity):
     def controlMovement(self) -> None:
         '''Sets enemy movement, with a little bit of randness.\n'''
         if self.action != 0: return
+
+        if self.isGoingOutOfBounds(): 
+            self.movement_behavior = self.seek_player_interval[0]
+            return
         
         self.updateMoveBehavior(self.upd_mov_behavior_coeficient)
 
@@ -85,12 +89,12 @@ class Enemy(ent.Entity):
         '''Blits enemy's stats\n.'''
         width, heigth = 80,3
 
-        life_rect = ent.pg.surface.Surface((width*self.stats.life/self.stats.max_life, heigth))
-        life_rect.fill((50,200,0))
+        life_surf = ent.pg.surface.Surface((width*self.stats.life/self.stats.max_life, heigth))
+        life_surf.fill((50,200,0))
 
-        coordinates = self.pos + ent.pg.math.Vector2(self.animator.image.get_width()/2,0) - ent.pg.math.Vector2(life_rect.get_size())*0.5
+        coordinates = self.pos + ent.pg.math.Vector2(self.animator.image.get_width()/2,0) - ent.pg.math.Vector2(life_surf.get_size())*0.5
         
-        ent.Entity.blitter.addImageInLayer(self.layer, life_rect, coordinates)
+        ent.Entity.blitter.addImageInLayer(self.layer, life_surf, coordinates)
 
     def collisionUpdate(self) -> None:
         '''Checks for collision between enemy and player.\n
@@ -129,7 +133,6 @@ class Enemy(ent.Entity):
 
     def update(self) -> None:
         if self.is_dead: return
-        if self.isGoingOutOfBounds(): return
 
         self.controlMovement()
         self.controlCombat()

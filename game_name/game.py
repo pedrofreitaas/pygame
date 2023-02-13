@@ -107,21 +107,16 @@ class Game():
         self.dt = getDt()
         pl.ent.Entity.dt = self.dt
 
-        if self.dt > 0.05: print('dt problem.\n')
+        #if self.dt > 0.05: print('dt problem.\n')
 
     def pauseloop(self) -> None:
         pl.ent.pauseTimers(throw=False)
         
-        unpauseButton = button.Button(pg.math.Vector2(500,500), lambda: self.UNpause(), 'unpause', Game.fonts[0], pg.color.Color('black'), True)
+        #unpauseButton = button.Button(pg.math.Vector2(500,500), lambda: self.UNpause(), 'unpause', Game.fonts[0], pg.color.Color('black'), True)
         
         while self.paused:            
             self.treatEvents()
-
-            unpauseButton.update(self.events)
-
-            unpauseButton.blit(self.blitter, self.blitter.lastLayer())
-
-            self.blitter.update(0, pg.math.Vector2())
+            self.blitter.lightBlit()
 
         pl.ent.unpauseTimers(throw=False)
         self.updateDt()
@@ -145,10 +140,10 @@ class Game():
             self.player.update(self.events)
             pl.ent.updateEnemies()
 
-            self.map.update(self.blitter)
-            
-            self.blitter.update(self.dt, self.player.center())
-
             updateTimers(self.game_timers)
             
-            #self.clock.tick(120)
+            self.map.update(self.blitter)
+
+            self.blitter.update(self.dt, self.player.center(), self.map.getIDS())
+            
+            self.clock.tick(500)

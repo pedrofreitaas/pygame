@@ -1,5 +1,44 @@
 import pygame as pg
-from random import randint
+from timer import *
+from typing import Dict
+from math import ceil, floor
+
+class TileDict():
+    '''Clears tiles every 10 seconds.\n'''
+    
+    def __init__(self, tiles_size: tuple[float,float]) -> None:
+        self.tiles: Dict[str,int|None] = {}
+        self.tiles_size: tuple[int,int] = tiles_size
+
+        Timer(10, lambda: self.tiles.clear(), -1)
+
+    def grid(self, pos: pg.math.Vector2|tuple[float,float]) -> tuple[int,int]:
+        return [floor(pos[0]/self.tiles_size[0]), floor(pos[1]/self.tiles_size[1])]
+
+    def key(self, grid: tuple[int,int]) -> str:
+        return str(grid[0])+','+str(grid[1])
+
+    def getID(self, pos: pg.math.Vector2) -> int|None:
+        '''Returns the id stored in that pos.\n'''
+        try:
+            return self.tiles[ self.key( self.grid(pos) ) ]
+        except KeyError:
+            return None
+
+    def setID(self, pos: pg.math.Vector2, ID: int|None) -> None:
+        '''Sets the ID of the position to be the parameter.\n'''
+        self.tiles[self.key(self.grid(pos))] = ID
+
+    def update(self, rect: pg.rect.Rect, ID: int|None) -> None:
+        '''Updates the content of the rect to the parameter ID.\n'''
+        startGrid = self.grid( rect.topleft )
+
+        grids_x = ceil( (rect.width+ rect.left%32)/self.tiles_size[0])
+        grids_y = ceil( (rect.height+ rect.top%32)/self.tiles_size[1])
+
+        for x in range(grids_x):
+            for y in range(grids_y):
+                self.tiles[ self.key( [x+startGrid[0],y+startGrid[1]] ) ] = ID
 
 class Camera():
     def __init__(self) -> None:
@@ -71,30 +110,50 @@ class Camera():
 class Layer():
     def __init__(self, display: pg.surface.Surface) -> None:
         #list with {images <-> cordinates}
-        self.images: list[pg.surface.Surface, pg.math.Vector2] = []
+        self.non_structs: list[tuple[pg.surface.Surface, pg.math.Vector2]] = []
+        self.structs: list[tuple[pg.surface.Surface, pg.math.Vector2]] = []
+        
         self.is_camera_sensible: bool = True
 
         self.display: pg.surface.Surface = display
 
     def imageTotal(self) -> int:
         """Returns the amount of images of the instance."""
-        return len(self.images)
+        return len(self.non_structs)+len(self.structs)
 
-    def addImage(self, image: pg.surface.Surface, image_cord : pg.math.Vector2, blit_ID: float=0) -> None:
-        """Appends the image with the cords info given, in this layer."""
-        self.images.append([image,image_cord])
+    def addImage(self, image: pg.surface.Surface, image_cord : pg.math.Vector2) -> None:
+        """Appends the image with the cords info given, in this layer"""
+        self.non_structs.append([image,image_cord])
 
-    def blit(self, camera: Camera) -> None:
-        offset = pg.math.Vector2()
+    def addStruct(self, image: pg.surface.Surface, image_cord : pg.math.Vector2) -> None:
+        """Appends the image with the cords info given, in this layer"""
+        self.structs.append([image,image_cord])
 
-        if self.is_camera_sensible: offset = camera.pos
+    def lightBlit(self) -> None:
+        '''Blits the images without offset nor checking ids.\n'''
+        for image in self.structs:
+            self.display.blit(image[0], image[1])
 
-        for image in self.images:
-            self.display.blit(image[0], offset+image[1])
-    
+        for image in self.non_structs:
+            self.display.blit(image[0], image[1])
+
+    def blit(self, offset: pg.math.Vector2, IDS: TileDict) -> None:
+        '''Blits the images in the instance.\n'''
+        if not self.is_camera_sensible: offset = pg.math.Vector2(0,0)
+
+        for image in self.structs:
+            self.display.blit(image[0], image[1]+offset)
+
+        for image in self.non_structs:
+            pos = image[1]+offset
+            self.display.blit(image[0], pos)
+
+            IDS.update( pg.rect.Rect(image[1], image[0].get_size()), None )
+
     def reset(self) -> None:
         """Resets the instance."""
-        self.images.clear()
+        self.non_structs.clear()
+        self.structs.clear()
     
 class Blitter():
     def __init__(self, display: pg.surface.Surface, total_layers: int) -> None:
@@ -125,10 +184,13 @@ class Blitter():
         """Creates a new layer in the last position.\n"""
         self.layers.append(Layer(self.display))
 
-    def addImageInLayer(self, layerIndex: int, image: pg.surface.Surface, image_cord: pg.math.Vector2, blit_ID: float=0) -> None:
-        """Adds the image in the chosen layer, with the coordinates of the parameter.\n
-           The blit_ID parameter is the differentiation pattern for images in the instance.\n"""
-        self.layers[layerIndex].addImage(image,image_cord, blit_ID)
+    def addImageInLayer(self, layerIndex: int, image: pg.surface.Surface, image_cord: pg.math.Vector2) -> None:
+        """Adds the image in the chosen layer, with the coordinates of the parameter.\n"""
+        self.layers[layerIndex].addImage(image,image_cord)
+
+    def addStructInLayer(self, layerIndex: int, image: pg.surface.Surface, image_cord: pg.math.Vector2) -> None:
+        """Adds the struct in the chosen layer, with the coordinates of the parameter.\n"""
+        self.layers[layerIndex].addStruct(image,image_cord)
 
     def displaySize(self) -> pg.math.Vector2:
         """Returns the size of the display of this instance.\n"""
@@ -151,17 +213,30 @@ class Blitter():
             image_total += layer.imageTotal()
 
         return image_total
+    
+    def lightBlit(self) -> None:
+        '''Blits all the images in the layers, taking less perfomance.\n'''
+        for layer in self.layers:
+            layer.lightBlit()
 
-    def blit(self) -> None:
+    def blit(self, IDS: TileDict) -> None:
         '''Blits all the images in the layers.\n'''
         for layer in self.layers:
-            layer.blit(self.camera)
+            layer.blit(self.camera.pos, IDS)
     
-    def update(self, dt: float, player_center: pg.math.Vector2) -> None:        
-        self.camera.update(dt, player_center)
-
-        self.blit()
-
+    def lightUpdate(self) -> None:
+        '''Updates instance withou handling: Struct IDs, Camera.\n'''
+        self.lightBlit()
         self.reset()
 
         pg.display.flip()
+
+    def update(self, dt: float, player_center: pg.math.Vector2, IDS: TileDict) -> None:        
+        '''Updates the instance handling: Camera, Struct IDs.\n'''
+        self.blit(IDS)
+        self.reset()
+
+        self.camera.update(dt, player_center)
+        pg.display.flip()
+
+        updateTimers()

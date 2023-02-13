@@ -14,14 +14,6 @@ class Entity():
     player: 'Entity' = 0
 
     blitter: blt.Blitter = 0
-
-    blit_id: int = -1
-
-    def generateBlitID(self) -> int:
-        '''Generates a unique blit_ID for entities, that is negative to prevent conflicts with tiles IDs.\n'''
-        id = Entity.blit_id
-        Entity.blit_id -= 1
-        return id
     
     def __init__(self, pos: pg.math.Vector2, layer: int, speed_value: float, max_life: float, max_mana: float, max_stamina: float) -> None:
         
@@ -48,8 +40,6 @@ class Entity():
         self.stats = Stats(max_life, max_mana, max_stamina)
 
         self.is_dead = False
-
-        self.blit_id = 0
 
 # movement.
     def complementSpeed(self, complement: pg.math.Vector2) -> None:
@@ -108,7 +98,7 @@ class Entity():
             return
 
         image = rotCenter(self.animator.image, self.blit_angle)
-        Entity.blitter.addImageInLayer(self.layer, image, self.pos, self.blit_id)
+        Entity.blitter.addImageInLayer(self.layer, image, self.pos)
 
         self.blitStats()
 
@@ -207,7 +197,7 @@ class Entity():
 
     def fitOutOfStructures(self) -> None:
         '''Makes sures the entity is out of structures.\n'''
-        structs: list[Structure] = Entity.map.getStructuresInRectInLayer(self.layer, self.rect.copy())
+        structs: list[Structure] = Entity.map.getStructuresInRectInLayer(self.layer, self.rect.copy(), pg.math.Vector2(64,64))
 
         for struct in structs:
             if not self.rect.colliderect(struct.rect): continue
