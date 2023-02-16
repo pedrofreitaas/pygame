@@ -1,22 +1,23 @@
 import pygame as pg
-import blitter as blt
-import win32api
-import widget.button as button
 from timer import *
 from time import time as tm
-from game_name.game_map.map import *
+import sys
 
 pg.init()
 pg.font.init()
 pg.mixer.init(1000, 0, 16, 2048)
 
 #Display.
-sizeDisplay = [1120, 630]#[win32api.GetSystemMetrics(0), win32api.GetSystemMetrics(1)]
-screen = pg.display.set_mode( (sizeDisplay[0],sizeDisplay[1]), pg.SCALED )
+flags = pg.SCALED | pg.DOUBLEBUF
+sizeDisplay = [1120, 630]
+screen = pg.display.set_mode( (sizeDisplay[0],sizeDisplay[1]), flags )
 
 #importing entities.
 import game_name.entities.player.player as pl
 import game_name.entities.enemies.water_priestess.water_priestess as wtr_priest
+import blitter as blt
+import widget.button as button
+from game_name.game_map.map import *
 
 previous = tm()
 def getDt() -> float:
@@ -60,15 +61,17 @@ class Game():
         self.player = pl.Player(pg.math.Vector2(20,20))
         self.previous_player_pos = self.player.pos
 
-        self.enemy = wtr_priest.WaterPriestess(pg.math.Vector2(200,400), 1)
+        #self.enemy = wtr_priest.WaterPriestess(pg.math.Vector2(200,400), 1)
 
         self.dtSurface = self.fonts[2].render(str(round(self.dt,4)), 1, pg.Color("black"))
         self.fpsSurface = self.fonts[2].render(str(round(0)), 1, (0,0,0))
     
-        self.dtSurface_blitPOS = [self.blitter.displaySize()[0]-self.dtSurface.get_size()[0]-20,10]
-        self.fpsSurface_blit_pos = [self.blitter.displaySize()[0]-self.dtSurface.get_size()[0]-20,10+self.dtSurface.get_size()[1]+10]
+        self.dtSurface_blitPOS = pg.math.Vector2( self.blitter.displaySize()[0]-self.dtSurface.get_size()[0]-20,10 )
+        self.fpsSurface_blit_pos = pg.math.Vector2( self.blitter.displaySize()[0]-self.dtSurface.get_size()[0]-20,10+self.dtSurface.get_size()[1]+10 )
 
         self.game_timers.append(Timer(1, lambda: self.updateDtSurface(),-1))
+
+        #self.game_timers.append(Timer(60, lambda: self.endGAME(), 1) )
 
     def updateDtSurface(self) -> None:
         '''Updates the dt surface with the most recent value.\n'''
@@ -124,10 +127,17 @@ class Game():
     def blitDt(self) -> None:
         '''Updates and blits delta time.\n'''
         self.updateDt()
-        self.blitter.addImageInLayer(self.blitter.lastLayer(), self.dtSurface, self.dtSurface_blitPOS)
-        self.blitter.addImageInLayer(self.blitter.lastLayer(), self.fpsSurface, self.fpsSurface_blit_pos)
+        self.blitter.addNonTile(self.blitter.lastLayer(), self.dtSurface, self.dtSurface_blitPOS)
+        self.blitter.addNonTile(self.blitter.lastLayer(), self.fpsSurface, self.fpsSurface_blit_pos)
+
+    def endGAME(self) -> None: self.playing = False
 
     def gameloop(self) -> None:
+        tmt_map = 0
+        tmt_blitter = 0
+        tm_start = tm()
+        total_loops = 0
+
         while self.playing:
 
             if self.paused:
@@ -137,13 +147,26 @@ class Game():
             
             self.treatEvents()
             
+            tm2 = tm()
+            self.map.update(self.blitter)
+            tmt_map += tm()-tm2
+
             self.player.update(self.events)
             pl.ent.updateEnemies()
 
             updateTimers(self.game_timers)
-            
-            self.map.update(self.blitter)
+        
+            tm2 = tm()
+            self.blitter.update(self.dt, self.player.center())
+            tmt_blitter += tm()-tm2
 
-            self.blitter.update(self.dt, self.player.center(), self.map.getIDS())
-            
-            self.clock.tick(500)
+            total_loops+=1
+
+        total_time = tm()-tm_start
+
+        # write average dt in measures file. With debugging write with an indicator.
+        gettrace = getattr(sys, 'gettrace', None)
+        with open('measures.txt','a') as fl: 
+            fl.write( 'total loops: ' + str(total_loops) + ' total time: ' + str(total_time) + ' m: ' + str(tmt_map) + ', b: ' + str(tmt_blitter) )
+            if gettrace(): fl.write('->d')
+            fl.write('\n')

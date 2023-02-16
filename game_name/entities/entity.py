@@ -98,7 +98,7 @@ class Entity():
             return
 
         image = rotCenter(self.animator.image, self.blit_angle)
-        Entity.blitter.addImageInLayer(self.layer, image, self.pos)
+        Entity.blitter.addNonTile(self.layer, image, self.pos)
 
         self.blitStats()
 
@@ -168,18 +168,16 @@ class Entity():
     def isGoingOutOfBounds(self) -> bool:
         '''Returns true if the entity is going out of display, according\n
            to entity's speed and current state of movement locking.\n'''
-        
-        displayRect = Entity.blitter.camera.captureRect()
 
-        if not displayRect.contains(self.rect.move(self.getMovementSpeed())):
+        if not Entity.blitter.camera.fitsDisplayRect(self.rect.move(self.getMovementSpeed())):
             return True
         return False
 
     def fitInDisplayBounds(self) -> None:
-        '''Checks where entity has escaped from display, and fits it back.\n'''
+        '''Checks where entity has escaped from display, and fits it back.\n'''    
         fitVector = pg.math.Vector2(0,0)
 
-        displayRect = Entity.blitter.camera.captureRect()
+        displayRect = Entity.blitter.camera.getDisplayRect()
 
         top_escape = self.rect.top - displayRect.top
         if top_escape < 0: fitVector[1] = fitVector[1]-top_escape

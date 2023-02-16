@@ -191,7 +191,6 @@ def updateTimers(timers: list[Timer]=Timer.timers) -> None:
        The default list parameter is the all the created timers united in a list.\n
        If the timer is destroyed, deletes the timer from the list in the next cycle.\n
        If it's paused or deactivated, does not complete any cycles.\n'''
-    
     for index, timer in enumerate(timers):
 
         if timer.destroyed:

@@ -2,20 +2,27 @@ from pytmx import load_pygame, TiledMap, TiledTileLayer
 import pygame as pg
 from game_name.game_map.structure import *
 import blitter as blt
+from time import time as tm
+from math import ceil
 
 class Layer():
-    def __init__(self, tmx_layer: TiledTileLayer, tmx_size: tuple[int,int]) -> None:
+    def __init__(self, tmx_layer: TiledTileLayer, tiles_numb: tuple[int,int], tile_size: tuple[int,int]) -> None:
         self.matrix: list[list[Structure]] = []
+        self.tiles_numb: tuple[int,int] = tiles_numb
+        self.tiles_size: tuple[int,int] = tile_size
 
-        for i in range(tmx_size[0]):
+        for i in range(self.tiles_numb[0]):
             self.matrix.append([])
-            for j in range(tmx_size[1]):
+            for j in range(self.tiles_numb[1]):
                 self.matrix[i].append(None)
 
         for x, y, surf in tmx_layer.tiles():
             try: self.matrix[x][y] = Structure(pg.math.Vector2(x,y), surf, tmx_layer.data[x][y])
-            except IndexError: self.matrix[x][y] = None
-
+            except IndexError: pass
+        
+    def getMapSize(self) -> tuple[int,int]:
+        return [self.tiles_size[0]*self.tiles_numb[0], self.tiles_size[1]*self.tiles_numb[1]]
+    
     def getStructuresInRect(self, rect: pg.rect.Rect, radius: pg.math.Vector2 ) -> list[Structure]:
         '''Returns all the structures that are in the rect and in the layer.\n
            Radius parameter inflates the rect.\n'''
@@ -43,36 +50,24 @@ class Layer():
 class Map():
     def __init__(self, blitter: blt.Blitter) -> None:
         tmx: TiledMap = load_pygame('assets/map/map.tmx')
-        blitter.setCameraMapSize( [tmx.width*tmx.tilewidth, tmx.height*tmx.tileheight] )
+
+        blitter.camera.setMapSize( [tmx.width*tmx.tilewidth, tmx.height*tmx.tileheight] )
 
         self.layers: list[Layer] = []
         
-        for layer in tmx:
-            self.layers.append(Layer(layer, [tmx.width, tmx.height]))
-
-        self.previous_camera_offset: pg.math.Vector2 = blitter.camera.pos
-
-        self.IDS: blt.TileDict = blt.TileDict( [tmx.tilewidth, tmx.tileheight] )
+        for layer in tmx: self.layers.append(Layer(layer, [tmx.width, tmx.height], [tmx.tilewidth, tmx.tileheight]))
 
     def getStructuresInRectInLayer(self, layer_idx: int, rect: pg.rect.Rect, radius: pg.math.Vector2) -> list[Structure]:
         return self.layers[layer_idx].getStructuresInRect(rect,radius)
 
     def blit(self, blitter: blt.Blitter) -> None:
-        '''Blits all the structures.\n'''
-        displayRect = pg.rect.Rect(-blitter.camera.pos, blitter.displaySize()) 
-
-        for idx, layer in enumerate(self.layers): 
-            for struct in layer.getStructuresInRect(displayRect, radius=[32,32]):
-
-                pos = struct.getPos()
-
-                if self.IDS.getID(pos) == struct.id: continue
-
-                blitter.addStructInLayer(idx, struct.image, pos)
-                self.IDS.setID(pos, struct.id)
-
-    def getIDS(self) -> blt.TileDict:
-        return self.IDS
+        '''Blits all the structures.\n
+           For every tile that is blitted, updates the id stored in lastTileIDs in that position.\n
+           Check if the current ID in lastTileIDs isn't equal to the one that is going to be blitted, to avoid rebliting the same tiles.\n'''
+        
+        for idx, layer in enumerate(self.layers):
+            for struct in layer.getStructuresInRect(blitter.camera.getCaptureRect(), [0,0]):
+                blitter.addTile(idx, struct.image, struct.getPos(), struct.id)
 
     def update(self, blitter: blt.Blitter) -> None:
         self.blit(blitter)
