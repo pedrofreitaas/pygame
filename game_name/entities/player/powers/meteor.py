@@ -48,7 +48,7 @@ class Meteor(pwr.Power):
         self.exploded = False
 
         self.pos: pwr.ent.pg.math.Vector2 = pwr.ent.pg.math.Vector2(randint(-100,pwr.ent.pg.display.get_window_size()[0]+100), randint(-400,-300))
-        self.hit_pos: pwr.ent.pg.math.Vector2 = pwr.ent.pg.mouse.get_pos()
+        self.hit_pos: pwr.ent.pg.math.Vector2 = pwr.ent.pg.mouse.get_pos()-pwr.ent.Entity.blitter.camera.getPos()
 
         self.timers[0].activateTimer()
         super().activate()
@@ -72,7 +72,7 @@ class Meteor(pwr.Power):
 
         total_loops = self.timers[0].timeLeft()/pwr.ent.Entity.dt
         
-        if total_loops != 0: self.complementSpeed(distance_vector / total_loops)
+        if total_loops != 0: self.complementSpeed( (distance_vector / total_loops) / pwr.ent.Entity.dt )
 
         return super().getMovementSpeed()
 

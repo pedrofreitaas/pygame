@@ -2,8 +2,6 @@ from pytmx import load_pygame, TiledMap, TiledTileLayer
 import pygame as pg
 from game_name.game_map.structure import *
 import blitter as blt
-from time import time as tm
-from math import ceil
 
 class Layer():
     def __init__(self, tmx_layer: TiledTileLayer, tiles_numb: tuple[int,int], tile_size: tuple[int,int]) -> None:
@@ -17,7 +15,7 @@ class Layer():
                 self.matrix[i].append(None)
 
         for x, y, surf in tmx_layer.tiles():
-            try: self.matrix[x][y] = Structure(pg.math.Vector2(x,y), surf, tmx_layer.data[x][y])
+            try: self.matrix[x][y] = Structure(pg.math.Vector2(x,y), surf, tmx_layer.data[y][x])
             except IndexError: pass
         
     def getMapSize(self) -> tuple[int,int]:
@@ -67,7 +65,7 @@ class Map():
         
         for idx, layer in enumerate(self.layers):
             for struct in layer.getStructuresInRect(blitter.camera.getCaptureRect(), [0,0]):
-                blitter.addTile(idx, struct.image, struct.getPos(), struct.id)
+                blitter.addImage(idx, struct.image, struct.getPos())
 
     def update(self, blitter: blt.Blitter) -> None:
         self.blit(blitter)

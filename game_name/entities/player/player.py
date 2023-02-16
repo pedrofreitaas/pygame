@@ -203,15 +203,15 @@ class Player( ent.Entity ):
         '''Blits player stats.\n
            Life+Mana+Stamina.\n'''
 
-        ent.Entity.blitter.addNonTile(ent.Entity.blitter.lastLayer(),
+        ent.Entity.blitter.addImage(ent.Entity.blitter.lastLayer(),
                                            self.life_surface.subsurface((0,0), (self.stats.life, 10)),
                                            self.getLifeSurfacePos())
 
-        ent.Entity.blitter.addNonTile(ent.Entity.blitter.lastLayer(), 
+        ent.Entity.blitter.addImage(ent.Entity.blitter.lastLayer(), 
                                            self.mana_surface.subsurface((0,0), (self.stats.mana, 6)),
                                            self.getManaSurfacePos())
 
-        ent.Entity.blitter.addNonTile(ent.Entity.blitter.lastLayer(), 
+        ent.Entity.blitter.addImage(ent.Entity.blitter.lastLayer(), 
                                            self.stamina_surface.subsurface((0,0), (self.stats.stamina, 8)),
                                            self.getStaminaSurfacePos())
 

@@ -38,7 +38,6 @@ class Game():
                                  pg.font.Font('assets/font/PeaberryBase.ttf', 28)]
 
     def __init__(self) -> None:
-
         #dt
         self.dt = getDt()
         
@@ -61,7 +60,7 @@ class Game():
         self.player = pl.Player(pg.math.Vector2(20,20))
         self.previous_player_pos = self.player.pos
 
-        #self.enemy = wtr_priest.WaterPriestess(pg.math.Vector2(200,400), 1)
+        self.enemy = wtr_priest.WaterPriestess(pg.math.Vector2(200,400), 1)
 
         self.dtSurface = self.fonts[2].render(str(round(self.dt,4)), 1, pg.Color("black"))
         self.fpsSurface = self.fonts[2].render(str(round(0)), 1, (0,0,0))
@@ -127,8 +126,8 @@ class Game():
     def blitDt(self) -> None:
         '''Updates and blits delta time.\n'''
         self.updateDt()
-        self.blitter.addNonTile(self.blitter.lastLayer(), self.dtSurface, self.dtSurface_blitPOS)
-        self.blitter.addNonTile(self.blitter.lastLayer(), self.fpsSurface, self.fpsSurface_blit_pos)
+        self.blitter.addImage(self.blitter.lastLayer(), self.dtSurface, self.dtSurface_blitPOS)
+        self.blitter.addImage(self.blitter.lastLayer(), self.fpsSurface, self.fpsSurface_blit_pos)
 
     def endGAME(self) -> None: self.playing = False
 
@@ -146,16 +145,16 @@ class Game():
             self.blitDt()
             
             self.treatEvents()
+
+            self.player.update(self.events)
+            pl.ent.updateEnemies()
             
             tm2 = tm()
             self.map.update(self.blitter)
             tmt_map += tm()-tm2
 
-            self.player.update(self.events)
-            pl.ent.updateEnemies()
-
             updateTimers(self.game_timers)
-        
+
             tm2 = tm()
             self.blitter.update(self.dt, self.player.center())
             tmt_blitter += tm()-tm2

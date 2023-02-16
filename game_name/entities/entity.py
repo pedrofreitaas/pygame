@@ -98,7 +98,7 @@ class Entity():
             return
 
         image = rotCenter(self.animator.image, self.blit_angle)
-        Entity.blitter.addNonTile(self.layer, image, self.pos)
+        Entity.blitter.addImage(self.layer, image, self.pos)
 
         self.blitStats()
 
@@ -198,6 +198,9 @@ class Entity():
         structs: list[Structure] = Entity.map.getStructuresInRectInLayer(self.layer, self.rect.copy(), pg.math.Vector2(64,64))
 
         for struct in structs:
+            pg.draw.rect(pg.display.get_surface(), (0,255,0), struct.rect, 2)
+            pg.display.update()
+
             if not self.rect.colliderect(struct.rect): continue
 
             if self.mask.overlap_area(struct.mask, struct.getPos()-self.pos) == 0: continue
