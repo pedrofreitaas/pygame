@@ -1,5 +1,6 @@
 import game_name.entities.entity as ent
 import game_name.entities.player.powers.meteor as meteor
+from io import open
 
 player_sprites_path = ['assets/entities/player/char_red_1.png', 'assets/entities/player/char_red_2.png' ]
 player_sounds_path = ['assets/entities/player/sounds/footsteps.ogg', 'assets/entities/player/sounds/hit.wav']
@@ -236,7 +237,7 @@ class Player( ent.Entity ):
 
         if self.action != 1: return
 
-        for en in ent.Entity.enemies:
+        for en in ent.Entity.enabled_enemies:
             if self.rect.colliderect(en.rect):
                 en.damageSelf(self.attack_damage)
 
@@ -257,3 +258,33 @@ class Player( ent.Entity ):
             self.meteor.activate()
             self.useMana(40,True)
         self.resetAction()
+
+# data saving and loading.
+    def __del__(self) -> None:
+        playerDict = {
+            'x': self.pos[0],
+            'y': self.pos[1]
+        }
+
+        entInfos: dict = {}
+
+        with open('infos/game.json', 'r') as file:
+            entInfos = ent.load(file)
+            entInfos['player'] = playerDict
+
+        with open('infos/game.json', 'w') as file:
+            file.write( ent.dumps(entInfos, indent=2) )
+
+def createPlayer( playerDict: dict ) -> Player:
+    return Player( ent.pg.math.Vector2(playerDict['x'], playerDict['y']) )
+
+def handleJson() -> Player:
+    '''Creates the player according to json data and returns it.\n'''
+
+    with open('infos/game.json', 'r') as file:
+        entInfos: dict = ent.load(file)
+
+        if 'player' not in entInfos.keys():
+            return Player(ent.pg.math.Vector2(20,20))
+        
+        return createPlayer( entInfos['player'] )

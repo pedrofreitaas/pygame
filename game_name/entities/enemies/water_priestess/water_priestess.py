@@ -1,9 +1,10 @@
 import game_name.entities.enemies.enemy as en
+from io import open
 
 spritesheet_path = ['assets/entities/enemies/waterpriestess/waterpriestess288x128.png']
 
 class WaterPriestess(en.Enemy):
-    def __init__(self, pos: en.ent.pg.math.Vector2, layer: int, speed_value: float=100) -> None:
+    def __init__(self, pos: en.ent.pg.math.Vector2, layer: int=1, speed_value: float=100) -> None:
         super().__init__(pos, layer, speed_value, 120, 60, 70)
 
         self.animator = en.ent.an.Animator(en.ent.pg.image.load(spritesheet_path[0]).convert_alpha(),
@@ -159,3 +160,21 @@ class WaterPriestess(en.Enemy):
             return
 
         self.animator.setRange([0,7])
+
+def handleJson() -> list[WaterPriestess]:
+    '''Creates instances of WaterPristess based in the content of the json file.\n
+       Json syntax:\n
+       "water_priestess": {\n
+            "quantity": N,\n
+            "x": [x1, x2, x3, ..., xN],\n
+            "y": [y1, y2, y3, ..., yN]\n
+       }\n'''
+    with open('infos/game.json', 'r') as file:
+        entInfos = en.ent.load(file)
+
+        if 'water_priestess' not in entInfos:
+            return []
+        
+        instances = []
+        for i in range(entInfos['water_priestess']['quantity']):
+            instances.append( WaterPriestess(en.ent.pg.math.Vector2(entInfos['water_priestess']['x'][i], entInfos['water_priestess']['y'][i])) )

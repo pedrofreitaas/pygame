@@ -5,18 +5,19 @@ from timer import *
 from game_name.extra import *
 from game_name.entities.stats import *
 from game_name.game_map.map import *
+from json import load, dumps
 
 class Entity():
     map: Map = 0
 
     dt = 0
-    enemies: list['Entity'] = []
+    disabled_enemies: list['Entity'] = []
+    enabled_enemies: list['Entity'] = []
     player: 'Entity' = 0
 
     blitter: blt.Blitter = 0
     
     def __init__(self, pos: pg.math.Vector2, layer: int, speed_value: float, max_life: float, max_mana: float, max_stamina: float) -> None:
-        
         self.pos: pg.math.Vector2 = pos
         self.speed_dir: pg.math.Vector2 = pg.math.Vector2()
         self.speed_complement: pg.math.Vector2 = pg.math.Vector2()
@@ -40,6 +41,7 @@ class Entity():
         self.stats = Stats(max_life, max_mana, max_stamina)
 
         self.is_dead = False
+        self.active = True
 
 # movement.
     def complementSpeed(self, complement: pg.math.Vector2) -> None:
@@ -169,7 +171,7 @@ class Entity():
         '''Returns true if the entity is going out of display, according\n
            to entity's speed and current state of movement locking.\n'''
 
-        if not Entity.blitter.camera.fitsDisplayRect(self.rect.move(self.getMovementSpeed())):
+        if not Entity.blitter.camera.getCaptureRect().contains(self.rect.move(self.getMovementSpeed())):
             return True
         return False
 
@@ -177,7 +179,7 @@ class Entity():
         '''Checks where entity has escaped from display, and fits it back.\n'''    
         fitVector = pg.math.Vector2(0,0)
 
-        displayRect = Entity.blitter.camera.getDisplayRect()
+        displayRect = Entity.blitter.camera.getCaptureRect()
 
         top_escape = self.rect.top - displayRect.top
         if top_escape < 0: fitVector[1] = fitVector[1]-top_escape
@@ -219,25 +221,47 @@ class Entity():
         '''Makes the entity stop updating.\n'''
         self.is_dead = True
 
+    def __del__(self) -> None:
+        '''Abstract function for saving entity's data before deleting.\n'''
+
+    def activate(self) -> None:
+        self.active = True
+
+    def deactivate(self) -> None:
+        self.active = False
+
     def update(self) -> None:
         '''Does the loop procedures of a regular entity. Call loop reset at the end of the loop.\n'''
         if self.is_dead: return
 
-        self.collisionUpdate()
+        if self.active:
+            self.collisionUpdate()
 
-        if not self.stats.update(Entity.dt): self.kill()
-        
-        self.animator.update(Entity.dt)
-        self.controlAnimator()
-        
-        self.move()
+            if not self.stats.update(Entity.dt): self.kill()
+            
+            self.animator.update(Entity.dt)
+            self.controlAnimator()
+            
+            self.move()
 
-        self.blit()
+            self.blit()
+            
+            updateTimers(self.timers)
         
-        updateTimers(self.timers)
+        else:
+            self.animator.update(Entity.dt)
+            self.controlAnimator()
+            self.blit()
 
 def updateEnemies() -> None:
     '''Updates all the registered enemies.\n'''
 
-    for enemy in Entity.enemies:
+    for enemy in Entity.disabled_enemies:
+        if (Entity.player.pos-enemy.pos).length_squared() <= 90000:
+            enemy.activate()
+
+    for enemy in Entity.enabled_enemies:
         enemy.update()
+
+        if (Entity.player.pos-enemy.pos).length_squared() > 90000:
+            enemy.deactivate()

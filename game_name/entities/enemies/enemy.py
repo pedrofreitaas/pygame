@@ -5,10 +5,9 @@ class Enemy(ent.Entity):
     def __init__(self, pos: ent.pg.math.Vector2, layer: int, speed_value: float, max_life: float, max_mana: float, max_stamina: float) -> None:
         super().__init__(pos, layer, speed_value, max_life, max_mana, max_stamina)
 
-        self.randomizer = SystemRandom(randint(1,1000))
-        
-        ent.Entity.enemies.append(self)
+        self.active: bool = False
 
+        self.randomizer = SystemRandom(randint(1,1000))
         self.movement_behavior: float = 0
         self.upd_mov_behavior_coeficient: float = 1
 
@@ -21,6 +20,8 @@ class Enemy(ent.Entity):
 
         self.attack_damage: float = 0
         self.attack_knockback: ent.pg.math.Vector2 = ent.pg.math.Vector2(0,0)
+        
+        ent.Entity.disabled_enemies.append(self)
 
     def updateMoveBehavior(self, coeficient: float) -> None:
         '''Updates the variable that controls the movement behavior.\n'''
@@ -115,7 +116,10 @@ class Enemy(ent.Entity):
     def die(self) -> None:
         '''Makes the enemy stop updating.\n'''
         
-        try: ent.Entity.enemies.remove(self)
+        try: ent.Entity.disabled_enemies.remove(self)
+        except ValueError: pass
+
+        try: ent.Entity.enabled_enemies.remove(self)
         except ValueError: pass
 
         return super().die()
@@ -134,7 +138,8 @@ class Enemy(ent.Entity):
     def update(self) -> None:
         if self.is_dead: return
 
-        self.controlMovement()
-        self.controlCombat()
+        if self.active:
+            self.controlMovement()
+            self.controlCombat()
         
         return super().update()
