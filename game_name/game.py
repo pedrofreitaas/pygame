@@ -70,8 +70,6 @@ class Game():
 
         self.game_timers.append(Timer(1, lambda: self.updateDtSurface(),-1))
 
-        #self.game_timers.append(Timer(60, lambda: self.endGAME(), 1) )
-
     def updateDtSurface(self) -> None:
         '''Updates the dt surface with the most recent value.\n'''
         self.dtSurface = self.fonts[2].render(str(round(self.dt,4)), 1, (0,0,0))
@@ -114,11 +112,16 @@ class Game():
     def pauseloop(self) -> None:
         pl.ent.pauseTimers(throw=False)
         
-        #unpauseButton = button.Button(pg.math.Vector2(500,500), lambda: self.UNpause(), 'unpause', Game.fonts[0], pg.color.Color('black'), True)
+        unpauseButton = button.Button(pg.math.Vector2(500,500), lambda: self.UNpause(), 'unpause', Game.fonts[3], pg.color.Color('black'), True)
         
-        while self.paused:            
+        while self.paused:
+            if not self.playing: break
+
             self.treatEvents()
-            self.blitter.lightBlit()
+
+            unpauseButton.update(self.blitter, self.events)
+
+            self.blitter.lightUpdate()
 
         pl.ent.unpauseTimers(throw=False)
         self.updateDt()
@@ -129,14 +132,7 @@ class Game():
         self.blitter.addImage(self.blitter.lastLayer(), self.dtSurface, self.dtSurface_blitPOS)
         self.blitter.addImage(self.blitter.lastLayer(), self.fpsSurface, self.fpsSurface_blit_pos)
 
-    def endGAME(self) -> None: self.playing = False
-
     def gameloop(self) -> None:
-        tmt_map = 0
-        tmt_blitter = 0
-        tm_start = tm()
-        total_loops = 0
-
         while self.playing:
 
             if self.paused:
@@ -149,23 +145,8 @@ class Game():
             self.player.update(self.events)
             pl.ent.updateEnemies()
             
-            tm2 = tm()
             self.map.update(self.blitter)
-            tmt_map += tm()-tm2
 
             updateTimers(self.game_timers)
 
-            tm2 = tm()
             self.blitter.update(self.dt, self.player.center())
-            tmt_blitter += tm()-tm2
-
-            total_loops+=1
-
-        total_time = tm()-tm_start
-
-        # write average dt in measures file. With debugging write with an indicator.
-        gettrace = getattr(sys, 'gettrace', None)
-        with open('measures.txt','a') as fl: 
-            fl.write( 'total loops: ' + str(total_loops) + ' total time: ' + str(total_time) + ' m: ' + str(tmt_map) + ', b: ' + str(tmt_blitter) )
-            if gettrace(): fl.write('->d')
-            fl.write('\n')
