@@ -7,6 +7,8 @@ class Structure():
         self.id: int = id
 
         self.rect = pg.rect.Rect( grid*32, (32, 32) )
+        
+        self.mask_centroid: pg.math.Vector2 = self.getPos()+pg.math.Vector2(self.mask.centroid())
 
     def getPos(self) -> pg.math.Vector2:
         return pg.math.Vector2(self.rect.topleft)
