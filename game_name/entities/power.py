@@ -4,19 +4,21 @@ class Power(ent.Entity):
     def __init__(self, pos: ent.pg.math.Vector2, layer: int, speed_value: float) -> None:
         super().__init__(pos, layer, speed_value,0,0,0)
 
-        self.activated = False
+        self.active = False
 
     def activate(self) -> None:
         '''Power general activation.\n'''
-        self.activated = True
+        if not self.active: ent.unpauseTimers(self.timers)
+        self.active = True
 
-    def deactive(self) -> None:
+    def deactivate(self) -> None:
         '''Power general deactivation.\n'''
-        self.activated = False
+        if self.active: ent.pauseTimers(self.timers)
+        self.active = False
 
     def update(self) -> None:
-        '''Regular power update, only updates if the instance is activated.\n'''
-        if not self.activated:
+        '''Regular power update, only updates if the instance is active.\n'''
+        if not self.active:
             return
         
         return super().update()

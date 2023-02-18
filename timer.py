@@ -166,6 +166,16 @@ class Timer():
         self.activated = False
 
 # list of timers procedures.
+def deactivateTimers(timers:list[Timer]=Timer.timers, throw: bool=True) -> None:
+    '''Deactivate all the timers in the parameter.\n
+       The default list parameter is the all the created timers united in a list.\n'''
+    for timer in timers: timer.deactiveTimer()
+
+def activateTimers(timers: list[Timer]=Timer.timers) -> None:
+    '''Activate all the timers in the parameter.\n
+       The default list parameter is the all the created timers united in a list.\n'''
+    for timer in timers: timer.activateTimer()
+        
 def unpauseTimers(timers: list[Timer]=Timer.timers, throw: bool=True) -> None:
     '''Unpauses all the timers in the parameter.\n
        The default list parameter is the all the created timers united in a list.\n'''

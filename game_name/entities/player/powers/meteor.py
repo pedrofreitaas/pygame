@@ -1,5 +1,4 @@
 import game_name.entities.power as pwr
-from random import randint
 
 meteor_sprite_path = 'assets/entities/player/powers/meteor.png'
 explosion_sprite_path = 'assets/entities/player/powers/explosion.png'
@@ -14,18 +13,18 @@ class Meteor(pwr.Power):
     explosion_sound = pwr.ent.pg.mixer.Sound(explosion_sound_path)
     explosion_sound.set_volume(0.2)
 
-    def __init__(self, pos: pwr.ent.pg.math.Vector2, layer: int, speed_value: float=1) -> None:
+    def __init__(self, pos: pwr.ent.pg.math.Vector2, layer: int=2, speed_value: float=1) -> None:
         super().__init__(pos, layer, speed_value)
+        
+        self.hit_time: float = 3.2
+        self.explode_time = 2.25
 
         self.animator = pwr.ent.an.Animator(pwr.ent.pg.image.load(meteor_sprite_path).convert_alpha(), [100,100], [8,8,8,8,8,8,8,5])
         self.animator.loadSprites(pwr.ent.pg.image.load(explosion_sprite_path).convert_alpha(), [100,100], [8,8,8,8,8,8,8,5])
 
         self.hit_pos = pwr.ent.pg.math.Vector2()
 
-        self.layer: int = 2
-        
-        self.hit_time: float = 1.5
-        self.explode_time = 0.75
+        self.layer: int = layer
 
         self.exploded: bool = False
 
@@ -34,35 +33,53 @@ class Meteor(pwr.Power):
         self.rect_adjust = [-50,-50]
 
         # meteor hit/explode timers.
-        self.timers: list[pwr.ent.Timer] = [pwr.ent.Timer(self.hit_time, lambda: self.explode(), -1), pwr.ent.Timer(self.explode_time, lambda: self.deactive(), -1)]
+        self.timers.append(pwr.ent.Timer(self.hit_time, lambda: self.explode(), -1))
+        self.pos_explosion_timer: pwr.ent.Timer = pwr.ent.Timer(self.explode_time, lambda: self.deactivate(), -1)
         
         # instance begin's deactived.
-        self.deactive()
+        self.deactivate()
+
+# .
+    def setAngle(self) -> None:
+        '''Sets the angle to rotate the meteor when moving to the target.\n'''
+        image_dir = pwr.ent.pg.math.Vector2(0,1)
+        self.blit_angle = self.getMovementSpeed().angle_to(image_dir)
 
     def activate(self) -> None:
         '''Meteor power activation.\n
            Activates the meteor hit timer of the instance.\n'''
-        if self.activated: return
+        if self.active: return
 
         self.animator.setRange([0,60])
         self.exploded = False
 
-        self.pos: pwr.ent.pg.math.Vector2 = pwr.ent.pg.math.Vector2(randint(-100,pwr.ent.pg.display.get_window_size()[0]+100), randint(-400,-300))
+        self.pos: pwr.ent.pg.math.Vector2 = pwr.ent.Entity.player.center() - pwr.ent.pg.math.Vector2(0, 800)
         self.hit_pos: pwr.ent.pg.math.Vector2 = pwr.ent.pg.mouse.get_pos()-pwr.ent.Entity.blitter.camera.getPos()
-
-        self.timers[0].activateTimer()
-        super().activate()
 
         self.setAngle()
 
         Meteor.meteor_sound.play(-1)
 
-    def deactive(self) -> None:
-        '''Deactivates instance and it's timers.\n'''
-        self.timers[0].deactiveTimer()
-        self.timers[1].deactiveTimer()
-        super().deactive()
+        super().activate()
 
+    def explode(self) -> None:
+        '''Triggers meteor explosion, if the instance didn't explode yet and is close enought to it's hit pos.\n'''
+        if self.exploded: return
+
+        Meteor.meteor_sound.stop()
+        Meteor.explosion_sound.play()
+
+        self.exploded = True
+        self.animator.setRange([60, self.animator.getTotalImages()-1])
+
+        self.pos_explosion_timer.activateTimer()
+
+    def deactivate(self) -> None:
+        super().deactivate()
+        self.pos_explosion_timer.deactiveTimer()
+# ------------------------------ #
+
+# .
     def getLockMovement(self) -> bool:
         return False
 
@@ -87,25 +104,9 @@ class Meteor(pwr.Power):
         self.speed_complement: pwr.ent.pg.math.Vector2 = pwr.ent.pg.math.Vector2()
 
         self.pos = self.pos + speed
-    
-    def setAngle(self) -> None:
-        '''Sets the angle to rotate the meteor when moving to the target.\n'''
-        image_dir = pwr.ent.pg.math.Vector2(0,1)
-        self.blit_angle = self.getMovementSpeed().angle_to(image_dir)
+# ------------------------------ #
 
-    def explode(self) -> None:
-        '''Triggers meteor explosion, if the instance didn't explode yet and is close enought to it's hit pos.\n'''
-
-        if self.exploded: return
-
-        Meteor.meteor_sound.stop()
-        Meteor.explosion_sound.play()
-
-        self.exploded = True
-        self.animator.setRange([60, self.animator.getTotalImages()-1])
-
-        self.timers[1].activateTimer()
-
+# .
     def collisionUpdate(self) -> None:
         super().collisionUpdate()
 
@@ -114,11 +115,13 @@ class Meteor(pwr.Power):
         for en in pwr.ent.Entity.enemies:
             if self.rect.colliderect(en.rect):
                 en.damageSelf(self.meteor_damage)
+# ------------------------------ #
 
     def update(self) -> None:
-        if not self.activated:
+        if not self.active:
             return
 
         if not self.exploded: self.animator.changeUpdateCoeficient(35)
+        else: pwr.ent.updateTimers( [self.pos_explosion_timer] )
 
         super().update()

@@ -1,4 +1,5 @@
 import game_name.entities.enemies.enemy as en
+import game_name.entities.enemies.water_priestess.water_hurricane as waterH
 from io import open
 
 spritesheet_path = ['assets/entities/enemies/waterpriestess/waterpriestess288x128.png']
@@ -19,6 +20,8 @@ class WaterPriestess(en.Enemy):
 
         self.upd_mov_behavior_coeficient = 5
 
+        self.water_hurricane: waterH.WaterHurricane = waterH.WaterHurricane(en.ent.pg.math.Vector2(0,0))
+
     def controlCombat(self) -> None:
         '''Controls the water_priestess attack.\n'''
 
@@ -34,25 +37,32 @@ class WaterPriestess(en.Enemy):
         if distance >= 10000:
             return
 
+        self.action = 6
+        return
+
         attack_decider = self.randomizer.randint(1,5000)
 
         if attack_decider <= 5: # attack 1
             self.action = 1
             return
+        
+        if attack_decider <= 9: # water hurricane attack.
+            self.action = 6
+            return
 
-        if attack_decider <= 10 and distance <= 3500: # attack 5
+        if attack_decider <= 15 and distance <= 3500: # attack 5
             self.action = 5
             return
 
-        if attack_decider <= 15 and distance <= 3000: # attack 4
+        if attack_decider <= 20 and distance <= 3000: # attack 4
             self.action = 4
             return
 
-        if attack_decider <= 40 and distance <= 1000: # attack 3
+        if attack_decider <= 50 and distance <= 1000: # attack 3
             self.action = 3
             return
 
-        if attack_decider <= 50 and distance <= 1000: # attack 2
+        if attack_decider <= 58 and distance <= 1000: # attack 2
             self.action = 2
             return
 
@@ -116,6 +126,14 @@ class WaterPriestess(en.Enemy):
                 self.attack_damage = 80 * percentage
 
             return
+        
+        if self.action == 6: # water hurricane attack.
+            self.animator.changeUpdateCoeficient(self.animator.upd_coeficient*0.8)
+            return
+
+    def waterHurricaneAttack(self) -> None:
+        self.water_hurricane.activate()
+        self.resetAction()
 
     def controlAnimator(self) -> None:
         super().controlAnimator()
@@ -153,13 +171,24 @@ class WaterPriestess(en.Enemy):
             self.animator.setRange([100,131])
             self.animator.setEAP(lambda: self.resetAction())
             return
+        
+        if self.action == 6:
+            self.animator.setRange([26,29])
+            self.animator.setEAP(lambda: self.waterHurricaneAttack())
+            return
 
         if self.isMoving():
-            self.animator.setRange([15,23])
+            self.animator.setRange([15,26])
             self.animator.activateStopAt(0.8)
             return
 
         self.animator.setRange([0,7])
+
+    def update(self) -> None:
+        if self.active:
+            self.water_hurricane.update()
+
+        return super().update()
 
 def handleJson() -> list[WaterPriestess]:
     '''Creates instances of WaterPristess based in the content of the json file.\n

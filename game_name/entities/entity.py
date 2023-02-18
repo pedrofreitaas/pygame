@@ -128,12 +128,13 @@ class Entity():
     
     def animationAction(self) -> None:
         '''Controls the entity's behavior based on the current action.\n'''
-
         if self.action == -1:
             self.animator.setEAP(lambda: self.die())
 
     def controlAnimator(self) -> None:
-        '''Flips the image based in the looking dir of the entitys.\n'''
+        '''Flips the image based in the looking dir of the entitys.\n
+           Proceed the animation update.\n'''
+        self.animator.update(Entity.dt)
 
         self.setLookingDir()
         if not self.isLookingRight: self.animator.flipHorizontally()
@@ -221,9 +222,13 @@ class Entity():
         '''Abstract function for saving entity's data before deleting.\n'''
 
     def activate(self) -> None:
+        '''Actives instance and unpauses it's timers.\n'''
+        if not self.active: activateTimers(self.timers)
         self.active = True
 
     def deactivate(self) -> None:
+        '''Deactives instance and pauses it's timers.\n'''
+        if self.active: deactivateTimers(self.timers)
         self.active = False
 
     def update(self) -> None:
@@ -237,8 +242,7 @@ class Entity():
         self.collisionUpdate()
 
         if not self.stats.update(Entity.dt): self.kill()
-        
-        self.animator.update(Entity.dt)
+    
         self.controlAnimator()
         
         self.move()
