@@ -21,7 +21,7 @@ class Enemy(ent.Entity):
         self.attack_damage: float = 0
         self.attack_knockback: ent.pg.math.Vector2 = ent.pg.math.Vector2(0,0)
         
-        ent.Entity.disabled_enemies.append(self)
+        ent.Entity.enemies.append(self)
 
     def updateMoveBehavior(self, coeficient: float) -> None:
         '''Updates the variable that controls the movement behavior.\n'''
@@ -138,8 +138,7 @@ class Enemy(ent.Entity):
     def update(self) -> None:
         if self.is_dead: return
 
-        if self.active:
-            self.controlMovement()
-            self.controlCombat()
+        self.controlMovement()
+        self.controlCombat()
         
-        return super().update()
+        super().update()

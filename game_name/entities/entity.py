@@ -11,8 +11,7 @@ class Entity():
     map: Map = 0
 
     dt = 0
-    disabled_enemies: list['Entity'] = []
-    enabled_enemies: list['Entity'] = []
+    enemies: list['Entity'] = []
     player: 'Entity' = 0
 
     blitter: blt.Blitter = 0
@@ -234,34 +233,51 @@ class Entity():
         '''Does the loop procedures of a regular entity. Call loop reset at the end of the loop.\n'''
         if self.is_dead: return
 
-        if self.active:
-            self.collisionUpdate()
+        self.blit()
 
-            if not self.stats.update(Entity.dt): self.kill()
-            
-            self.animator.update(Entity.dt)
-            self.controlAnimator()
-            
-            self.move()
+        if not self.active: return
 
-            self.blit()
-            
-            updateTimers(self.timers)
+        self.collisionUpdate()
+
+        if not self.stats.update(Entity.dt): self.kill()
         
-        else:
-            self.animator.update(Entity.dt)
-            self.controlAnimator()
-            self.blit()
+        self.animator.update(Entity.dt)
+        self.controlAnimator()
+        
+        self.move()
+        
+        updateTimers(self.timers)
+
+def blitMinimap(font: pg.font.Font) -> None:
+    minimap = Entity.map.miniature.copy()
+    scale_vec = Entity.map.scale_vec
+    minimap_size = minimap.get_size()
+
+    minimap.blit( pg.transform.scale_by(Entity.player.animator.image, 0.5),
+                 (Entity.player.pos[0]*scale_vec[0], Entity.player.pos[1]*scale_vec[1]) )
+    
+    for en in Entity.enemies:
+        minimap.blit( pg.transform.scale_by(en.animator.image, 0.5),
+                      (en.pos[0]*scale_vec[0], en.pos[1]*scale_vec[1]) )
+
+    Entity.blitter.addImage(Entity.blitter.lastLayer(),
+                            minimap,
+                            pg.math.Vector2(0,0))
+    
+    minimap_text = font.render('Minimap', 1, (0,0,0))
+
+    Entity.blitter.addImage(Entity.blitter.lastLayer(),
+                            minimap_text,
+                            pg.math.Vector2( (minimap_size[0]-minimap_text.get_size()[0] )/2, 20))
 
 def updateEnemies() -> None:
     '''Updates all the registered enemies.\n'''
 
-    for enemy in Entity.disabled_enemies:
-        if (Entity.player.pos-enemy.pos).length_squared() <= 90000:
-            enemy.activate()
+    for idx in range(len(Entity.enemies)):
+        Entity.enemies[idx].update()
 
-    for enemy in Entity.enabled_enemies:
-        enemy.update()
+        distance = (Entity.enemies[idx].pos-Entity.player.pos).length_squared()
 
-        if (Entity.player.pos-enemy.pos).length_squared() > 90000:
-            enemy.deactivate()
+        if distance <= 360000: Entity.enemies[idx].activate()
+        elif distance >= 490000: Entity.enemies[idx].deactivate()
+            

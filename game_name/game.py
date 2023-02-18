@@ -48,6 +48,7 @@ class Game():
         #booleans
         self.playing: bool = True
         self.paused: bool = False
+        self.blit_minimap: bool = False
 
         self.events: list[pg.event.Event] = []
 
@@ -100,6 +101,9 @@ class Game():
                 if event.key == pg.K_F11:
                     pg.display.toggle_fullscreen()
 
+                if event.key == 109:
+                    self.blit_minimap = not self.blit_minimap
+
     def UNpause(self) -> None:
         '''Pauses or unpauses the game, depending on the current value of self.paused.\n'''
         self.paused = not self.paused
@@ -151,5 +155,7 @@ class Game():
             self.map.update(self.blitter)
 
             updateTimers(self.game_timers)
+
+            if self.blit_minimap: pl.ent.blitMinimap(self.fonts[3])
 
             self.blitter.update(self.dt, self.player.center())

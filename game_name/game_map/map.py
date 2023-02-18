@@ -15,7 +15,8 @@ class Layer():
                 self.matrix[i].append(None)
 
         for x, y, surf in tmx_layer.tiles():
-            try: self.matrix[x][y] = Structure(pg.math.Vector2(x,y), surf, tmx_layer.data[y][x])
+            try: 
+                self.matrix[x][y] = Structure(pg.math.Vector2(x,y), surf, tmx_layer.data[y][x])
             except IndexError: pass
         
     def getMapSize(self) -> tuple[int,int]:
@@ -52,8 +53,34 @@ class Map():
         blitter.camera.setMapSize( [tmx.width*tmx.tilewidth, tmx.height*tmx.tileheight] )
 
         self.layers: list[Layer] = []
+
+        self.map_size: tuple[float,float] = [tmx.width*tmx.tilewidth, tmx.height*tmx.tileheight]
         
         for layer in tmx: self.layers.append(Layer(layer, [tmx.width, tmx.height], [tmx.tilewidth, tmx.tileheight]))
+
+        self.miniature: pg.surface.Surface = pg.surface.Surface(self.map_size).convert()
+        self.miniature.set_colorkey((0,0,0))
+        self.scale_vec: pg.math.Vector2 = pg.math.Vector2(0,0)
+
+        self.createMiniature()
+    
+    def createMiniature(self) -> None:
+        '''Blits the current state of the map into a miniature.\n'''
+        for layer in self.layers:
+            for structures in layer.matrix:
+                for struct in structures:
+                    if struct == None: continue
+                    self.miniature.blit( struct.image, struct.getPos() )
+
+        miniature_size: tuple[int,int] = (400,400)
+
+        self.miniature = pg.transform.scale(self.miniature, miniature_size)
+        self.scale_vec: pg.math.Vector2 = pg.math.Vector2(miniature_size[0]/self.map_size[0], miniature_size[1]/self.map_size[1])
+        
+        background = pg.surface.Surface((miniature_size[0]+10, miniature_size[1]+10)).convert()
+        background.blit(self.miniature, (5,5))
+
+        self.miniature = background
 
     def getStructuresInRectInLayer(self, layer_idx: int, rect: pg.rect.Rect, radius: pg.math.Vector2) -> list[Structure]:
         return self.layers[layer_idx].getStructuresInRect(rect,radius)
