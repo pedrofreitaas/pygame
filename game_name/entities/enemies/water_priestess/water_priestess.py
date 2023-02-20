@@ -37,9 +37,6 @@ class WaterPriestess(en.Enemy):
         if distance >= 10000:
             return
 
-        self.action = 6
-        return
-
         attack_decider = self.randomizer.randint(1,5000)
 
         if attack_decider <= 5: # attack 1

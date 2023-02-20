@@ -17,7 +17,14 @@ class Camera():
         #map infos
         if map_size == None: self.map_size: tuple[float,float] = pg.display.get_window_size()
         else: self.map_size: tuple[float, float] = map_size
+
+        #booleans
+        self.is_lock = False
     
+    def UNlock(self) -> None:
+        '''Locks or unlocks the camera.\n'''
+        self.is_lock = not self.is_lock
+
     def setMapSize(self, map_size : tuple[float,float]) -> None:
         '''Sets the instance's map size with the given parameter.\n'''
         self.map_size = map_size
@@ -74,7 +81,9 @@ class Camera():
 # ------------------- #
 
     def update(self, dt: float, player_center: pg.math.Vector2) -> None:
-        """Moves the camera, based on the speed/delta given.\n"""
+        """Moves the camera, based on the speed/delta given.\n
+           Does not update if locked.\n"""
+        if self.is_lock: return
 
         self.dt = dt
         self.move(player_center)

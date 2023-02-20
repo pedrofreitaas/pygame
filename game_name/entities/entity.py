@@ -255,7 +255,7 @@ def blitMinimap(font: pg.font.Font) -> None:
     minimap_size = minimap.get_size()
 
     minimap.blit( pg.transform.scale_by(Entity.player.animator.image, 0.5),
-                 (Entity.player.pos[0]*scale_vec[0], Entity.player.pos[1]*scale_vec[1]) )
+                  (Entity.player.pos[0]*scale_vec[0], Entity.player.pos[1]*scale_vec[1]) )
     
     for en in Entity.enemies:
         minimap.blit( pg.transform.scale_by(en.animator.image, 0.5),

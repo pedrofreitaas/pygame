@@ -61,6 +61,7 @@ class Map():
         self.miniature: pg.surface.Surface = pg.surface.Surface(self.map_size).convert()
         self.miniature.set_colorkey((0,0,0))
         self.scale_vec: pg.math.Vector2 = pg.math.Vector2(0,0)
+        self.miniature_size: tuple[float,float] = (600,600)
 
         self.createMiniature()
     
@@ -72,12 +73,10 @@ class Map():
                     if struct == None: continue
                     self.miniature.blit( struct.image, struct.getPos() )
 
-        miniature_size: tuple[int,int] = (400,400)
-
-        self.miniature = pg.transform.scale(self.miniature, miniature_size)
-        self.scale_vec: pg.math.Vector2 = pg.math.Vector2(miniature_size[0]/self.map_size[0], miniature_size[1]/self.map_size[1])
+        self.miniature = pg.transform.scale(self.miniature, self.miniature_size)
+        self.scale_vec: pg.math.Vector2 = pg.math.Vector2(self.miniature_size[0]/self.map_size[0],self.miniature_size[1]/self.map_size[1])
         
-        background = pg.surface.Surface((miniature_size[0]+10, miniature_size[1]+10)).convert()
+        background = pg.surface.Surface((self.miniature_size[0]+10, self.miniature_size[1]+10)).convert()
         background.blit(self.miniature, (5,5))
 
         self.miniature = background

@@ -104,6 +104,9 @@ class Game():
                 if event.key == 109:
                     self.blit_minimap = not self.blit_minimap
 
+                if event.key == pg.K_LCTRL:
+                    self.blitter.camera.UNlock()
+
     def UNpause(self) -> None:
         '''Pauses or unpauses the game, depending on the current value of self.paused.\n'''
         self.paused = not self.paused
