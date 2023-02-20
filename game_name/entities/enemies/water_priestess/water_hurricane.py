@@ -1,5 +1,5 @@
 import game_name.entities.power as pwr
-from random import random
+from random import randint
 from math import sin, cos
 
 sprites_path = ['assets/entities/enemies/waterpriestess/waterHurricane_start.png',
@@ -17,13 +17,13 @@ class WaterHurricane(pwr.Power):
                                   [128,128],
                                   [3,3,2])
 
-        self.rect_adjust: tuple[float,float] = [-60, -20]
+        self.rect_adjust: tuple[float,float] = [-90, -40]
 
         self.timers.append( pwr.ent.Timer(8, lambda: self.kill(), -1) )
 
         self.speed_value: float = 130
 
-        self.attack_damage: float = 40
+        self.attack_damage: float = 20
 
         self.parameter: float = 0
 
@@ -35,7 +35,7 @@ class WaterHurricane(pwr.Power):
 
         super().activate()
 
-        self.pos = pwr.ent.Entity.player.pos - pwr.ent.pg.math.Vector2(30, 30)*random()
+        self.pos = pwr.ent.Entity.player.pos - pwr.ent.pg.math.Vector2(randint(30,80), randint(30,80))
 
     def die(self) -> None:
         '''Deactives the waterHurricane power and resets action.\n'''
@@ -58,14 +58,13 @@ class WaterHurricane(pwr.Power):
         if self.rect.colliderect(pwr.ent.Entity.player):
             pwr.ent.Entity.player.damageSelf(self.attack_damage)
 
-    def blit(self) -> None:
+    def move(self) -> None:
+        '''WaterHurricane movement method.\n
+           Same as entity's movement, but without fitInDisplayBounds method.\n'''
+        self.pos = self.pos + self.getMovementSpeed()
 
-        surf = pwr.ent.pg.surface.Surface((self.rect.width, self.rect.height))
-
-        pwr.ent.Entity.blitter.addImage( 3, surf, self.pos)
-
-
-        return super().blit()
+        # reseting variables for nxt loop.
+        self.speed_complement: pwr.ent.pg.math.Vector2 = pwr.ent.pg.math.Vector2()
 
     def update(self) -> None:
         if not self.active: return
