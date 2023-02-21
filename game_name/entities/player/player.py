@@ -24,16 +24,14 @@ class Player( ent.Entity ):
                                                           [8,2,8,4,4,8,2] )
 
         ent.Entity.player = self
-
-        self.meteor: meteor.Meteor = meteor.Meteor(ent.pg.math.Vector2(), self.layer, 100)
-
         self.rect_adjust: tuple = [-30,-20]
+        self.attacks: list[ent.Attack] = [ ent.Attack(40, False, 0, 20, None) ]
+        self.target: int = 1
 
-        self.attack_damage: float = 40
-
+        # player variables.
         self.slide_speed: ent.pg.math.Vector2 = ent.pg.math.Vector2(0,0)
-
         self.setStatsSurfaces()
+        self.meteor: meteor.Meteor = meteor.Meteor()
 
     def setStatsSurfaces(self) -> None:
         '''Sets the surface that represents the player's stats.\n'''
@@ -61,7 +59,7 @@ class Player( ent.Entity ):
                     
             else: Player.hit_sound.stop()
 
-        elif self.action == 2: # deffending
+        elif self.action == 2: # defending
             pass       
 
         elif self.action == 3: # casting
@@ -216,47 +214,33 @@ class Player( ent.Entity ):
                                            self.stamina_surface.subsurface((0,0), (self.stats.stamina, 8)),
                                            self.getStaminaSurfacePos())
 
-    def damageSelf(self, value: float, instant=False) -> None:
-        '''Damages the player.\n
+    def damageSelf(self, attack: ent.Attack) -> None:
+        '''Almost the same as the entity's procedure.\n
            If defending inflicts reduced damage to life, but damages stamina.\n'''
-
-        if instant: dt = 1
-        else: dt = ent.Entity.dt
         
         if self.action == 2: # defending.
-            self.stats.spend(dt, value*0.2, 1)
-            self.stats.spend(dt, value*0.6, 3)
-
+            attack.damage = attack.damage*0.2
+            self.stats.spend(ent.Entity.dt, attack.damage*0.6, 3)
             return
 
-        self.stats.spend(dt, value, 1)
-        self.stats.spend(dt, value*0.2, 3)
-
-    def collisionUpdate(self) -> None:
-        super().collisionUpdate()
-
-        if self.action != 1: return
-
-        for en in ent.Entity.enabled_enemies:
-            if self.rect.colliderect(en.rect):
-                en.damageSelf(self.attack_damage)
+        super().damageSelf(attack)
 
     def update(self, events: list[ent.pg.event.Event]) -> None:
+        self.meteor.update()
+        
         if self.is_dead: return
 
         self.checkInputs(events)
 
         self.animationAction()
 
-        self.meteor.update()
-
         super().update()
 
 # power methods.
     def launchMeteor(self) -> None:
-        if self.stats.hasEnough(40, 2):
+        if self.meteor.canUse(self.stats):
             self.meteor.activate()
-            self.useMana(40,True)
+            self.useMana(self.meteor.current_attack.mana_cost, True)
         self.resetAction()
 
 # data saving and loading.

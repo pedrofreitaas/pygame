@@ -5,6 +5,7 @@ from timer import *
 from game_name.extra import *
 from game_name.entities.stats import *
 from game_name.game_map.map import *
+from game_name.entities.combat import *
 from json import load, dumps
 
 class Entity():
@@ -31,16 +32,28 @@ class Entity():
         self.rect_adjust: tuple = [0,0]
 
         self.timers: list[Timer] = []
+        self.attacks: list[Attack] = []
+        self.current_attack: Attack = Attack()
 
         #booleans
         self.isLookingRight: bool = True
 
         self.action: int = 0
 
+        self.target: int = 0
+        '''0-> no target.\n
+           1-> targets enemies.\n
+           2-> targets players.\n
+           3-> targets enemies and players'''
+
         self.stats = Stats(max_life, max_mana, max_stamina)
 
         self.is_dead = False
         self.active = True
+
+    def center(self) -> pg.math.Vector2:
+        '''Returns the center of the current sprite.\n'''
+        return self.pos + pg.math.Vector2(self.animator.currentSpriteSize())*0.5
 
 # movement.
     def complementSpeed(self, complement: pg.math.Vector2) -> None:
@@ -92,6 +105,7 @@ class Entity():
         self.speed_complement: pg.math.Vector2 = pg.math.Vector2()
 # ------------------- #
 
+# blitting.
     def blit(self) -> None:
         '''Blits the instance's animator image using a blitter instance.\n'''
 
@@ -105,21 +119,42 @@ class Entity():
 
     def blitStats(self) -> None:
         '''Abstract function to blit entity's stats.\n'''
+# ----------------------- #
 
-    def center(self) -> pg.math.Vector2:
-        '''Returns the center of the current sprite.\n'''
-        return self.pos + pg.math.Vector2(self.animator.currentSpriteSize())*0.5
+# interacting with game word.
+    def resetAction(self) -> None:
+        '''Resets entity action and current Attack.\n'''
+        self.action = 0
+        self.current_attack = Attack()
+
+    def collidePlayer(self) -> None:
+        '''Checks for collision with player and damages in.\n
+           Mask collision.\n'''
+        if self.mask.overlap(Entity.player.mask, Entity.player.pos-self.pos) != None:
+            Entity.player.damageSelf(self.current_attack)
+            Entity.player.complementSpeed(self.current_attack.knockback)
+
+    def collideEnemies(self) -> None:
+        '''Checks for collision with enemies and damages the collided ones.\n
+           Rect collision.\n'''
+        for en in Entity.enemies:
+            if self.rect.colliderect(en.rect):
+                en.damageSelf(self.current_attack)
 
     def collisionUpdate(self) -> None:
         '''Updates the collision handle variables.\n'''
-        
         image: pg.surface.Surface = rotCenter(self.animator.image, self.blit_angle)
 
         self.rect: pg.rect.Rect = image.get_rect().move(self.pos)
         self.rect = self.rect.inflate(self.rect_adjust[0],self.rect_adjust[1])
 
         self.mask: pg.mask.Mask = pg.mask.from_surface(image)
-    
+
+        if self.target in [1,3]: self.collideEnemies()
+        if self.target in [2,3]: self.collidePlayer
+# ------------------------------ #
+
+# animation.
     def setLookingDir(self) -> bool:
         '''If self.speed_dir[0] is different than zero, changes the looking dir'''
         
@@ -138,18 +173,36 @@ class Entity():
 
         self.setLookingDir()
         if not self.isLookingRight: self.animator.flipHorizontally()
-
-    def resetAction(self) -> None:
-        '''Resets entity action.\n'''
-        self.action = 0
+# -------------------- #
 
 # stats spend functions.
-    def damageSelf(self, value: float, instant=False) -> None:
+    def applyEffect(self, effect: Effect|None) -> None:
+        '''Applies effect in instance.\n'''
+        if effect == None: return
+        return
+
+    def damageSelf(self, attack: Attack) -> None:
         '''Procedure to damage entity.\n
-           Instant flag true, to be used if the damage will be done in one single call.\n
-           Instant flag false, to be used if the damage will tick many times.\n'''
-        if not instant: self.stats.spend(Entity.dt, value, 1)
-        else: self.stats.spend(1, value, 1)
+           Applies the corresponding effect of the parameter to the entity.\n'''
+        if not attack.instant: self.stats.spend(Entity.dt, attack.damage, 1)
+        else: self.stats.spend(1, attack.damage, 1)
+
+        self.applyEffect(attack.effect)
+
+    def setCurrentAttack(self, attack: Attack) -> bool:
+        '''If the attack can be used, sets it as current attack, applies it's cost and returns True.\n
+           If attack can't be used, returns false.\n
+           Sets the instance action with (index+1). Where the index represents the position of the attack in the list.\n'''
+        if attack.canUse(self.stats, self.center(), Entity.player.center()):
+            self.current_attack = attack
+            self.action = self.attacks.index(self.current_attack)+1
+
+            self.useMana(attack.mana_cost, True)
+            self.useStamina(attack.stamina_cost, True)
+
+            return True
+        
+        return False
 
     def useMana(self, value: float, instant=False) -> None:
         '''Procedure to use entity's Mana.\n
@@ -210,6 +263,7 @@ class Entity():
             self.pos = self.pos + distance
 # ----------------------- #
 
+# killing methods.
     def kill(self) -> None:
         '''Sets the entity death animation.\n'''
         self.action = -1
@@ -220,7 +274,9 @@ class Entity():
 
     def __del__(self) -> None:
         '''Abstract function for saving entity's data before deleting.\n'''
+# ---------------------------- #
 
+# main procedures.
     def activate(self) -> None:
         '''Actives instance and unpauses it's timers.\n'''
         if not self.active: activateTimers(self.timers)
