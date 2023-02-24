@@ -53,11 +53,17 @@ class WaterPriestess(en.Enemy):
 
         rand = self.randomizer.randint(1,5000)
 
-        if rand > 80: return
-        elif rand > 70: self.action = 6 #waterH
-        else:
-            attack_choosed = choices(self.attacks, self.attack_prob, k=1)[0]
-            self.setCurrentAttack(attack_choosed)
+        if self.stats.getPercentage(1) < 0.75 and rand < 50: 
+            self.action = 7 #block action
+            return
+        if rand > 80: 
+            return
+        if rand > 70 and self.water_hurricane.canUse(): 
+            self.action = 6 #waterH
+            return
+        
+        attack_choosed = choices(self.attacks, self.attack_prob, k=1)[0]
+        self.setCurrentAttack(attack_choosed)
 
     def animationAction(self) -> None:
         '''Controls water_priestess animation behavior.\n'''
@@ -105,6 +111,12 @@ class WaterPriestess(en.Enemy):
             self.animator.changeUpdateCoeficient(self.animator.upd_coeficient*0.8)
             return
 
+        if self.action == 7: # defending.
+            if self.stats.hasEnough(20, 3):
+                self.stats.spend(en.ent.Entity.dt, 20, 3)
+            else: self.resetAction()
+            return
+
     def waterHurricaneAttack(self) -> None:
         '''Triggers the water hurricane attack.\n'''
         self.water_hurricane.use(self.center(), en.ent.Entity.player.center())
@@ -115,50 +127,62 @@ class WaterPriestess(en.Enemy):
         self.animationAction()
 
         if self.action == -1:
-            self.animator.setRange([162, 179])
+            self.animator.setRange( (162, 179) )
             return
 
         if self.stats.is_taking_damage:
-            self.animator.setRange([156, 162])
+            self.animator.setRange( (156, 162) )
             return
 
         if self.action == 1:
-            self.animator.setRange([32,40])
+            self.animator.setRange( (32,40) )
             self.animator.setEAP(lambda: self.resetAction())
             return
 
         if self.action == 2:
-            self.animator.setRange([46,52])
+            self.animator.setRange( (46,52) )
             self.animator.setEAP(lambda: self.resetAction())
             return
 
         if self.action == 3:
-            self.animator.setRange([52,72])
+            self.animator.setRange( (52,72) )
             self.animator.setEAP(lambda: self.resetAction())
             return
 
         if self.action == 4:
-            self.animator.setRange([72,100])
+            self.animator.setRange( (72,100) )
             self.animator.setEAP(lambda: self.resetAction())
             return
 
         if self.action == 5:
-            self.animator.setRange([100,131])
+            self.animator.setRange( (100,131) )
             self.animator.setEAP(lambda: self.resetAction())
             return
         
         if self.action == 6:
-            self.animator.setRange([26,29])
+            self.animator.setRange( (26,29) )
             self.animator.setEAP(lambda: self.waterHurricaneAttack())
+            return
+        
+        if self.action == 7:
+            self.animator.setRange( (145,154) )
+            self.animator.resizeRange(5, 7)
             return
 
         if self.isMoving():
-            self.animator.setRange([15,26])
-            self.animator.activateStopAt(0.8)
+            self.animator.setRange( (15,26) )
+            self.animator.resizeRange(8, 11)
             return
 
-        self.animator.setRange([0,7])
+        self.animator.setRange( (0,7) )
 #
+
+    def damageSelf(self, attack: en.ent.Attack) -> None:
+        if self.action == 7: #blocking
+            self.stats.spend(en.ent.Entity.dt, attack.damage*0.3, 3)
+            return
+        
+        return super().damageSelf(attack)
 
     def update(self) -> None:
         if self.active: self.water_hurricane.update()

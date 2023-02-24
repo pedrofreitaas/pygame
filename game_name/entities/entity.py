@@ -87,7 +87,7 @@ class Entity():
 
         if self.getLockMovement(): speed = pg.math.Vector2()
 
-        if self.stats.is_taking_damage: speed = speed * 0.4
+        if self.stats.is_taking_damage: speed = speed * 0.25
 
         speed = speed + self.speed_complement*Entity.dt
 
@@ -147,8 +147,6 @@ class Entity():
            Rect collision.\n'''
         for en in Entity.enemies:
             if self.rect.colliderect(en.rect):
-                print(en.__str__())
-                print(self.__str__())
                 en.damageSelf(self.current_attack)
 
     def collisionUpdate(self) -> None:
@@ -348,11 +346,11 @@ def blitMinimap(font: pg.font.Font) -> None:
 def updateEnemies() -> None:
     '''Updates all the registered enemies.\n'''
 
-    for idx in range(len(Entity.enemies)):
-        Entity.enemies[idx].update()
+    for en in Entity.enemies:
+        en.update()
 
-        distance = (Entity.enemies[idx].pos-Entity.player.pos).length_squared()
+        distance = (en.pos-Entity.player.pos).length_squared()
 
-        if distance <= 360000: Entity.enemies[idx].activate()
-        elif distance >= 490000: Entity.enemies[idx].deactivate()
+        if distance <= 360000: en.activate()
+        elif distance >= 490000: en.deactivate()
             

@@ -81,6 +81,13 @@ class Stats():
 
             return
 
+    def getPercentage(self, which: int) -> float:
+        '''Returns the percentage of the corresponde which parameter stat.\n
+           which -> 1=life, 2=mana, 3=stamina.\n'''
+        if which == 1: return self.life/self.max_life
+        elif which == 2: return self.mana/self.max_mana
+        elif which == 3: return self.stamina/self.max_stamina
+        
     def checkStats(self) -> bool:
         '''Checks if the entity is taking damage.\n'''
         #life

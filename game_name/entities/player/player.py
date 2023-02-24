@@ -25,8 +25,7 @@ class Player( ent.Entity ):
 
         ent.Entity.player = self
         self.rect_adjust: tuple = [-30,-20]
-        self.current_attack: ent.Attack = ent.Attack(40, stamina_cost=20)
-        self.attacks: list[ent.Attack] = [ self.current_attack ]
+        self.attacks: list[ent.Attack] = [ ent.Attack(25, stamina_cost=20) ]
         self.target: int = 1
 
         # player variables.
@@ -88,7 +87,7 @@ class Player( ent.Entity ):
 
         if self.stats.is_taking_damage:
             self.animator.setRange([90,93])
-            self.animator.activateStopAt(0.8)
+            self.animator.resizeRange(2,3)
             return
 
         if self.action == 1:
@@ -97,7 +96,7 @@ class Player( ent.Entity ):
 
         if self.action == 2:
             self.animator.setRange([65,68])
-            self.animator.activateStopAt(0.5)
+            self.animator.resizeRange(2,3)
             return
 
         if self.action == 3:
@@ -172,6 +171,7 @@ class Player( ent.Entity ):
         '''Toogles player's attack, if possible.\n'''
         if self.action == 0 and not self.stats.is_taking_damage:
             self.action = 1
+            if self.attacks[0].canUse(self.stats): self.current_attack = self.attacks[0]
 
     def defend(self) -> None:
         '''Toggles player's defense, if possible.\n'''
