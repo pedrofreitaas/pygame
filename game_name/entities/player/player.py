@@ -25,13 +25,17 @@ class Player( ent.Entity ):
 
         ent.Entity.player = self
         self.rect_adjust: tuple = [-30,-20]
-        self.attacks: list[ent.Attack] = [ ent.Attack(40, False, 0, 20, None) ]
+        self.current_attack: ent.Attack = ent.Attack(40, stamina_cost=20)
+        self.attacks: list[ent.Attack] = [ self.current_attack ]
         self.target: int = 1
 
         # player variables.
         self.slide_speed: ent.pg.math.Vector2 = ent.pg.math.Vector2(0,0)
         self.setStatsSurfaces()
         self.meteor: meteor.Meteor = meteor.Meteor()
+
+    def __str__(self) -> str:
+        return super().__str__()+'.player'
 
     def setStatsSurfaces(self) -> None:
         '''Sets the surface that represents the player's stats.\n'''
@@ -238,9 +242,7 @@ class Player( ent.Entity ):
 
 # power methods.
     def launchMeteor(self) -> None:
-        if self.meteor.canUse(self.stats):
-            self.meteor.activate()
-            self.useMana(self.meteor.current_attack.mana_cost, True)
+        self.meteor.use()
         self.resetAction()
 
 # data saving and loading.

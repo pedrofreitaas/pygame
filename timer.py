@@ -4,6 +4,12 @@ class Timer():
     timers: list['Timer'] = []
 
 # Exceptions.
+    class restartedNotWorkingClock(AssertionError):
+        def __init__(self, *args: object) -> None:
+            super().__init__(*args)
+    class restartedPausedClock(AssertionError):
+        def __init__(self, *args: object) -> None:
+            super().__init__(*args)
     class pausedDeactivatedClock(AssertionError):
         def __init__(self, *args: object) -> None:
             super().__init__(*args)
@@ -26,17 +32,17 @@ class Timer():
            procedure: the method to be called after the timer completes a cycle.\n
            cycles: defines how many cycles the timer will have, if it's -1, timer won't stop cycling.\n'''
 
-        self.trigger_time = tm()
-        self.how_long = howLong
-        self.procedure = procedure
-        self.cycles = cycles
+        self.trigger_time: float = tm()
+        self.how_long: float = howLong
+        self.procedure: callable = procedure
+        self.cycles: int = cycles
 
-        self.activated = True
-        self.destroyed = False
-        self.paused = False
+        self.activated: bool = True
+        self.destroyed: bool = False
+        self.paused: bool = False
 
         #aux.
-        self.time_spent_before_pause = 0
+        self.time_spent_before_pause: float = 0
 
         Timer.timers.append(self)
 
@@ -50,6 +56,16 @@ class Timer():
         if reset:
             self.trigger_time = tm()
     
+    def restart(self) -> None:
+        '''Restart timer's cycle.\n
+           Will throw if instance was destroyed or paused.\n
+           Won't do anything if instance was deactivated.\n'''
+        if self.destroyed: raise Timer.restartedNotWorkingClock
+        if not self.activated: return
+        if self.paused: raise Timer.restartedPausedClock
+
+        self.trigger_time: float = tm()
+
     def timeLeft(self) -> float:
         '''Gets time to next cycle.\n
            Throws if clock is destroyed.\n

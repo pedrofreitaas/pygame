@@ -28,14 +28,18 @@ class WaterPriestess(en.Enemy):
                                              en.ent.Attack(damage=50, mana_cost=50, stamina_cost=20, range=60),
                                              en.ent.Attack(damage=80, mana_cost=50, stamina_cost=60, range=120)]
 
-        self.water_hurricane: waterH.WaterHurricane = waterH.WaterHurricane()
+        self.water_hurricane: waterH.WaterHurricane = waterH.WaterHurricane(self.stats)
 
         self.attack_prob: list[float] = [.15, .30, .25, .15, .15]    
 
         self.current_attack: en.ent.Attack = en.ent.Attack()                  
 
-        self.stats.setRegenFactor(self.stats.regen_factor*1.8)   
+        self.stats.setRegenFactor(self.stats.regen_factor*1.8)
 
+    def __str__(self) -> str:
+        return super().__str__()+'.water_priestess'
+
+#
     def controlCombat(self) -> None:
         '''Controls the water_priestess attack.\n'''
 
@@ -47,22 +51,13 @@ class WaterPriestess(en.Enemy):
         # if not seeking player.
         if not en.ent.inInterval(self.seek_player_interval, self.movement_behavior): return
 
-        if (self.center() - en.ent.Entity.player.center()).length_squared() > 10000: return
-
-        self.action = 6
-        return
-        
         rand = self.randomizer.randint(1,5000)
 
         if rand > 80: return
-        
-        # water hurricane attack.
-        if rand < 5:
-            self.action = 6
-            return
-
-        attack_choosed = choices(self.attacks, self.attack_prob, k=1)[0]
-        self.setCurrentAttack(attack_choosed)
+        elif rand > 70: self.action = 6 #waterH
+        else:
+            attack_choosed = choices(self.attacks, self.attack_prob, k=1)[0]
+            self.setCurrentAttack(attack_choosed)
 
     def animationAction(self) -> None:
         '''Controls water_priestess animation behavior.\n'''
@@ -112,7 +107,7 @@ class WaterPriestess(en.Enemy):
 
     def waterHurricaneAttack(self) -> None:
         '''Triggers the water hurricane attack.\n'''
-        self.water_hurricane.activate()
+        self.water_hurricane.use(self.center(), en.ent.Entity.player.center())
         self.resetAction()
 
     def controlAnimator(self) -> None:
@@ -163,10 +158,11 @@ class WaterPriestess(en.Enemy):
             return
 
         self.animator.setRange([0,7])
+#
 
     def update(self) -> None:
         if self.active: self.water_hurricane.update()
-        
+
         return super().update()
 
 def handleJson() -> list[WaterPriestess]:

@@ -14,37 +14,38 @@ class Meteor(Power):
     explosion_sound.set_volume(0.2)
 
     def __init__(self) -> None:
-        super().__init__(layer=2,speed_value=0,damage=70,mana_cost=40,damage_is_instant=False,cooldown=8)
-        
-        self.hit_time: float = 1.8
-        self.explode_time: float = 2.5
-
+        # entity's values.
+        super().__init__(layer=2,speed_value=0,caster_stats=Entity.player.stats,damage=70,mana_cost=40,damage_is_instant=False,cooldown=8)
         self.animator = an.Animator(pg.image.load(meteor_sprite_path).convert_alpha(),
                                     [100,100],
                                     [8,8,8,8,8,8,8,5])
-        
         self.animator.loadSprites(pg.image.load(explosion_sprite_path).convert_alpha(),
                                   [100,100],
                                   [8,8,8,8,8,8,8,5])
+        self.rect_adjust = [-50,-50]
+        self.target: int = 1
+        
+        # meteor values.
+        self.hit_time: float = 1.8
+        self.explode_time: float = 2.5
 
         self.hit_pos: pg.math.Vector2 = pg.math.Vector2(0,0)
 
         self.exploded: bool = False
 
-        self.rect_adjust = [-50,-50]
-
-        self.target: int = 1
-
-        # meteor hit/explode timers.
         self.explode_timer_index: int = len(self.timers)
         self.timers.append(Timer(self.hit_time, lambda: self.explode(), -1))
 
         self.pos_explode_timer_index: int = len(self.timers)
         self.timers.append(Timer(self.explode_time, lambda: self.deactivate(), -1))
 
-        # instance has only one attack.
         self.attacks.append( Attack(damage=70, mana_cost=40) )
         self.current_attack = self.attacks[0]
+
+        self.initialize()
+
+    def __str__(self) -> str:
+        return super().__str__()+'.meteor'
 
 # .
     def setAngle(self) -> None:
@@ -52,10 +53,10 @@ class Meteor(Power):
         image_dir = pg.math.Vector2(0,1)
         self.blit_angle = self.getMovementSpeed().angle_to(image_dir)
 
-    def activate(self) -> None:
+    def use(self) -> None:
         '''Meteor power activation.\n
            Activates the meteor hit timer of the instance.\n'''
-        if self.active or self.in_cooldown: return
+        if not super().use(): return
 
         self.animator.setRange([0,60])
         self.exploded = False
@@ -67,12 +68,11 @@ class Meteor(Power):
 
         Meteor.meteor_sound.play(-1)
 
-        super().activate()
-
         self.timers[self.pos_explode_timer_index].deactiveTimer()
 
     def explode(self) -> None:
-        '''Triggers meteor explosion, if the instance didn't explode yet and is close enought to it's hit pos.\n'''
+        '''Triggers meteor explosion.\n
+           Triggers time for meteor deactivation.\n'''
         if self.exploded: return
 
         Meteor.meteor_sound.stop()

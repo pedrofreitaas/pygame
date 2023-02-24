@@ -9,6 +9,11 @@ from game_name.entities.combat import *
 from json import load, dumps
 
 class Entity():
+# exceptions.
+    class revivingNotDeadEntity(AssertionError):
+        def __init__(self, *args: object) -> None:
+            super().__init__(*args)
+# ----------------- #
     map: Map = 0
 
     dt = 0
@@ -50,6 +55,9 @@ class Entity():
 
         self.is_dead = False
         self.active = True
+
+    def __str__(self) -> str:
+        return 'entity'
 
     def center(self) -> pg.math.Vector2:
         '''Returns the center of the current sprite.\n'''
@@ -139,6 +147,8 @@ class Entity():
            Rect collision.\n'''
         for en in Entity.enemies:
             if self.rect.colliderect(en.rect):
+                print(en.__str__())
+                print(self.__str__())
                 en.damageSelf(self.current_attack)
 
     def collisionUpdate(self) -> None:
@@ -150,8 +160,8 @@ class Entity():
 
         self.mask: pg.mask.Mask = pg.mask.from_surface(image)
 
-        if self.target in [1,3]: self.collideEnemies()
-        if self.target in [2,3]: self.collidePlayer
+        if self.target in (1,3): self.collideEnemies()
+        if self.target in (2,3): self.collidePlayer()
 # ------------------------------ #
 
 # animation.
@@ -163,8 +173,7 @@ class Entity():
     
     def animationAction(self) -> None:
         '''Controls the entity's behavior based on the current action.\n'''
-        if self.action == -1:
-            self.animator.setEAP(lambda: self.die())
+        if self.action == -1: self.animator.setEAP(lambda: self.die())
 
     def controlAnimator(self) -> None:
         '''Flips the image based in the looking dir of the entitys.\n
@@ -265,25 +274,34 @@ class Entity():
 
 # killing methods.
     def kill(self) -> None:
-        '''Sets the entity death animation.\n'''
+        '''Kills the entity after the current animation.\n
+           At the end of the current animation the self.die() method will be called by default.\n'''
         self.action = -1
     
     def die(self) -> None:
-        '''Makes the entity stop updating.\n'''
+        '''Instantly kills the entity.\n
+           Makes the entity stop updating.\n'''
         self.is_dead = True
+        self.resetAction()
+# ---------------------------- #
+
+    def revive(self) -> None:
+        '''Makes the entity update.\n
+           If it was alredy alive, throws.\n'''
+        if not self.is_dead: raise Entity.revivingNotDeadEntity 
+        self.is_dead = False
 
     def __del__(self) -> None:
         '''Abstract function for saving entity's data before deleting.\n'''
-# ---------------------------- #
 
 # main procedures.
     def activate(self) -> None:
-        '''Actives instance and unpauses it's timers.\n'''
+        '''Actives instance and activates it's timers.\n'''
         if not self.active: activateTimers(self.timers)
         self.active = True
 
     def deactivate(self) -> None:
-        '''Deactives instance and pauses it's timers.\n'''
+        '''Deactives instance and deactivates it's timers.\n'''
         if self.active: deactivateTimers(self.timers)
         self.active = False
 

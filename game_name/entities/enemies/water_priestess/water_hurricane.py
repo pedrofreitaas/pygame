@@ -6,8 +6,8 @@ sprites_path = ['assets/entities/enemies/waterpriestess/waterHurricane_start.png
                 'assets/entities/enemies/waterpriestess/waterHurricane_end.png' ]
 
 class WaterHurricane(Power):
-    def __init__(self) -> None:
-        super().__init__(layer=2, speed_value=130, damage=20, mana_cost=50, stamina_cost=0, damage_is_instant=False, cooldown=6, effect=None)
+    def __init__(self, caster_stats: Stats) -> None:
+        super().__init__(layer=2, speed_value=130, caster_stats=caster_stats, damage=20, mana_cost=50, stamina_cost=0, damage_is_instant=False, cooldown=6,effect=None)
 
         self.target: int = 2
 
@@ -19,30 +19,26 @@ class WaterHurricane(Power):
                                   [128,128],
                                   [3,3,2])
 
-        self.rect_adjust: tuple[float,float] = [-90, -40]
+        self.rect_adjust: tuple[float,float] = (-90, -40)
 
+        self.kill_timer_index: int = len(self.timers)
         self.timers.append( Timer(8, lambda: self.kill(), -1) )
 
         self.parameter: float = 0
         
-        self.current_attack = Attack(damage=20, mana_cost=50, stamina_cost=30)
+        self.current_attack = Attack(damage=20, mana_cost=50, stamina_cost=30, range=250)
         self.attacks.append(self.current_attack)
 
-    def activate(self) -> None:
-        if self.active: return
+        self.initialize()
 
-        super().activate()
+    def __str__(self) -> str:
+        return super().__str__()+'.water_hurricane'
 
+#
+    def use(self, userCenter: pg.math.Vector2, targetCenter: pg.math.Vector2) -> bool:
+        if not super().use(userCenter, targetCenter): return
         self.pos = Entity.player.pos - pg.math.Vector2(randint(30,80), randint(30,80))
 
-    def die(self) -> None:
-        '''Deactives the waterHurricane power and resets action.\n'''
-        self.action = 0
-        self.deactivate()
-
-    def damageSelf(self) -> None:
-        '''Water_hurricane power doesn't take damage.\n'''
-    
     def controlAnimator(self) -> None:
         super().controlAnimator()
         super().animationAction()
@@ -53,18 +49,17 @@ class WaterHurricane(Power):
     def move(self) -> None:
         '''WaterHurricane movement method.\n
            Same as entity's movement, but without fitInDisplayBounds method.\n'''
-        self.pos = self.pos + self.getMovementSpeed()
-
-        # reseting variables for nxt loop.
-        self.speed_complement: pg.math.Vector2 = pg.math.Vector2()
-
-    def update(self) -> None:
-        if not self.active: return
-
         self.speed_dir: pg.math.Vector2 = pg.math.Vector2(-1.4*sin(self.parameter), 2.5*cos(self.parameter)).rotate(30)
         
         self.parameter+=0.01
         if self.parameter>=6.28: 
             self.parameter = 0
-            
-        super().update()
+
+        self.pos = self.pos + self.getMovementSpeed()
+
+        # reseting variables for nxt loop.
+        self.speed_complement: pg.math.Vector2 = pg.math.Vector2()
+
+    def die(self) -> None:
+        self.deactivate()
+        self.resetAction()

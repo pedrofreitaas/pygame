@@ -20,6 +20,9 @@ class Enemy(ent.Entity):
         self.randommizer_coeficient = 5
         
         ent.Entity.enemies.append(self)
+    
+    def __str__(self) -> str:
+        return super().__str__()+'.enemy'
 
 # artificial inteligence for movement.
     def updateMoveBehavior(self, coeficient: float) -> None:
