@@ -82,37 +82,37 @@ class Player( ent.Entity ):
         super().controlAnimator()
 
         if self.action == -1:
-            self.animator.setRange([43,54])
+            self.animator.setRange( (43,54) )
             return
 
         if self.stats.is_taking_damage:
-            self.animator.setRange([90,93])
+            self.animator.setRange( (90,93) )
             self.animator.resizeRange(2,3)
             return
 
         if self.action == 1:
-            self.animator.setRange([6,23])
+            self.animator.setRange( (6,23) )
             return
 
         if self.action == 2:
-            self.animator.setRange([65,68])
+            self.animator.setRange( (65,68) )
             self.animator.resizeRange(2,3)
             return
 
         if self.action == 3:
-            self.animator.setRange([54,62])
+            self.animator.setRange( (54,62) )
             return
 
         if self.action == 4:
-            self.animator.setRange([78,86])
+            self.animator.setRange( (78,86) )
             return
 
         if self.isMoving():
-            self.animator.setRange([38,42])
+            self.animator.setRange( (38,42) )
             return
         
         #idle animation.
-        self.animator.setRange([0,5])
+        self.animator.setRange( (0,5) )
 
     def checkInputs(self, events: list[ent.pg.event.Event]) -> None:
         '''Check keyboard and mouse inputs.\n'''
@@ -192,6 +192,21 @@ class Player( ent.Entity ):
             if self.speed_dir == ent.pg.math.Vector2(): self.slide_speed = self.speed_dir
 
             else: self.slide_speed = self.speed_dir.normalize()*self.speed_value*1.2
+
+    def setCurrentAttack(self, attack: ent.Attack) -> bool:
+        '''If the attack can be used, sets it as current attack, applies it's cost and returns True.\n
+           If attack can't be used, returns false.\n
+           Sets the instance action with (index+1). Where the index represents the position of the attack in the list.\n'''
+        if attack.canUse(self.stats):
+            self.current_attack = attack
+            self.action = self.attacks.index(self.current_attack)+1
+
+            self.useMana(attack.mana_cost, True)
+            self.useStamina(attack.stamina_cost, True)
+
+            return True
+        
+        return False
 
     def getLifeSurfacePos(self) -> ent.pg.math.Vector2:
         return ent.pg.math.Vector2(5,10)

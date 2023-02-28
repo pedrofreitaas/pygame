@@ -30,9 +30,7 @@ class WaterPriestess(en.Enemy):
 
         self.water_hurricane: waterH.WaterHurricane = waterH.WaterHurricane(self.stats)
 
-        self.attack_prob: list[float] = [.15, .30, .25, .15, .15]    
-
-        self.current_attack: en.ent.Attack = en.ent.Attack()                  
+        self.attack_prob: list[float] = [.15, .30, .25, .15, .15]                 
 
         self.stats.setRegenFactor(self.stats.regen_factor*1.8)
 
@@ -114,13 +112,13 @@ class WaterPriestess(en.Enemy):
         if self.action == 7: # defending.
             if self.stats.hasEnough(20, 3):
                 self.stats.spend(en.ent.Entity.dt, 20, 3)
-            else: self.resetAction()
+            else: self.resetCombat()
             return
 
     def waterHurricaneAttack(self) -> None:
         '''Triggers the water hurricane attack.\n'''
         self.water_hurricane.use(self.center(), en.ent.Entity.player.center())
-        self.resetAction()
+        self.resetCombat()
 
     def controlAnimator(self) -> None:
         super().controlAnimator()
@@ -136,27 +134,27 @@ class WaterPriestess(en.Enemy):
 
         if self.action == 1:
             self.animator.setRange( (32,40) )
-            self.animator.setEAP(lambda: self.resetAction())
+            self.animator.setEAP(lambda: self.resetCombat())
             return
 
         if self.action == 2:
             self.animator.setRange( (46,52) )
-            self.animator.setEAP(lambda: self.resetAction())
+            self.animator.setEAP(lambda: self.resetCombat())
             return
 
         if self.action == 3:
             self.animator.setRange( (52,72) )
-            self.animator.setEAP(lambda: self.resetAction())
+            self.animator.setEAP(lambda: self.resetCombat())
             return
 
         if self.action == 4:
             self.animator.setRange( (72,100) )
-            self.animator.setEAP(lambda: self.resetAction())
+            self.animator.setEAP(lambda: self.resetCombat())
             return
 
         if self.action == 5:
             self.animator.setRange( (100,131) )
-            self.animator.setEAP(lambda: self.resetAction())
+            self.animator.setEAP(lambda: self.resetCombat())
             return
         
         if self.action == 6:

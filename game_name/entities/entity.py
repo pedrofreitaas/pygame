@@ -133,7 +133,15 @@ class Entity():
     def resetAction(self) -> None:
         '''Resets entity action and current Attack.\n'''
         self.action = 0
-        self.current_attack = Attack()
+
+    def resetAttack(self) -> None:
+        '''Sets the current attack to be a empty attack.\n'''
+        self.current_attack: Attack = Attack()
+
+    def resetCombat(self) -> None:
+        '''Resets the combat features of the entity.\n'''
+        self.resetAction()
+        self.resetAttack()
 
     def collidePlayer(self) -> None:
         '''Checks for collision with player and damages in.\n
@@ -197,19 +205,8 @@ class Entity():
         self.applyEffect(attack.effect)
 
     def setCurrentAttack(self, attack: Attack) -> bool:
-        '''If the attack can be used, sets it as current attack, applies it's cost and returns True.\n
-           If attack can't be used, returns false.\n
-           Sets the instance action with (index+1). Where the index represents the position of the attack in the list.\n'''
-        if attack.canUse(self.stats, self.center(), Entity.player.center()):
-            self.current_attack = attack
-            self.action = self.attacks.index(self.current_attack)+1
-
-            self.useMana(attack.mana_cost, True)
-            self.useStamina(attack.stamina_cost, True)
-
-            return True
-        
-        return False
+        '''Abstract for setting entities attack.\n
+           If the attack can be used, sets it as current attack, applies it's cost and returns True.\n'''
 
     def useMana(self, value: float, instant=False) -> None:
         '''Procedure to use entity's Mana.\n
@@ -280,7 +277,7 @@ class Entity():
         '''Instantly kills the entity.\n
            Makes the entity stop updating.\n'''
         self.is_dead = True
-        self.resetAction()
+        self.resetCombat()
 # ---------------------------- #
 
     def revive(self) -> None:

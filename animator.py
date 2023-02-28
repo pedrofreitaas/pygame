@@ -84,7 +84,12 @@ class Animator():
         self.flipV = True
 
     def resizeRange(self, begin_sprite: int, end_sprite: int) -> None:
-        """Resizes the range of the animation.\n"""
+        """Sets the animation to be a 'sub animation' of itself.\n
+           Only operates if the current animation has reached the begin_sprite parameter stage.\n
+           The number parameters should be the indexes of the sprites considering the current animation.\n
+           Ex: self.resizeRange(3,7) would consider the third/seventh sprites of the current animation.\n"""
+        if int(self.index_image - self.range_image[0]) < begin_sprite: return
+
         animation_total_spr = self.range_image[1]-self.range_image[0]
 
         if begin_sprite < 1 or end_sprite > animation_total_spr: raise ValueError

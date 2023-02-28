@@ -91,21 +91,15 @@ class Stats():
     def checkStats(self) -> bool:
         '''Checks if the entity is taking damage.\n'''
         #life
-        if self.life < self.previous_life: self.is_taking_damage = True
-        else: self.is_taking_damage = False
-
+        self.is_taking_damage = self.life < self.previous_life
         self.previous_life = self.life
 
         #mana
-        if self.mana < self.previous_mana: self.is_using_mana = True
-        else: self.is_using_mana = False
-
+        self.is_using_mana = self.mana < self.previous_mana
         self.previous_mana = self.mana
         
         #stamina
-        if self.stamina < self.previous_stamina: self.is_using_stamina = True
-        else: self.is_using_stamina = False
-
+        self.is_using_stamina = self.stamina < self.previous_stamina
         self.previous_stamina = self.stamina
 
     def update(self, dt: float) -> bool:

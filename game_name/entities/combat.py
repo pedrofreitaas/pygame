@@ -1,6 +1,7 @@
 from timer import *
 import pygame as pg
 from game_name.entities.stats import * 
+from math import pow
 
 class Effect():
     def __init__(self) -> None:
@@ -26,11 +27,12 @@ class Attack():
 
         self.knockback: pg.math.Vector2 = knockback
         self.range: float = range
+        self.range_squared: float = range**2
 
     def canUse(self, stats: Stats, userCenter: pg.math.Vector2=pg.math.Vector2(0,0), targetCenter: pg.math.Vector2=pg.math.Vector2(0,0)) -> bool:
         '''Returns true if the attack can be used.\n'''
         if not stats.hasEnough(self.mana_cost, 2): return False
         if not stats.hasEnough(self.stamina_cost, 3): return False
-        if (userCenter - targetCenter).length_squared() > self.range**2: return False
+        if (userCenter - targetCenter).length_squared() > self.range_squared: return False
 
         return True

@@ -37,13 +37,13 @@ class Enemy(ent.Entity):
         if self.action != 0: return
 
         if self.isGoingOutOfBounds(): 
-            self.setSeekPlayerSpeed()
-            return
+            self.movement_behavior = self.seek_player_interval[0]
         
-        self.updateMoveBehavior(self.upd_mov_behavior_coeficient)
+        else:
+            self.updateMoveBehavior(self.upd_mov_behavior_coeficient)
 
-        if self.randomizer.randint(1,50000) <= self.randommizer_coeficient:
-            self.movement_behavior = self.randomizer.random() * 100
+            if self.randomizer.randint(1,50000) <= self.randommizer_coeficient:
+                self.movement_behavior = self.randomizer.random() * 100
 
         if ent.inInterval(self.random_move_interval, self.movement_behavior):
             self.setRandomSpeed()
@@ -101,6 +101,21 @@ class Enemy(ent.Entity):
     def controlCombat(self) -> None:
         '''Abstract function to control the enemy's combat.\n'''
         return
+
+    def setCurrentAttack(self, attack: ent.Attack) -> bool:
+        '''If the attack can be used, sets it as current attack, applies it's cost and returns True.\n
+           If attack can't be used, returns false.\n
+           Sets the instance action with (index+1). Where the index represents the position of the attack in the list.\n'''
+        if attack.canUse(self.stats, self.center(), ent.Entity.player.center()):
+            self.current_attack = attack
+            self.action = self.attacks.index(self.current_attack)+1
+
+            self.useMana(attack.mana_cost, True)
+            self.useStamina(attack.stamina_cost, True)
+
+            return True
+        
+        return False
 # ---------------- #
 
 # blitting.
