@@ -13,22 +13,24 @@ class ForestWolf(Enemy):
         self.rect_adjust = (-50,-40)
 
         self.seek_player_interval = (0,70)
-        self.random_move_interval = (70,90)
-        self.distance_player_interval = (90,100)
+        self.random_move_interval = (70,100)
+        self.distance_player_interval = (None,None)
         self.idle_interval = (None,None)
 
-        self.upd_mov_behavior_coeficient = 3
+        self.upd_mov_behavior_coeficient = 4
 
-        self.attacks: list[ent.Attack] = [ent.Attack(stamina_cost=15, range=50),
-                                          ent.Attack(stamina_cost=15, range=20)]
-                                          #ent.Attack(stamina_cost=40, range=150, knockback=ent.pg.math.Vector2(5,5))]
-        self.attack_prob: list[float] = [.5,.5]                  
+        self.attacks: list[ent.Attack] = [ent.Attack(stamina_cost=20, range=50),
+                                          ent.Attack(stamina_cost=20, range=20),
+                                          ent.Attack(stamina_cost=70, range=150, knockback=ent.pg.math.Vector2(5,5))]
+        self.attack_prob: list[float] = [.4,.4,.2]                  
 
-        self.stats.setRegenFactor(self.stats.regen_factor*1.5)
+        self.stats.setRegenFactor(2, 1)
+        self.stats.setRegenFactor(0, 2)
+        self.stats.setRegenFactor(6, 3)
 
         self.default_speed_value: float = self.speed_value
-        self.stamina_run_cost: float = 10
-        self.speed_booster: float = 80
+        self.stamina_run_cost: float = 9
+        self.speed_booster: float = 95
         
     def __str__(self) -> str:
         return super().__str__()+'forest_wolf'
@@ -39,11 +41,7 @@ class ForestWolf(Enemy):
 
         # alredy taking action.
         if self.action != 0: return
-
         if self.stats.is_taking_damage: return
-
-        # if not seeking player.
-        if not ent.inInterval(self.seek_player_interval, self.movement_behavior): return
         
         attack_choosed = choices(self.attacks, self.attack_prob, k=1)[0]
         self.setCurrentAttack(attack_choosed)
@@ -55,6 +53,19 @@ class ForestWolf(Enemy):
 
         if self.action == 1:
             if percentage > 0.6: self.current_attack.damage = 80
+            
+            return
+        
+        if self.action == 2:
+            if percentage > 0.6: self.current_attack.damage = 80
+            
+            return
+
+        if self.action == 3:
+            if ent.inInterval((.3,.6), percentage) : 
+                self.complementSpeed( self.speed_dir*self.speed_value*5 )
+                self.current_attack.damage = 120
+            return
 
     def controlAnimator(self) -> None:
         super().controlAnimator()
@@ -70,7 +81,17 @@ class ForestWolf(Enemy):
 
         if self.action == 1: # attack 1.
             self.animator.setRange( (0,9) )
-            self.animator.setEAP(lambda: self.resetCombat())
+            self.animator.setEAP( lambda: self.resetCombat() )
+            return
+        
+        if self.action == 2: # attack 2.
+            self.animator.setRange( (9,19) )
+            self.animator.setEAP( lambda: self.resetCombat() )
+            return
+        
+        if self.action == 3: # attack 3(running).
+            self.animator.setRange( (24,30) )
+            self.animator.setEAP( lambda: self.resetCombat() )
             return
 
         if self.isMoving():
@@ -79,10 +100,9 @@ class ForestWolf(Enemy):
             return
 
     def setSeekPlayerSpeed(self) -> None:
-        return super().setSeekPlayerSpeed()
         '''Forest Wolf seek player function.\n
            This enemy focus on the player, goes with everthing, than stops seeking player for stamina recovering.\n
-           Enemy consumes stamina while moving.\n'''        
+           Enemy consumes stamina while seeking the player.\n'''        
         if not self.stats.hasEnough(self.stamina_run_cost, 3):
             self.speed_value = self.default_speed_value
             self.movement_behavior = self.random_move_interval[0]

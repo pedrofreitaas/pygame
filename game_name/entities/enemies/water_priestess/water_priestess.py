@@ -32,7 +32,9 @@ class WaterPriestess(en.Enemy):
 
         self.attack_prob: list[float] = [.15, .30, .25, .15, .15]                 
 
-        self.stats.setRegenFactor(self.stats.regen_factor*1.8)
+        self.stats.setRegenFactor(2,1)
+        self.stats.setRegenFactor(1.2, 2)
+        self.stats.setRegenFactor(2.5, 3)
 
     def __str__(self) -> str:
         return super().__str__()+'.water_priestess'

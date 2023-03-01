@@ -57,10 +57,11 @@ class Animator():
 
     def checkCallEAP(self) -> None:
         '''Checks if the end of animation procedure needs to be called.\n
-           Doesn't call EAP with a new range setted yet not took effect.\n'''
+           Doesn't call EAP with if a new range was setted and yet not took effect.\n'''
         if self.new_range: 
             self.new_range = False
             return
+        
         if self.index_image >= self.range_image[1]: self.EAP()
 
     def updateImage(self, dt: float) -> None:
@@ -104,6 +105,8 @@ class Animator():
         if range[1] < range[0]: raise ValueError
         if range[1] < 0 or range[0] < 0: raise ValueError
         if range[1] >= self.getTotalImages(): raise ValueError
+
+        if range != self.range_image: self.new_range = True
 
         self.range_image = range
 

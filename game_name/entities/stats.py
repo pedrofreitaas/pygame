@@ -13,7 +13,9 @@ class Stats():
         self.stamina = self.max_stamina
         self.previous_stamina = self.stamina
 
-        self.regen_factor = 2
+        self.life_regen_factor = 2
+        self.mana_regen_factor = 1.4
+        self.stamina_regen_factor = 2.3
 
         # booleans.
         self.is_taking_damage = False
@@ -21,26 +23,30 @@ class Stats():
         self.is_using_stamina = False
         self.is_dying = False
 
-    def setRegenFactor(self, value: float) -> None:
-        self.regen_factor = value
+    def setRegenFactor(self, value: float, which: int=1) -> None:
+        '''Changes the stat regeneration to the value paremeter.\n
+           which: 1->life, 2->mana, 3->stamina.\n'''
+        if which == 1: self.life_regen_factor = value
+        elif which == 2: self.mana_regen_factor = value
+        elif which == 3: self.stamina_regen_factor = value
 
     def regen(self, dt: float) -> None:
-        '''Regens all the atributes with regen_factor base.\n'''
+        '''Regens all the atributes with (stat)_regen_factor base.\n'''
         if not self.is_taking_damage:
-            self.life += self.regen_factor*dt
+            self.life += self.life_regen_factor*dt
             if self.life > self.max_life: self.life = self.max_life
 
         if not self.is_using_mana:
-            self.mana += self.regen_factor*1.4*dt
+            self.mana += self.mana_regen_factor*dt
             if self.mana > self.max_mana: self.mana = self.max_mana
 
         if not self.is_using_stamina:
-            self.stamina += self.regen_factor*2*dt
+            self.stamina += self.stamina_regen_factor*dt
             if self.stamina > self.max_stamina: self.stamina = self.max_stamina
 
     def hasEnough(self, qnt: float, which: int) -> bool:
         '''Returns true if the instance has the according stat in the parameter quantity.\n
-           1->life, 2->mana, 3->stamina.\n'''
+           which: 1->life, 2->mana, 3->stamina.\n'''
 
         if which == 1:
             if self.life >= qnt: return True
