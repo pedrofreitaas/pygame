@@ -9,7 +9,7 @@ class ForestWolf(Enemy):
         super().__init__(pos, layer, speed_value, max_life, max_mana, max_stamina)
         self.animator: ent.an.Animator = ent.an.Animator(ent.pg.image.load(spritesheet[0]).convert_alpha(),
                                                          [96,96],
-                                                         [10,10,6,6,6,10])
+                                                         [7,7,7,7,7,7,6])
         self.rect_adjust = (-50,-40)
 
         self.seek_player_interval = (0,70)
@@ -29,13 +29,25 @@ class ForestWolf(Enemy):
         self.stats.setRegenFactor(6, 3)
 
         self.default_speed_value: float = self.speed_value
-        self.stamina_run_cost: float = 9
+        self.stamina_run_cost: float = 4
         self.speed_booster: float = 95
         
     def __str__(self) -> str:
         return super().__str__()+'forest_wolf'
     
 #
+    def setHitbox(self) -> None:
+        '''Sets the damage infliction rect of the forest wolf according to it's action.\n
+           Has special hitbox only for the idle bit attacks.\n'''
+        super().setHitbox()
+        
+        if self.action in [1,2]:
+            if self.isLookingRight: self.damage_rect = ent.pg.rect.Rect( ent.pg.math.Vector2(self.rect.topleft)+ent.pg.math.Vector2(45,30),
+                                                                         (40,20) )
+                
+            else: self.damage_rect = ent.pg.rect.Rect( ent.pg.math.Vector2(self.rect.topleft)+ent.pg.math.Vector2(-20,30),
+                                                      (40,20) )    
+
     def controlCombat(self) -> None:
         '''Controls the water_priestess attack.\n'''
 
@@ -52,19 +64,19 @@ class ForestWolf(Enemy):
         percentage = self.animator.animationPercentage()
 
         if self.action == 1:
-            if percentage > 0.6: self.current_attack.damage = 80
+            if percentage > 0.8: self.current_attack.damage = 40
             
             return
         
         if self.action == 2:
-            if percentage > 0.6: self.current_attack.damage = 80
+            if percentage > 0.8: self.current_attack.damage = 40
             
             return
 
         if self.action == 3:
             if ent.inInterval((.3,.6), percentage) : 
                 self.complementSpeed( self.speed_dir*self.speed_value*5 )
-                self.current_attack.damage = 120
+                self.current_attack.damage = 200
             return
 
     def controlAnimator(self) -> None:

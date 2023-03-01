@@ -71,7 +71,7 @@ class Player( ent.Entity ):
         elif self.action == 4: # sliding
             self.complementSpeed(self.slide_speed)
             self.animator.changeUpdateCoeficient(self.animator.upd_coeficient*2)
-            self.animator.setEAP(lambda: self.resetAction())
+            self.animator.setEAP(lambda: self.resetCombat())
         
         if self.isMoving(): Player.footstep_sound.play()
         else: Player.footstep_sound.stop()
@@ -128,7 +128,7 @@ class Player( ent.Entity ):
 
             if ev.type == ent.pg.MOUSEBUTTONUP:
                 if ev.button in [1,3]:
-                    self.resetAction()
+                    self.resetCombat()
 
             if ev.type == ent.pg.KEYDOWN:
                 
@@ -165,7 +165,7 @@ class Player( ent.Entity ):
                     self.speed_dir[0] -= 1
 
                 elif ev.key == 101: #ord('e')
-                    self.resetAction()
+                    self.resetCombat()
 
     def attack(self) -> None:
         '''Toogles player's attack, if possible.\n'''
@@ -258,7 +258,7 @@ class Player( ent.Entity ):
 # power methods.
     def launchMeteor(self) -> None:
         self.meteor.use()
-        self.resetAction()
+        self.resetCombat()
 
 # data saving and loading.
     def __del__(self) -> None:

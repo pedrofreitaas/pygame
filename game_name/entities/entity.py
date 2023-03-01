@@ -32,9 +32,12 @@ class Entity():
 
         self.animator: an.Animator = an.Animator(pg.image.load('assets/entities/empty.png').convert_alpha(), [5,5], [1])
         self.blit_angle: float = 0
-        self.rect = self.animator.image.get_rect().move(self.pos)
+
+        #collision.
+        self.rect: pg.rect.Rect = self.animator.image.get_rect().move(self.pos)
+        self.damage_rect: pg.rect.Rect = self.rect
         self.mask = pg.mask.from_surface(self.animator.image)
-        self.rect_adjust: tuple = [0,0]
+        self.rect_adjust: tuple = (0,0)
 
         self.timers: list[Timer] = []
         self.attacks: list[Attack] = []
@@ -145,7 +148,9 @@ class Entity():
 
     def collidePlayer(self) -> None:
         '''Checks for collision with player and damages in.\n
-           Mask collision.\n'''
+           Rect and mask collision.\n'''
+        if not self.damage_rect.colliderect(Entity.player.rect): return
+
         if self.mask.overlap(Entity.player.mask, Entity.player.pos-self.pos) != None:
             Entity.player.damageSelf(self.current_attack)
             Entity.player.complementSpeed(self.current_attack.knockback)
@@ -154,15 +159,23 @@ class Entity():
         '''Checks for collision with enemies and damages the collided ones.\n
            Rect collision.\n'''
         for en in Entity.enemies:
-            if self.rect.colliderect(en.rect):
+            if self.damage_rect.colliderect(en.rect):
                 en.damageSelf(self.current_attack)
 
+    def setHitbox(self) -> None:
+        '''Entity's function for setting it's damage inflicter hitbox.\n
+           Function has default call is the update procedure (inside collision update).\n'''
+        self.damage_rect = self.rect
+
     def collisionUpdate(self) -> None:
-        '''Updates the collision handle variables.\n'''
+        '''Updates the collision handle variables.\n
+           The self.rect is a rect for checking general collision with the entity.\n
+           While the self.damage_rect is a rect for checking damage infliction by the entity.\n'''
         image: pg.surface.Surface = rotCenter(self.animator.image, self.blit_angle)
 
         self.rect: pg.rect.Rect = image.get_rect().move(self.pos)
         self.rect = self.rect.inflate(self.rect_adjust[0],self.rect_adjust[1])
+        self.setHitbox()
 
         self.mask: pg.mask.Mask = pg.mask.from_surface(image)
 
