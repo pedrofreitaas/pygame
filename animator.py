@@ -132,7 +132,8 @@ class Animator():
     def resizeSprites(self, size: tuple[float,float]) -> None:
         """Resizes all the sprites with the given size.\n"""
         for ind, sprite in enumerate(self.sprites):
-            self.sprites[ind] = pg.transform.smoothscale(sprite, size)
+            self.sprites[ind] = pg.transform.scale(sprite, size)
+        self.image = pg.transform.scale(self.image, size)
 
     def changeUpdateCoeficient(self, coeficient: float) -> None:
         '''Changes the upd coeficient based on the parameter.\n

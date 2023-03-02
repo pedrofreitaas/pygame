@@ -1,5 +1,6 @@
 import game_name.entities.entity as ent
 import game_name.entities.player.powers.meteor as meteor
+from game_name.entities.player.powers.hookax import *
 from io import open
 
 player_sprites_path = ['assets/entities/player/char_red_1.png', 'assets/entities/player/char_red_2.png' ]
@@ -32,6 +33,7 @@ class Player( ent.Entity ):
         self.slide_speed: ent.pg.math.Vector2 = ent.pg.math.Vector2(0,0)
         self.setStatsSurfaces()
         self.meteor: meteor.Meteor = meteor.Meteor()
+        self.hookax: Hookax = Hookax()
 
     def __str__(self) -> str:
         return super().__str__()+'.player'
@@ -66,7 +68,7 @@ class Player( ent.Entity ):
             pass       
 
         elif self.action == 3: # casting
-            self.animator.setEAP(lambda: self.launchMeteor())
+            self.animator.setEAP(lambda: self.activeCurrentPower())
         
         elif self.action == 4: # sliding
             self.complementSpeed(self.slide_speed)
@@ -246,6 +248,7 @@ class Player( ent.Entity ):
 
     def update(self, events: list[ent.pg.event.Event]) -> None:
         self.meteor.update()
+        self.hookax.update()
         
         if self.is_dead: return
 
@@ -256,6 +259,15 @@ class Player( ent.Entity ):
         super().update()
 
 # power methods.
+    def activeCurrentPower(self) -> None:
+        '''Activates player current power.\n'''
+        self.launchHookax()
+        # self.launchMeteor()
+    
+    def launchHookax(self) -> None:
+        self.hookax.use()
+        self.resetCombat()
+
     def launchMeteor(self) -> None:
         self.meteor.use()
         self.resetCombat()
