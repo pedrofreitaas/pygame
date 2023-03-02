@@ -15,7 +15,7 @@ class Meteor(Power):
 
     def __init__(self) -> None:
         # entity's values.
-        super().__init__(layer=2,speed_value=0,caster_stats=Entity.player.stats,damage=70,mana_cost=40,damage_is_instant=False,cooldown=8)
+        super().__init__(layer=2,speed_value=0,caster_stats=Entity.player.stats,damage=70,mana_cost=40,instant=False,cooldown=8)
         self.animator = an.Animator(pg.image.load(meteor_sprite_path).convert_alpha(),
                                     [100,100],
                                     [8,8,8,8,8,8,8,5])
@@ -38,9 +38,6 @@ class Meteor(Power):
 
         self.pos_explode_timer_index: int = len(self.timers)
         self.timers.append(Timer(self.explode_time, lambda: self.deactivate(), -1))
-
-        self.attacks.append( Attack(damage=70, mana_cost=40) )
-        self.current_attack = self.attacks[0]
 
         self.initialize()
 

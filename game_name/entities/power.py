@@ -2,11 +2,14 @@ from game_name.entities.entity import *
 from game_name.entities.combat import *
 
 class Power(Entity):
-    def __init__(self, layer: int, speed_value: float, caster_stats: Stats, damage: float, mana_cost: float=0, stamina_cost: float=0,damage_is_instant: bool=False, cooldown: float=0, effect: Effect=None) -> None:
+    def __init__(self, layer: int, speed_value: float, caster_stats: Stats, damage: float, mana_cost: float=0, range: float=0, stamina_cost: float=0, instant: bool=False, cooldown: float=0, effect: Effect=None) -> None:
         '''The power's and caster's stats are shared.\n
-           Remember to call initialize method at the of subclass __ini__() methods.\n'''
+           Remember to call initialize method at the of subclass __init__() methods.\n'''
         Entity.__init__(self, pg.math.Vector2(0,0), layer, speed_value, 1,0,0)
         
+        self.current_attack: Attack = Attack(damage=damage, mana_cost=mana_cost, stamina_cost=stamina_cost, effect=effect, instant=instant, range=range)
+        self.attacks.append(self.current_attack)
+
         self.stats: Stats = caster_stats
         self.in_cooldown: bool = False
         self.cooldown_timer: Timer = Timer(cooldown, lambda: self.setOutOfCooldown(), -1)

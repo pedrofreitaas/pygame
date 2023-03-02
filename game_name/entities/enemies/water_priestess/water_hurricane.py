@@ -7,7 +7,7 @@ sprites_path = ['assets/entities/enemies/waterpriestess/waterHurricane_start.png
 
 class WaterHurricane(Power):
     def __init__(self, caster_stats: Stats) -> None:
-        super().__init__(layer=2, speed_value=130, caster_stats=caster_stats, damage=20, mana_cost=50, stamina_cost=0, damage_is_instant=False, cooldown=6,effect=None)
+        super().__init__(layer=2, speed_value=130, caster_stats=caster_stats,damage=20,range=160,mana_cost=20,stamina_cost=0,instant=False,cooldown=6,effect=None)
 
         self.target: int = 2
 
@@ -25,9 +25,6 @@ class WaterHurricane(Power):
         self.timers.append( Timer(8, lambda: self.kill(), -1) )
 
         self.parameter: float = 0
-        
-        self.current_attack = Attack(damage=20, mana_cost=50, stamina_cost=30, range=250)
-        self.attacks.append(self.current_attack)
 
         self.initialize()
 
@@ -43,8 +40,8 @@ class WaterHurricane(Power):
         super().controlAnimator()
         super().animationAction()
 
-        if self.action == -1: self.animator.setRange([12,19])
-        else: self.animator.setRange([0,12])
+        if self.action == -1: self.animator.setRange((12,19))
+        else: self.animator.setRange((0,12))
 
     def move(self) -> None:
         '''WaterHurricane movement method.\n
@@ -59,6 +56,9 @@ class WaterHurricane(Power):
 
         # reseting variables for nxt loop.
         self.speed_complement: pg.math.Vector2 = pg.math.Vector2()
+
+    def kill(self) -> None:
+        return super().kill()
 
     def die(self) -> None:
         self.deactivate()

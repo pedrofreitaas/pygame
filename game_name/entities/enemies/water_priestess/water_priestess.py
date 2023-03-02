@@ -22,7 +22,7 @@ class WaterPriestess(en.Enemy):
 
         self.upd_mov_behavior_coeficient = 5
 
-        self.attacks: list[en.ent.Attack] = [en.ent.Attack(damage=110, mana_cost=30, stamina_cost=70, range=300),
+        self.attacks: list[en.ent.Attack] = [en.ent.Attack(damage=110, mana_cost=30, stamina_cost=70, range=180),
                                              en.ent.Attack(damage=30, stamina_cost=40, range=60),
                                              en.ent.Attack(damage=30, stamina_cost=50, range=65),
                                              en.ent.Attack(damage=50, mana_cost=50, stamina_cost=20, range=60),
@@ -34,7 +34,7 @@ class WaterPriestess(en.Enemy):
 
         self.stats.setRegenFactor(2,1)
         self.stats.setRegenFactor(1.2, 2)
-        self.stats.setRegenFactor(2.5, 3)
+        self.stats.setRegenFactor(8, 3)
 
     def __str__(self) -> str:
         return super().__str__()+'.water_priestess'
@@ -48,17 +48,12 @@ class WaterPriestess(en.Enemy):
 
         if self.stats.is_taking_damage: return
 
-        # if not seeking player.
-        if not en.ent.inInterval(self.seek_player_interval, self.movement_behavior): return
-
         rand = self.randomizer.randint(1,5000)
 
         if self.stats.getPercentage(1) < 0.75 and rand < 50: 
             self.action = 7 #block action
             return
-        if rand > 80: 
-            return
-        if rand > 70 and self.water_hurricane.canUse(): 
+        if rand < 30 and self.water_hurricane.canUse(self.center(), en.ent.Entity.player.center()):
             self.action = 6 #waterH
             return
         
@@ -73,7 +68,10 @@ class WaterPriestess(en.Enemy):
 
         if self.action == 1: # attack 1
             if en.ent.inInterval([0.4, 0.5], percentage):
+                
                 self.complementSpeed(self.speed_dir*self.speed_value*10)
+            
+            elif not en.ent.inInterval(self.seek_player_interval, self.movement_behavior): self.setSeekPlayerSpeed()
             
             return
         
