@@ -86,6 +86,29 @@ class Stats():
             if self.stamina < 0: self.stamina = 0
 
             return
+    
+    def add(self, dt: float, qnt: float, which: int) -> None:
+        '''Adds the instance atributte by the given quantity according to delta time.\n
+            1->life, 2->mana, 3->stamina.\n'''
+           
+        if which == 1:
+            self.life += (qnt*dt)
+            if self.life > self.max_life:
+                self.life = self.max_life
+            
+            return
+
+        if which == 2:
+            self.mana += qnt*dt
+            if self.mana > self.max_mana: self.mana = self.max_mana
+            
+            return
+
+        if which == 3:
+            self.stamina += qnt*dt
+            if self.stamina > self.max_stamina: self.stamina = self.max_stamina
+
+            return
 
     def getPercentage(self, which: int) -> float:
         '''Returns the percentage of the corresponde which parameter stat.\n

@@ -68,7 +68,7 @@ class Player( ent.Entity ):
             pass       
 
         elif self.action == 3: # casting
-            self.animator.setEAP(lambda: self.activeCurrentPower())
+            self.animator.setEAP(lambda: self.launchMeteor())
         
         elif self.action == 4: # sliding
             self.complementSpeed(self.slide_speed)
@@ -149,6 +149,10 @@ class Player( ent.Entity ):
                 elif ev.key == 101: #ord('e')
                     self.cast()
 
+                elif ev.key == 114: #ord('r')
+                    self.launchHookax()
+                    self.action = 5
+
                 elif ev.key == ent.pg.K_SPACE:
                     self.slide()
             
@@ -166,7 +170,7 @@ class Player( ent.Entity ):
                 elif ev.key == 100: #ord('d')
                     self.speed_dir[0] -= 1
 
-                elif ev.key == 101: #ord('e')
+                elif ev.key in (101,114): #ord('e'),ord('r')
                     self.resetCombat()
 
     def attack(self) -> None:
@@ -259,14 +263,12 @@ class Player( ent.Entity ):
         super().update()
 
 # power methods.
-    def activeCurrentPower(self) -> None:
-        '''Activates player current power.\n'''
-        self.launchHookax()
-        # self.launchMeteor()
-    
     def launchHookax(self) -> None:
+        if self.hookax.active: 
+            self.cast()
+            return
+        
         self.hookax.use()
-        self.resetCombat()
 
     def launchMeteor(self) -> None:
         self.meteor.use()

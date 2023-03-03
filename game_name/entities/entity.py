@@ -190,7 +190,7 @@ class Entity():
         self.action = -2
         try: 
             speed = ( target-self.center() ).normalize()
-            self.complementSpeed( speed * self.speed_value * speed_factor )
+            self.complementSpeed( speed * speed_factor )
         except ValueError: pass
 
     def stopPull(self) -> None:
