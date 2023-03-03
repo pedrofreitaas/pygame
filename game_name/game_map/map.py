@@ -65,6 +65,15 @@ class Map():
 
         self.createMiniature()
     
+    def structExists(self, rect: pg.rect.Rect, layer: int=0) -> bool:
+        '''Returns true if there is a structure in the parameter rect.\n
+           Starts the search from the layer parameter, with default value zero.\n'''
+
+        for layerInd in range(layer, len(self.layers) ):
+            if len(self.layers[layerInd].getStructuresInRect(rect, (0,0))) > 0: return True
+
+        return False
+    
     def createMiniature(self) -> None:
         '''Blits the current state of the map into a miniature.\n'''
         for layer in self.layers:

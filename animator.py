@@ -104,7 +104,7 @@ class Animator():
         """Sets the range of the change in image.\n"""
         if range[1] < range[0]: raise ValueError
         if range[1] < 0 or range[0] < 0: raise ValueError
-        if range[1] >= self.getTotalImages(): raise ValueError
+        if range[1] >= self.getTotalImages()+1: raise ValueError
 
         if range != self.range_image: self.new_range = True
 

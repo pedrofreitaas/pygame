@@ -183,6 +183,21 @@ class Entity():
         if self.target in (2,3): self.collidePlayer()
 # ------------------------------ #
 
+#
+    def pull(self, target: pg.math.Vector2, speed_factor: float=1) -> None:
+        '''Pulls the entity to the target.\n
+           Sets the pulling action.\n'''
+        self.action = -2
+        try: 
+            speed = ( target-self.center() ).normalize()
+            self.complementSpeed( speed * self.speed_value * speed_factor )
+        except ValueError: pass
+
+    def stopPull(self) -> None:
+        '''Stops entity's pulling.\n'''
+        self.resetAction()
+#
+
 # animation.
     def setLookingDir(self) -> bool:
         '''If self.speed_dir[0] is different than zero, changes the looking dir'''
@@ -193,6 +208,7 @@ class Entity():
     def animationAction(self) -> None:
         '''Controls the entity's behavior based on the current action.\n'''
         if self.action == -1: self.animator.setEAP(lambda: self.die())
+        if self.action == -2: self.animator.setEAP(lambda: self.resetAction())
 
     def controlAnimator(self) -> None:
         '''Flips the image based in the looking dir of the entitys.\n

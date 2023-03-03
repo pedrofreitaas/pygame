@@ -248,7 +248,7 @@ class Player( ent.Entity ):
 
     def update(self, events: list[ent.pg.event.Event]) -> None:
         self.meteor.update()
-        self.hookax.update()
+        self.hookax.update(events)
         
         if self.is_dead: return
 
