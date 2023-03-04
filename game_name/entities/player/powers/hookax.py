@@ -121,6 +121,7 @@ class Hookax(Power):
         if not self.pulling: return
         if not self.stats.spend(Entity.dt, self.pull_cost, 2): return
 
+        self.rotate = True
         if self.hitted_entity != None: self.hitted_entity.pull(Entity.player.center(), self.max_speed_value)
         else: super().pull(Entity.player.center(), self.max_speed_value)
 
@@ -129,8 +130,6 @@ class Hookax(Power):
            Spends player mana.\n'''
         if not self.pushing: return
         if not self.stats.spend(Entity.dt,self.push_cost,2): return
-
-        self.useMana(self.push_cost, False)
 
         Entity.player.pull(self.center(), self.max_speed_value)
 #
@@ -172,8 +171,10 @@ class Hookax(Power):
 
     def blit(self) -> None:
         '''Makes the hookax spins and blits it.\n'''
+
         if self.rotate: self.blit_angle -= Entity.dt*self.speed_value*4
         else: self.blit_angle = 0
+
         return super().blit()
 
     def update(self, events: list[pg.event.Event]) -> None:

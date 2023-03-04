@@ -1,5 +1,6 @@
 import game_name.entities.entity as ent
 import game_name.entities.player.powers.meteor as meteor
+from game_name.entities.player.powers.sprint import *
 from game_name.entities.player.powers.hookax import *
 from io import open
 
@@ -34,6 +35,7 @@ class Player( ent.Entity ):
         self.setStatsSurfaces()
         self.meteor: meteor.Meteor = meteor.Meteor()
         self.hookax: Hookax = Hookax()
+        self.Sprint: Sprint = Sprint()
 
     def __str__(self) -> str:
         return super().__str__()+'.player'
@@ -155,6 +157,9 @@ class Player( ent.Entity ):
 
                 elif ev.key == ent.pg.K_SPACE:
                     self.slide()
+
+                elif ev.key == ent.pg.K_LSHIFT:
+                    self.sprint()
             
             if ev.type == ent.pg.KEYUP:
                 
@@ -172,7 +177,7 @@ class Player( ent.Entity ):
 
                 elif ev.key in (101,114): #ord('e'),ord('r')
                     self.resetCombat()
-
+                
     def attack(self) -> None:
         '''Toogles player's attack, if possible.\n'''
         if self.action == 0 and not self.stats.is_taking_damage:
@@ -252,6 +257,7 @@ class Player( ent.Entity ):
 
     def update(self, events: list[ent.pg.event.Event]) -> None:
         self.meteor.update()
+        self.Sprint.update(events)
         self.hookax.update(events)
         
         super().update()
@@ -263,6 +269,9 @@ class Player( ent.Entity ):
 
 
 # power methods.
+    def sprint(self) -> None:
+        self.Sprint.use()
+
     def launchHookax(self) -> None:
         if self.hookax.active: 
             self.cast()
