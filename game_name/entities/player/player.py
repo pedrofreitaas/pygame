@@ -254,13 +254,13 @@ class Player( ent.Entity ):
         self.meteor.update()
         self.hookax.update(events)
         
+        super().update()
+
         if self.is_dead: return
 
         self.checkInputs(events)
-
         self.animationAction()
 
-        super().update()
 
 # power methods.
     def launchHookax(self) -> None:

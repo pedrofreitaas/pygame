@@ -14,8 +14,8 @@ class Hookax(Power):
         
         self.hit_pos: pg.math.Vector2 = self.pos
 
-        self.pull_cost: float = 15.8
-        self.push_cost: float = 10
+        self.pull_cost: float = 13.4
+        self.push_cost: float = 14.9
         
         self.animator.resizeSprites( (40,40) )
 
@@ -32,7 +32,7 @@ class Hookax(Power):
         self.timers.append( Timer(self.active_time, lambda: self.kill(), -1) )
 
         self.max_speed_value: float = self.speed_value
-        self.slow_factor: float = 50
+        self.slow_factor: float = 40
         
         self.initialize()
 
@@ -119,18 +119,16 @@ class Hookax(Power):
         '''Pulls the hookax and what is sticked to it in the player's direction.\n
            Spends player mana.\n'''
         if not self.pulling: return
-        if not self.stats.hasEnough(self.pull_cost,2): return
+        if not self.stats.spend(Entity.dt, self.pull_cost, 2): return
 
-        self.useMana(self.pull_cost, False)
-
-        if self.hitted_entity != None: self.hitted_entity.pull(Entity.player.center())
+        if self.hitted_entity != None: self.hitted_entity.pull(Entity.player.center(), self.max_speed_value)
         else: super().pull(Entity.player.center(), self.max_speed_value)
 
     def push(self) -> None:
         '''Pushes the player to the center of the hookax.\n
            Spends player mana.\n'''
         if not self.pushing: return
-        if not self.stats.hasEnough(self.push_cost,2): return
+        if not self.stats.spend(Entity.dt,self.push_cost,2): return
 
         self.useMana(self.push_cost, False)
 
@@ -140,6 +138,9 @@ class Hookax(Power):
 #
     def deactivate(self) -> None:
         self.hitted_entity = None
+        self.pulling = False
+        self.pushing = False
+        self.resetAction()
         return super().deactivate()
 
     def kill(self) -> None:

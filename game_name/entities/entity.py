@@ -188,10 +188,12 @@ class Entity():
         '''Pulls the entity to the target.\n
            Sets the pulling action.\n'''
         self.action = -2
-        try: 
-            speed = ( target-self.center() ).normalize()
-            self.complementSpeed( speed * speed_factor )
-        except ValueError: pass
+        distance_vec = target-self.center()
+        distance = distance_vec.length()
+
+        if distance <= 10: return
+
+        self.complementSpeed( distance_vec * speed_factor / distance )
 
     def stopPull(self) -> None:
         '''Stops entity's pulling.\n'''
