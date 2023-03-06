@@ -6,7 +6,7 @@ spritesheet = ['assets/entities/player/powers/sprint.png']
 
 class Sprint(Power):
     def __init__(self) -> None:
-        super().__init__(Entity.player.layer, speed_value=0, caster_stats=Entity.player.stats, damage=0, mana_cost=6, range=0, stamina_cost=10, instant=False, cooldown=4, effect=None)
+        super().__init__(Entity.player.layer, speed_value=0, caster_stats=Entity.player.stats, damage=0, mana_cost=4, range=0, stamina_cost=15, instant=False, cooldown=4, effect=None)
 
         self.animator = an.Animator( pg.image.load(spritesheet[0]).convert_alpha(),
                                      (48,48),
@@ -52,6 +52,7 @@ class Sprint(Power):
         super().update()
 
         if not self.active: return
+
         self.checkInputs(events)
-        if self.stats.spend(Entity.dt, self.current_attack.mana_cost, 2): return
-        self.turnOff()
+        if not self.stats.spend(Entity.dt, self.current_attack.mana_cost, 2) or not self.stats.spend(Entity.dt, self.current_attack.stamina_cost, 3):
+            self.turnOff()
