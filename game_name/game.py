@@ -158,7 +158,7 @@ class Game():
             self.player.update(self.events)
             pl.ent.updateEnemies()
             
-            self.map.update(self.blitter)
+            self.map.update(self.blitter, self.dt)
 
             updateTimers(self.game_timers)
 

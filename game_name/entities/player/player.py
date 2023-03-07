@@ -52,6 +52,7 @@ class Player( ent.Entity ):
         self.stamina_surface: ent.pg.surface.Surface = ent.pg.surface.Surface((self.stats.max_stamina, 8))
         self.stamina_surface.fill((0,200,0))
 
+#
     def animationAction(self) -> None:
         '''Sets actions for the player according to the current animation stage.\n'''
         super().animationAction()
@@ -117,6 +118,7 @@ class Player( ent.Entity ):
         
         #idle animation.
         self.animator.setRange( (0,5) )
+#
 
     def checkInputs(self, events: list[ent.pg.event.Event]) -> None:
         '''Check keyboard and mouse inputs.\n'''
@@ -177,7 +179,8 @@ class Player( ent.Entity ):
 
                 elif ev.key in (101,114): #ord('e'),ord('r')
                     self.resetCombat()
-                
+
+#            
     def attack(self) -> None:
         '''Toogles player's attack, if possible.\n'''
         if self.action == 0 and not self.stats.is_taking_damage:
@@ -203,6 +206,7 @@ class Player( ent.Entity ):
             if self.speed_dir == ent.pg.math.Vector2(): self.slide_speed = self.speed_dir
 
             else: self.slide_speed = self.speed_dir.normalize()*self.speed_value*1.2
+#
 
     def setCurrentAttack(self, attack: ent.Attack) -> bool:
         '''If the attack can be used, sets it as current attack, applies it's cost and returns True.\n
@@ -219,6 +223,7 @@ class Player( ent.Entity ):
         
         return False
 
+#
     def getLifeSurfacePos(self) -> ent.pg.math.Vector2:
         return ent.pg.math.Vector2(5,10)
 
@@ -227,6 +232,7 @@ class Player( ent.Entity ):
 
     def getStaminaSurfacePos(self) -> ent.pg.math.Vector2:
         return ent.pg.math.Vector2(5,28)
+#
 
     def blitStats(self) -> None:
         '''Blits player stats.\n
