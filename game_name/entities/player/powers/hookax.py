@@ -33,7 +33,7 @@ class Hookax(Power):
 
         self.max_speed_value: float = self.speed_value
         self.slow_factor: float = 40
-        
+
         self.initialize()
 
     def __str__(self) -> str:
@@ -174,6 +174,8 @@ class Hookax(Power):
 
         if self.rotate: self.blit_angle -= Entity.dt*self.speed_value*4
         else: self.blit_angle = 0
+
+        Entity.blitter.addLine(0, Entity.player.center(), self.center(), (40,80,30), 3)
 
         return super().blit()
 

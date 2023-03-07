@@ -117,6 +117,9 @@ class Layer():
         self.is_camera_sensible: bool = True
         self.display: pg.surface.Surface = display
 
+        self.lines: list[ tuple[pg.math.Vector2, pg.math.Vector2, pg.color.Color, int] ] = []
+        self.rects: list[ tuple[pg.rect.Rect, pg.color.Color, int] ] = []
+
     def imageTotal(self) -> int:
         """Returns the amount of images of the instance."""
         return len(self.images)
@@ -124,11 +127,21 @@ class Layer():
     def reset(self) -> None:
         """Resets the instance."""
         self.images.clear()
+        self.lines.clear()
+        self.rects.clear()
     
 # adding registers functions.
     def addImage(self, image: pg.surface.Surface, image_cord : pg.math.Vector2) -> None:
         """Appends the image with the cords info given, in this layer"""
         self.images.append((image,image_cord))
+
+    def addLine(self, start_pos: pg.math.Vector2, end_pos: pg.math.Vector2, color: pg.color.Color, thickness: int) -> None:
+        '''Adds line to be blitted.\n'''
+        self.lines.append( (start_pos, end_pos, color, thickness) )
+
+    def addRect(self, rect: pg.rect.Rect, color: pg.color.Color, width: int) -> None:
+        '''Adds rect to be blitted.\n'''
+        self.rects.append( (rect, color, width) )
 #-------------------------------- #
 
 # blit functions.
@@ -142,10 +155,20 @@ class Layer():
             pos = pos + offset
             self.display.blit(image,pos)
 
+        for start_pos, end_pos, color, thickness in self.lines:
+            pg.draw.line(self.display, color, start_pos + offset, end_pos + offset, thickness)
+
+        for rect, color, width in self.rects:
+            pg.draw.rect(self.display, color, rect.move(offset), width)
+
     def blitNotOffsetWise(self) -> None:
         '''Blits the instance's images without couting for offsets.\n'''
         for image, pos in self.images:
             self.display.blit(image,pos)
+        for start_pos, end_pos, color, thickness in self.lines:
+            pg.draw.line(self.display, start_pos, end_pos, color, thickness)
+        for rect, color, width in self.rects:
+            pg.draw.rect(self.display, color, rect, width)
 
 def createCameraFromJson() -> Camera:
     '''Creates and returns a camera instance created from json data.\n
@@ -226,6 +249,12 @@ class Blitter():
     def addImage(self, layerIndex: int, image: pg.surface.Surface, image_cord: pg.math.Vector2) -> None:
         """Adds the image in the chosen layer, with the coordinates of the parameter.\n"""
         self.layers[layerIndex].addImage(image,image_cord)
+
+    def addLine(self, layerIndex: int, start_pos: pg.math.Vector2, end_pos: pg.math.Vector2, color: pg.color.Color, thickness: int) -> None:
+        self.layers[layerIndex].addLine(start_pos, end_pos, color, thickness)
+
+    def addRect(self, layerIndex: int, rect: pg.rect.Rect, color: pg.color.Color, width: int) -> None:
+        self.layers[layerIndex].addRect(rect, color, width)
 # ----------------------- #
 
 # blitting.
