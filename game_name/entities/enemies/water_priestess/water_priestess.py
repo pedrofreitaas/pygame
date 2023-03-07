@@ -127,6 +127,11 @@ class WaterPriestess(en.Enemy):
         if self.action == -1:
             self.animator.setRange( (162, 179) )
             return
+        
+        if self.action == -2:
+            self.animator.setRange( (39,45) )
+            self.animator.setEAP( lambda: self.resetCombat() )
+            return
 
         if self.stats.is_taking_damage:
             self.animator.setRange( (156, 162) )

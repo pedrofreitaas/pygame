@@ -1,12 +1,14 @@
 from game_name.entities.power import *
 from game_name.game_map.structure import *
 
-spritesheet = ['assets/entities/player/powers/hookax.png']
+spritesheet = ['assets/entities/player/powers/hookax.png',
+               'assets/entities/player/powers/chain_link.png']
 
 class Hookax(Power):
+    chain_link: pg.surface.Surface = pg.image.load(spritesheet[1]).convert_alpha()
     
     def __init__(self) -> None:
-        super().__init__(layer=2, speed_value=250, caster_stats=Entity.player.stats, damage=1, mana_cost=15, stamina_cost=0, range=0, instant=False, cooldown=3, effect=None)
+        super().__init__(layer=1, speed_value=250, caster_stats=Entity.player.stats, damage=1, mana_cost=15, stamina_cost=0, range=0, instant=False, cooldown=3, effect=None)
 
         self.animator = an.Animator( pg.image.load(spritesheet[0]).convert_alpha(),
                                      (80,80),
@@ -14,12 +16,11 @@ class Hookax(Power):
         
         self.hit_pos: pg.math.Vector2 = self.pos
 
-        self.pull_cost: float = 13.4
-        self.push_cost: float = 14.9
+        self.pull_cost: float = 6.4
+        self.push_cost: float = 8.7
         
         self.animator.resizeSprites( (40,40) )
 
-        self.rotate: bool = True
         self.pulling: bool = False
         self.pushing: bool = False
 
@@ -31,8 +32,8 @@ class Hookax(Power):
         self.active_time: float = 12
         self.timers.append( Timer(self.active_time, lambda: self.kill(), -1) )
 
-        self.max_speed_value: float = self.speed_value
-        self.slow_factor: float = 40
+        self.rope_length: float = 450
+        self.traveled_distance_squared: float = 0
 
         self.initialize()
 
@@ -46,9 +47,9 @@ class Hookax(Power):
         self.pulling = False
         self.pushing = False
 
+        self.traveled_distance_squared: float = 0
+
         self.pos = Entity.player.center()- (pg.math.Vector2( self.animator.currentSpriteSize() )/2)
-        self.speed_value = self.max_speed_value
-        self.rotate = True
         self.hit_pos = pg.mouse.get_pos()- Entity.blitter.camera.getPos()
         self.speed_dir = (self.hit_pos-self.pos).normalize()
 
@@ -70,7 +71,6 @@ class Hookax(Power):
 
                 if self.mask.overlap_area(en.mask, en.pos-self.pos) <= 0: continue
 
-                self.rotate = False
                 self.hitted_entity = en
                 self.vec = self.center()-en.center()
                 
@@ -83,7 +83,6 @@ class Hookax(Power):
         if not Entity.map.structExists(self.rect, 1): return
 
         self.speed_dir = pg.math.Vector2(0,0)
-        self.rotate = False
     
     def collisionUpdate(self) -> None:
         super().collisionUpdate()
@@ -106,12 +105,13 @@ class Hookax(Power):
     def move(self) -> None:
         '''Moves the hookax in the fire direction.\n
            If it has hitted entity, always drags the hookax to be at the hit_distance from entity.\n'''
+        if self.traveled_distance_squared >= self.rope_length and not self.pulling: return
+        
         if self.hitted_entity != None: 
             self.pos = self.hitted_entity.center()-self.vec
             return
 
-        self.speed_value -= Entity.dt*self.slow_factor
-        if self.speed_value < 0: self.speed_value = 0
+        self.traveled_distance_squared += self.getMovementSpeed().length_squared()
 
         return super().move()
     
@@ -121,9 +121,8 @@ class Hookax(Power):
         if not self.pulling: return
         if not self.stats.spend(Entity.dt, self.pull_cost, 2): return
 
-        self.rotate = True
-        if self.hitted_entity != None: self.hitted_entity.pull(Entity.player.center(), self.max_speed_value)
-        else: super().pull(Entity.player.center(), self.max_speed_value)
+        if self.hitted_entity != None: self.hitted_entity.pull(Entity.player.center(), self.speed_value)
+        else: super().pull(Entity.player.center(), self.speed_value)
 
     def push(self) -> None:
         '''Pushes the player to the center of the hookax.\n
@@ -131,7 +130,7 @@ class Hookax(Power):
         if not self.pushing: return
         if not self.stats.spend(Entity.dt,self.push_cost,2): return
 
-        Entity.player.pull(self.center(), self.max_speed_value)
+        Entity.player.pull(self.center(), self.speed_value)
 #
 
 #
@@ -143,7 +142,6 @@ class Hookax(Power):
         return super().deactivate()
 
     def kill(self) -> None:
-        self.rotate = False
         self.speed_dir = pg.math.Vector2(0,0)
         return super().kill()
 
@@ -172,8 +170,10 @@ class Hookax(Power):
     def blit(self) -> None:
         '''Makes the hookax spins and blits it.\n'''
 
-        if self.rotate: self.blit_angle -= Entity.dt*self.speed_value*4
-        else: self.blit_angle = 0
+        # rotating.
+        if self.speed_dir == pg.math.Vector2(0,0) and not (self.pulling or self.pushing): 
+            self.blit_angle = 0
+        else: self.blit_angle -= Entity.dt*self.speed_value*4
 
         Entity.blitter.addLine(0, Entity.player.center(), self.center(), (40,80,30), 3)
 

@@ -89,6 +89,11 @@ class Player( ent.Entity ):
         if self.action == -1:
             self.animator.setRange( (43,54) )
             return
+        
+        if self.action == -2:
+            self.animator.setRange( (22,26) )
+            self.animator.resizeRange(3,4)
+            return
 
         if self.stats.is_taking_damage:
             self.animator.setRange( (90,93) )
