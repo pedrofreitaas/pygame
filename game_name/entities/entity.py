@@ -102,7 +102,7 @@ class Entity():
         return (self.getMovementSpeed() != pg.math.Vector2())
 
     def getLockMovement(self) -> bool:
-        '''Returns a tuple that checks entity's current action adn returns if it's moving or not.\n'''
+        '''Returns true if entity's is allowed to move.\n'''
         return bool(self.action)
 
     def move(self) -> None:

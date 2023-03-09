@@ -34,9 +34,13 @@ class Enemy(ent.Entity):
         if self.movement_behavior >= 100: self.movement_behavior = 0
         if self.movement_behavior < 0: self.movement_behavior = 0
 
+    def setAleatoryMovementBehavior(self) -> None:
+        '''Sets the enemy's movement behavior randomly.\n'''
+        self.movement_behavior = self.randomizer.random() * 100
+
     def controlMovement(self) -> None:
         '''Sets enemy movement, with a little bit of randness.\n'''
-        if self.action != 0: return
+        if self.getLockMovement(): return
 
         if self.isGoingOutOfBounds(): 
             self.movement_behavior = self.seek_player_interval[0]
@@ -45,7 +49,7 @@ class Enemy(ent.Entity):
             self.updateMoveBehavior(self.upd_mov_behavior_coeficient)
 
             if self.randomizer.randint(1,50000) <= self.randommizer_coeficient:
-                self.movement_behavior = self.randomizer.random() * 100
+                self.setAleatoryMovementBehavior()
 
         if ent.inInterval(self.random_move_interval, self.movement_behavior):
             self.setRandomSpeed()
