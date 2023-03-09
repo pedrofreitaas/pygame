@@ -209,3 +209,5 @@ def handleJson() -> list[WaterPriestess]:
         instances = []
         for i in range(entInfos['water_priestess']['quantity']):
             instances.append( WaterPriestess(en.ent.pg.math.Vector2(entInfos['water_priestess']['x'][i], entInfos['water_priestess']['y'][i])) )
+
+        return instances

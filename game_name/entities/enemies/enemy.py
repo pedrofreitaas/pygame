@@ -18,6 +18,8 @@ class Enemy(ent.Entity):
         self.idle_interval = [90,100]
 
         self.randommizer_coeficient = 5
+
+        self.stats_blit_adjust: ent.pg.math.Vector2 = ent.pg.math.Vector2(0,0)
         
         ent.Entity.enemies.append(self)
     
@@ -122,17 +124,17 @@ class Enemy(ent.Entity):
     def blitStats(self) -> None:
         '''Blits enemy's stats\n.'''
         if self.stats.life > 0:
-            width, heigth = 80,3
+            width, heigth = self.stats.life,3
             life_surf = ent.pg.surface.Surface((width*self.stats.life/self.stats.max_life, heigth))
             life_surf.fill((200,50,0))
-            coordinates = self.pos + ent.pg.math.Vector2(self.animator.image.get_width()/2,0) - ent.pg.math.Vector2(life_surf.get_size())*0.5
+            coordinates = self.pos + ent.pg.math.Vector2(self.animator.image.get_width()/2,0) - ent.pg.math.Vector2(life_surf.get_size())*0.5 + self.stats_blit_adjust
             ent.Entity.blitter.addImage(self.layer, life_surf, coordinates)
 
         if self.stats.mana > 0:
             width, heigth = self.stats.max_mana, 3
             mana_surf = ent.pg.surface.Surface((width*self.stats.mana/self.stats.max_mana, heigth))
             mana_surf.fill((0,50,200))
-            coordinates = self.pos + ent.pg.math.Vector2(self.animator.image.get_width()/2,0) - ent.pg.math.Vector2(mana_surf.get_size())*0.5
+            coordinates = self.pos + ent.pg.math.Vector2(self.animator.image.get_width()/2,0) - ent.pg.math.Vector2(mana_surf.get_size())*0.5 + self.stats_blit_adjust
             coordinates += ent.pg.math.Vector2(0,10)
             ent.Entity.blitter.addImage(self.layer, mana_surf, coordinates)
 
@@ -140,7 +142,7 @@ class Enemy(ent.Entity):
             width, heigth = self.stats.max_stamina,3
             stamina_surf = ent.pg.surface.Surface((width*self.stats.stamina/self.stats.max_stamina, heigth))
             stamina_surf.fill((50,200,0))
-            coordinates = self.pos + ent.pg.math.Vector2(self.animator.image.get_width()/2,0) - ent.pg.math.Vector2(stamina_surf.get_size())*0.5
+            coordinates = self.pos + ent.pg.math.Vector2(self.animator.image.get_width()/2,0) - ent.pg.math.Vector2(stamina_surf.get_size())*0.5 + self.stats_blit_adjust
             coordinates += ent.pg.math.Vector2(0,20)
             ent.Entity.blitter.addImage(self.layer, stamina_surf, coordinates)
 # ----------------- #

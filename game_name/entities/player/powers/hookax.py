@@ -111,7 +111,7 @@ class Hookax(Power):
             self.pos = self.hitted_entity.center()-self.vec
             return
 
-        self.traveled_distance_squared += self.getMovementSpeed().length_squared()
+        if not self.pulling: self.traveled_distance_squared += self.getMovementSpeed().length_squared()
 
         return super().move()
     
@@ -175,6 +175,7 @@ class Hookax(Power):
             self.blit_angle = 0
         else: self.blit_angle -= Entity.dt*self.speed_value*4
 
+        Entity.blitter.addLine(0, Entity.player.center(), self.center(), (200,200,200), 6)
         Entity.blitter.addLine(0, Entity.player.center(), self.center(), (40,80,30), 3)
 
         return super().blit()

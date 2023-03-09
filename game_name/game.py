@@ -18,6 +18,9 @@ import game_name.entities.player.player as pl
 import game_name.entities.enemies.water_priestess.water_priestess as wtr_priest
 wtr_priest.handleJson()
 
+import game_name.entities.enemies.ronin.ronin as ronin
+ronin.handleJson()
+
 import game_name.entities.enemies.forest_wolf.forest_wolf as frst_wolf
 frst_wolf.handleJson()
 # ------------------------- #

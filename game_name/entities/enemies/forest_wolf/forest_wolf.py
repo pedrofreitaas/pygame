@@ -148,3 +148,5 @@ def handleJson() -> list[ForestWolf]:
         instances = []
         for i in range(entInfos['forest_wolf']['quantity']):
             instances.append( ForestWolf(ent.pg.math.Vector2(entInfos['forest_wolf']['x'][i], entInfos['forest_wolf']['y'][i])) )
+
+        return instances
