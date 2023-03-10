@@ -7,16 +7,18 @@ spritesheet_path = ['assets/entities/enemies/ronin/ronin.png']
 class Ronin( Enemy ):
 
     def __init__(self, pos: ent.pg.math.Vector2) -> None:
-        super().__init__(pos, 1, speed_value=90, max_life=150, max_mana=60, max_stamina=110)
+        super().__init__(pos, 1, speed_value=110, max_life=150, max_mana=60, max_stamina=110)
+
+        self.alert_distance_squared: float = 80**2
         
         self.loadSprites()
         self.stats_blit_adjust: ent.pg.math.Vector2 = ent.pg.math.Vector2(0,-20)
 
         self.default_speed_value: float = self.speed_value
 
-        self.attacks.append(ent.Attack(damage=60, mana_cost=40, stamina_cost=30, range=70))
+        self.attacks.append(ent.Attack(damage=60, mana_cost=5, stamina_cost=8, range=50))
 
-        self.stats.setRegenFactor(5, 2)
+        self.stats.setRegenFactor(7, 2)
         self.stats.setRegenFactor(6, 3)
 
         self.seek_player_interval = (0,60)
@@ -26,8 +28,18 @@ class Ronin( Enemy ):
 
         self.jump_cost: float = 20 #instant
         self.jump_speed: float = 3.2
+
+        self.fade_cost: float = 12 #not instant
         
         self.rect_adjust: tuple[int,int] = (-100,-45)
+
+    def activate(self) -> None:
+        self.alert_distance_squared = 600**2
+        return super().activate()
+    
+    def deactivate(self) -> None:
+        self.alert_distance_squared = 200**2
+        return super().deactivate()
 
     def __str__(self) -> str:
         return super().__str__()+'.ronin'
@@ -43,18 +55,31 @@ class Ronin( Enemy ):
                                                             'death': (27,43),
                                                             'take_dmg': (44,51),
                                                             'jump': (52,68),
-                                                            'dash': (69,80),
+                                                            'fade': (69,80),
                                                             'run': (81,93),
                                                             'idle': (94,self.animator.getTotalImages())}
 
+    def damageSelf(self, attack: ent.Attack) -> None:
+        if self.action == 3: return
+
+        return super().damageSelf(attack)
+    
     def jump(self) -> None:
         '''Makes the ronin start jumping.\n'''
         if self.action != 0: return
         if not (ent.inInterval(self.distance_player_interval, self.movement_behavior) or ent.inInterval(self.seek_player_interval, self.movement_behavior)): return
         if self.speed_dir == ent.pg.math.Vector2(0,0): return
-        if not self.stats.spend(1, self.jump_cost, 3): return
+        if self.stats.hasEnough(self.jump_cost, 3) and not self.stats.spend(1, self.jump_cost, 3): return
 
         self.action = 2
+
+    def fade(self) -> None:
+        '''Makes the ronin fade, avoiding attacks'''
+        if self.action != 0: return
+        if ent.Entity.player.action != 1: return
+        if self.stats.hasEnough(self.fade_cost,3) and not self.stats.spend(1, self.fade_cost, 3): return
+
+        self.action = 3
 
     def controlCombat(self) -> None:
         if self.getLockMovement(): return
@@ -63,6 +88,8 @@ class Ronin( Enemy ):
         if self.randomizer.randint(0,10000) < 50:
             self.jump()
             return
+        
+        if self.randomizer.randint(0,10) == 0: self.fade()
 
         self.setCurrentAttack(self.attacks[0])
 
@@ -81,8 +108,15 @@ class Ronin( Enemy ):
 
         percentage = self.animator.animationPercentage()
 
+        if self.action == 1:
+            if not self.stats.spend(ent.Entity.dt, 10, 2) or not self.stats.spend(ent.Entity.dt, 4, 3): self.resetCombat()
+
         if self.action == 2 and ent.inInterval((.1,.4), percentage):
             self.complementSpeed(self.speed_dir * self.speed_value * self.jump_speed)
+
+        if self.action == 3:
+            if not self.stats.spend(ent.Entity.dt, self.fade_cost, 2): self.resetAction()
+            elif ent.Entity.player.action != 1: self.resetAction()
 
     def controlAnimator(self) -> None:
         super().controlAnimator()
@@ -108,6 +142,10 @@ class Ronin( Enemy ):
             self.animator.changeUpdateCoeficient( 11 )
             self.animator.setRange( self.animations_range['jump'] )
             self.animator.setEAP( lambda: self.resetAction() )
+            return
+        
+        if self.action == 3:
+            self.animator.setRange( self.animations_range['fade'] )
             return
 
         if self.isMoving():

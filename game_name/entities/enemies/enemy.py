@@ -7,6 +7,8 @@ class Enemy(ent.Entity):
         self.target: int = 2
         self.deactivate()
 
+        self.alert_distance_squared: float = 400**2
+
         # enemy's variables.
         self.randomizer = SystemRandom(randint(1,1000))
         self.movement_behavior: float = 0

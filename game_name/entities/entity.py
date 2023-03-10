@@ -46,6 +46,8 @@ class Entity():
         #booleans
         self.isLookingRight: bool = True
 
+        self.alert_distance_squared: float = 0
+
         self.action: int = 0
 
         self.target: int = 0
@@ -379,6 +381,6 @@ def updateEnemies() -> None:
 
         distance = (en.pos-Entity.player.pos).length_squared()
 
-        if distance <= 360000: en.activate()
-        elif distance >= 490000: en.deactivate()
+        if distance <= en.alert_distance_squared: en.activate()
+        elif distance >= en.alert_distance_squared: en.deactivate()
             
