@@ -273,8 +273,6 @@ class Player( ent.Entity ):
         
         super().update()
 
-        print(len(self.timers))
-
         if self.is_dead: return
 
         self.checkInputs(events)

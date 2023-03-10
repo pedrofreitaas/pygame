@@ -232,10 +232,11 @@ class Entity():
     def stun(self, effect: Stun) -> None:
         '''Stuns entity.\n'''
         if self.stunned: return
-        
+
+        self.resetCombat()
+
         self.stunned = True
         self.timers.append( Timer(effect.time, lambda: self.unstun(), 1) )
-
 # ----------------------- #
 
 # stats spend functions.

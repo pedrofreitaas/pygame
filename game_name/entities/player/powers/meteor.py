@@ -15,7 +15,7 @@ class Meteor(Power):
 
     def __init__(self) -> None:
         # entity's values.
-        super().__init__(layer=2,speed_value=0,caster_stats=Entity.player.stats,damage=70,mana_cost=40,instant=False,cooldown=8)
+        super().__init__(layer=2,speed_value=0,caster_stats=Entity.player.stats,damage=50,mana_cost=40,instant=False,cooldown=8)
         self.animator = an.Animator(pg.image.load(meteor_sprite_path).convert_alpha(),
                                     [100,100],
                                     [8,8,8,8,8,8,8,5])
@@ -26,7 +26,7 @@ class Meteor(Power):
         self.target: int = 1
         
         # meteor values.
-        self.hit_time: float = 1.8
+        self.hit_time: float = 1.3
         self.explode_time: float = 2.5
 
         self.hit_pos: pg.math.Vector2 = pg.math.Vector2(0,0)
