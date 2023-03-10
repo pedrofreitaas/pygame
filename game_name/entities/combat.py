@@ -1,11 +1,22 @@
 from timer import *
 import pygame as pg
 from game_name.entities.stats import * 
-from math import pow
 
 class Effect():
+    def __init__(self, time: float=0) -> None:
+        self.time: float = time
+
+class Stun(Effect):
+    def __init__(self, time: float) -> None:
+        super().__init__(time)
+
+class Paralyze(Effect):
     def __init__(self) -> None:
-        pass
+        super().__init__()
+
+class Freeze(Effect):
+    def __init__(self) -> None:
+        super().__init__()
 
 class Attack():
     def __init__(self, damage: float=0, instant: bool=False, mana_cost: float=0, stamina_cost: float=0, knockback: pg.math.Vector2=pg.math.Vector2(0,0), range: float=0, effect: Effect=None) -> None:

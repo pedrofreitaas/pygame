@@ -19,6 +19,19 @@ class EarthMonk( Enemy ):
         self.distance_player_interval = (85,95)
         self.idle_interval = (95,100)
 
+        self.attacks.extend( (ent.Attack(damage=30, mana_cost=20, range=30), #punch1
+                              ent.Attack(damage=30, mana_cost=20, range=40), #punch2
+                              ent.Attack(damage=35, mana_cost=30, range=40), #punch3
+                              ent.Attack(damage=50, mana_cost=10, stamina_cost=30, range=90), #round kick
+                              ent.Attack(damage=10, mana_cost=50, stamina_cost=50,range=45, effect=None) ) ) #earth hand
+        
+        self.attack_prob: tuple[float] = (.25,.25,.25,.145,.105)
+        self.attack_prob: tuple[float] = (0,0,0,0,1)
+
+        self.stats.setRegenFactor(3, 1)
+        self.stats.setRegenFactor(4, 2)
+        self.stats.setRegenFactor(7, 3)
+
     def loadSprites(self) -> None:
         '''Loads entity's sprites.\n'''
 
@@ -53,8 +66,65 @@ class EarthMonk( Enemy ):
 #
 
 #
+    def controlCombat(self) -> None:
+        if self.action != 0: return
+        if self.stats.is_taking_damage: return
+
+        self.setCurrentAttack( choices(self.attacks, self.attack_prob, k=1)[0] )
+#
+
+    def setHitbox(self) -> None:
+        super().setHitbox()
+
+        if self.action in (1,2): 
+            self.damage_rect.inflate_ip((0,-20))
+
+            if self.isLookingRight: self.damage_rect.move_ip((30,0))
+            else: self.damage_rect.move_ip((-30,0))
+
+            return
+        
+        if self.action == 3:
+            
+            if self.isLookingRight: self.damage_rect.move_ip((30+40*self.animator.animationPercentage(),0))
+            else: self.damage_rect.move_ip((-30-40*self.animator.animationPercentage(),0))
+            
+            return
+
+        if self.action == 4: 
+            self.damage_rect.inflate_ip(30, -10)
+            return
+        
+        if self.action == 5: 
+            self.damage_rect.inflate_ip(30,0)
+
+            if self.isLookingRight: self.damage_rect.move_ip((35,0))
+            else: self.damage_rect.move_ip((-40,0))
+            
+            return
+
+#
     def animationAction(self) -> None:
-        return super().animationAction()
+        super().animationAction()
+
+        percentage = self.animator.animationPercentage()
+
+        if self.action == 1: return
+
+        if self.action == 2: return
+
+        if self.action == 3: return
+
+        if self.action == 4:
+            if not ent.inInterval((.3,.6),percentage): return
+            self.complementSpeed( self.speed_dir * self.speed_value * 4 )
+            return
+
+        if self.action == 5: 
+            if not ent.inInterval((.2,.3), percentage): self.current_attack.effect = None
+            else: self.current_attack.effect = ent.Stun(1.8)
+
+            return
 
     def controlAnimator(self) -> None:
         super().controlAnimator()
@@ -67,7 +137,32 @@ class EarthMonk( Enemy ):
         if self.stats.is_taking_damage:
             self.animator.setRange( self.animaton_ranges['take_dmg'] )
             return
+        
+        if self.action == 1:
+            self.animator.setRange( self.animaton_ranges['punch1'] )
+            self.animator.setEAP( lambda: self.resetCombat() )
+            return
 
+        if self.action == 2:
+            self.animator.setRange( self.animaton_ranges['punch2'] )
+            self.animator.setEAP( lambda: self.resetCombat() )
+            return
+        
+        if self.action == 3:
+            self.animator.setRange( self.animaton_ranges['punch3'] )
+            self.animator.setEAP( lambda: self.resetCombat() )
+            return
+        
+        if self.action == 4:
+            self.animator.setRange( self.animaton_ranges['round_kick'] )
+            self.animator.setEAP( lambda: self.resetCombat() )
+            return
+        
+        if self.action == 5:
+            self.animator.setRange( self.animaton_ranges['earth_hand'] )
+            self.animator.setEAP( lambda: self.resetCombat() )
+            return
+        
         if self.isMoving():
             self.animator.setRange( self.animaton_ranges['run'] )
             return

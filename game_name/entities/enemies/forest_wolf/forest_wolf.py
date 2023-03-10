@@ -5,6 +5,7 @@ from random import choices
 spritesheet = ['assets/entities/enemies/forestwolf/forestwolf96x96.png']
 
 class ForestWolf(Enemy):
+    
     def __init__(self, pos: ent.pg.math.Vector2, layer: int=1, speed_value: float=90, max_life: float=80, max_mana: float=0, max_stamina: float=200) -> None:
         super().__init__(pos, layer, speed_value, max_life, max_mana, max_stamina)
         self.animator: ent.an.Animator = ent.an.Animator(ent.pg.image.load(spritesheet[0]).convert_alpha(),

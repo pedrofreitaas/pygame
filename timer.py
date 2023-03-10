@@ -21,11 +21,6 @@ class Timer():
             super().__init__(*args)
 # --------------- #
 
-    def __eq__(self, __o: object) -> bool:
-        if type(self) == type(__o) and self.id == __o.id:
-            return True
-        return False
-
     def __init__(self, howLong: float, procedure: callable, cycles: int = -1) -> None:
         '''Creates a timer instance.\n
            howLong: the amount of time for the timer.\n

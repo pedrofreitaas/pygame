@@ -58,8 +58,9 @@ class Entity():
 
         self.stats = Stats(max_life, max_mana, max_stamina)
 
-        self.is_dead = False
-        self.active = True
+        self.is_dead: bool = False
+        self.active: bool = True
+        self.stunned: bool = False
 
     def __str__(self) -> str:
         return 'entity'
@@ -105,7 +106,7 @@ class Entity():
 
     def getLockMovement(self) -> bool:
         '''Returns true if entity's is allowed to move.\n'''
-        return bool(self.action)
+        return bool(self.action) or self.stunned
 
     def move(self) -> None:
         '''Moves the entity if movement isn't locked.\n'''
@@ -223,10 +224,26 @@ class Entity():
         if not self.isLookingRight: self.animator.flipHorizontally()
 # -------------------- #
 
+# effects.
+    def unstun(self) -> None:
+        '''Un-stuns the entity.\n'''
+        self.stunned = False
+
+    def stun(self, effect: Stun) -> None:
+        '''Stuns entity.\n'''
+        if self.stunned: return
+        
+        self.stunned = True
+        self.timers.append( Timer(effect.time, lambda: self.unstun(), 1) )
+
+# ----------------------- #
+
 # stats spend functions.
     def applyEffect(self, effect: Effect|None) -> None:
         '''Applies effect in instance.\n'''
-        if effect == None: return
+
+        if isinstance(effect, Stun): self.stun(effect)
+
         return
 
     def damageSelf(self, attack: Attack) -> None:
