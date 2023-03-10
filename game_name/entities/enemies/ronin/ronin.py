@@ -33,14 +33,6 @@ class Ronin( Enemy ):
         
         self.rect_adjust: tuple[int,int] = (-100,-45)
 
-    def activate(self) -> None:
-        self.alert_distance_squared = 600**2
-        return super().activate()
-    
-    def deactivate(self) -> None:
-        self.alert_distance_squared = 200**2
-        return super().deactivate()
-
     def __str__(self) -> str:
         return super().__str__()+'.ronin'
     
@@ -59,11 +51,18 @@ class Ronin( Enemy ):
                                                             'run': (81,93),
                                                             'idle': (94,self.animator.getTotalImages())}
 
-    def damageSelf(self, attack: ent.Attack) -> None:
-        if self.action == 3: return
-
-        return super().damageSelf(attack)
+#
+    def activate(self) -> None:
+        self.alert_distance_squared = 600**2
+        return super().activate()
     
+    def deactivate(self) -> None:
+        self.alert_distance_squared = 200**2
+        return super().deactivate()
+#
+
+
+#
     def jump(self) -> None:
         '''Makes the ronin start jumping.\n'''
         if self.action != 0: return
@@ -92,7 +91,9 @@ class Ronin( Enemy ):
         if self.randomizer.randint(0,10) == 0: self.fade()
 
         self.setCurrentAttack(self.attacks[0])
+#
 
+#
     def setHitbox(self) -> None:
         super().setHitbox()
 
@@ -103,6 +104,13 @@ class Ronin( Enemy ):
             else: self.damage_rect = ent.pg.rect.Rect( ent.pg.math.Vector2(self.rect.topleft)-ent.pg.math.Vector2(15,0),
                                                       (20,40) )
 
+    def damageSelf(self, attack: ent.Attack) -> None:
+        if self.action == 3: return
+
+        return super().damageSelf(attack)
+#
+
+#
     def animationAction(self) -> None:
         super().animationAction()
 

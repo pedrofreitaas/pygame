@@ -6,6 +6,7 @@ from random import choices
 spritesheet_path = ['assets/entities/enemies/waterpriestess/waterpriestess288x128.png']
 
 class WaterPriestess(en.Enemy):
+    
     def __init__(self, pos: en.ent.pg.math.Vector2, layer: int=1, speed_value: float=100) -> None:
         super().__init__(pos, layer, speed_value, 120, 60, 70)
 

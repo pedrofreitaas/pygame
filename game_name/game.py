@@ -21,6 +21,9 @@ wtr_priest.handleJson()
 import game_name.entities.enemies.ronin.ronin as ronin
 ronin.handleJson()
 
+import game_name.entities.enemies.earth_monk.earth_monk as earth_monk
+earth_monk.handleJson()
+
 import game_name.entities.enemies.forest_wolf.forest_wolf as frst_wolf
 frst_wolf.handleJson()
 # ------------------------- #
