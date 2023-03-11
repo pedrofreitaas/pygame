@@ -22,13 +22,12 @@ class EarthMonk( Enemy ):
         self.attacks.extend( (ent.Attack(damage=30, mana_cost=20, range=30), #punch1
                               ent.Attack(damage=30, mana_cost=20, range=40), #punch2
                               ent.Attack(damage=35, mana_cost=30, range=40), #punch3
-                              ent.Attack(damage=50, mana_cost=10, stamina_cost=30, range=90), #round kick
+                              ent.Attack(damage=50, mana_cost=10, stamina_cost=40, range=90), #round kick
                               ent.Attack(damage=10, mana_cost=50, stamina_cost=50,range=45, effect=None) ) ) #earth hand
         
         self.attack_prob: tuple[float] = (.25,.25,.25,.145,.105)
-        self.attack_prob: tuple[float] = (0,0,0,0,1)
 
-        self.stats.setRegenFactor(3, 1)
+        self.stats.setRegenFactor(1.2, 1)
         self.stats.setRegenFactor(4, 2)
         self.stats.setRegenFactor(7, 3)
 
@@ -65,10 +64,22 @@ class EarthMonk( Enemy ):
         return super().deactivate()
 #
 
+    def defend(self) -> None:
+        if self.action != 0: return
+        if ent.Entity.player.action <= 0: return
+
+        self.action = 6
+
 #
     def controlCombat(self) -> None:
         if self.action != 0: return
         if self.stats.is_taking_damage: return
+
+        if self.stats.hasEnough(10,3) and self.randomizer.randint(0,1000) < 2:
+            self.defend()
+            return
+        
+        if self.randomizer.randint(0,1000) > 800: return
 
         self.setCurrentAttack( choices(self.attacks, self.attack_prob, k=1)[0] )
 #
@@ -103,17 +114,31 @@ class EarthMonk( Enemy ):
             
             return
 
+    def damageSelf(self, attack: ent.Attack) -> None:
+        '''Reduces damage and spend stamina in case the earth monk is blocking.\n'''
+
+        if self.action == 6 and self.stats.spend(ent.Entity.dt, 6, 3): attack.damage *= 0.3
+    
+        return super().damageSelf(attack)
+
 #
     def animationAction(self) -> None:
         super().animationAction()
 
         percentage = self.animator.animationPercentage()
 
-        if self.action == 1: return
+        if self.action == 1: 
+            self.animator.changeUpdateCoeficient(12)
+            return
 
-        if self.action == 2: return
+        if self.action == 2:
+            self.animator.changeUpdateCoeficient(12)
+            return
 
-        if self.action == 3: return
+        if self.action == 3:
+            self.animator.changeUpdateCoeficient(12) 
+            if percentage > .7: self.current_attack.knockback = self.speed_dir*self.speed_value
+            return
 
         if self.action == 4:
             if not ent.inInterval((.3,.6),percentage): return
@@ -124,6 +149,10 @@ class EarthMonk( Enemy ):
             if not ent.inInterval((.2,.3), percentage): self.current_attack.effect = None
             else: self.current_attack.effect = ent.Stun(1.8)
 
+            return
+
+        if self.action == 6:
+            if not self.stats.hasEnough(5, 3) or self.randomizer.randint(0,1000) < 2: self.resetCombat()
             return
 
     def controlAnimator(self) -> None:
@@ -163,17 +192,17 @@ class EarthMonk( Enemy ):
             self.animator.setEAP( lambda: self.resetCombat() )
             return
         
+        if self.action == 6:
+            self.animator.setRange( self.animaton_ranges['block'] )
+            self.animator.resizeRange(4,9)
+            return
+        
         if self.isMoving():
             self.animator.setRange( self.animaton_ranges['run'] )
             return
 
         self.animator.setRange( self.animaton_ranges['idle'] )
 #
-
-    def blit(self) -> None:
-        ent.Entity.blitter.addRect(2, self.rect, (255,0,0), 2)
-        ent.Entity.blitter.addRect(2, self.damage_rect, (0,0,255), 2)
-        return super().blit()
 
 def handleJson() -> list[EarthMonk]:
     '''Creates instances of EarthMonk based in the content of the json file.\n

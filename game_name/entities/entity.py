@@ -168,7 +168,7 @@ class Entity():
     def setHitbox(self) -> None:
         '''Entity's function for setting it's damage inflicter hitbox.\n
            Function has default call is the update procedure (inside collision update).\n'''
-        self.damage_rect = self.rect
+        self.damage_rect = self.rect.copy()
 
     def collisionUpdate(self) -> None:
         '''Updates the collision handle variables.\n
