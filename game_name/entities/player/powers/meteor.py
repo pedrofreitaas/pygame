@@ -1,6 +1,7 @@
 from game_name.entities.power import *
 
 meteor_sprite_path = 'assets/entities/player/powers/meteor.png'
+meteor_icon_path = 'assets/entities/player/powers/meteor_icon.png'
 explosion_sprite_path = 'assets/entities/player/powers/explosion.png'
 
 meteor_sound_path = 'assets/entities/player/powers/sounds/flamethrower.ogg'
@@ -38,6 +39,11 @@ class Meteor(Power):
 
         self.pos_explode_timer_index: int = len(self.timers)
         self.timers.append(Timer(self.explode_time, lambda: self.deactivate(), -1))
+
+        self.trigger_key: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('e', False) )
+        self.trigger_key_pressed: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('e', True) )
+
+        self.trigger_image: pg.surface.Surface = pg.image.load(meteor_icon_path).convert_alpha()
 
         self.initialize()
 
@@ -113,6 +119,16 @@ class Meteor(Power):
         if not self.exploded: return
         super().collisionUpdate()
 # ------------------------------ #
+
+    def activeAndNotActiveBlitting(self) -> None:
+        '''Blits the meteor interface.\n'''
+
+        if not self.active and not self.in_cooldown and self.canUse():
+            Entity.blitter.addImage(Entity.blitter.lastLayer(), self.trigger_key, (70,50) )
+        else:
+            Entity.blitter.addImage(Entity.blitter.lastLayer(), self.trigger_key_pressed, (70,50) )
+        
+        Entity.blitter.addImage(Entity.blitter.lastLayer(), self.trigger_image, (100,50) )
 
     def update(self) -> None:
         super().update()
