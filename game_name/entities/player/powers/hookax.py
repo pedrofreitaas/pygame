@@ -8,7 +8,7 @@ class Hookax(Power):
     chain_link: pg.surface.Surface = pg.image.load(spritesheet[1]).convert_alpha()
     
     def __init__(self) -> None:
-        super().__init__(layer=1, speed_value=250, caster_stats=Entity.player.stats, damage=1, mana_cost=15, stamina_cost=0, range=0, instant=False, cooldown=3, effect=None)
+        super().__init__(layer=1, speed_value=250, caster_stats=Entity.player.stats, damage=3, mana_cost=15, stamina_cost=0, range=0, instant=False, cooldown=3, effect=None)
 
         self.animator = an.Animator( pg.image.load(spritesheet[0]).convert_alpha(),
                                      (80,80),
@@ -19,7 +19,7 @@ class Hookax(Power):
         self.pull_cost: float = 6.4
         self.push_cost: float = 8.7
         
-        self.animator.resizeSprites( (40,40) )
+        self.animator.resizeSprites( (30,30) )
 
         self.pulling: bool = False
         self.pushing: bool = False
@@ -60,6 +60,7 @@ class Hookax(Power):
         if (self.center()-Entity.player.center()).length_squared() > 400: return
 
         self.stats.add(1, 10, 2)
+        Entity.player.resetCombat()
         self.deactivate()
 
     def collideEnemies(self) -> None:
@@ -69,10 +70,10 @@ class Hookax(Power):
         for en in Entity.enemies:
             if self.damage_rect.colliderect(en.rect):
 
-                if self.mask.overlap_area(en.mask, en.pos-self.pos) <= 0: continue
+                if self.mask.overlap_area(en.mask, en.pos-self.pos) <= 30: continue
 
                 self.hitted_entity = en
-                self.vec = self.center()-en.center()
+                self.vec = self.pos-en.pos
                 
                 break
 
@@ -108,7 +109,7 @@ class Hookax(Power):
         if self.traveled_distance_squared >= self.rope_length and not self.pulling: return
         
         if self.hitted_entity != None: 
-            self.pos = self.hitted_entity.center()-self.vec
+            self.pos = self.hitted_entity.pos+self.vec
             return
 
         if not self.pulling: self.traveled_distance_squared += self.getMovementSpeed().length_squared()
