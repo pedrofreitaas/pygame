@@ -6,6 +6,7 @@ sprites_path = ['assets/entities/enemies/waterpriestess/waterHurricane_start.png
                 'assets/entities/enemies/waterpriestess/waterHurricane_end.png' ]
 
 class WaterHurricane(Power):
+    
     def __init__(self, caster_stats: Stats) -> None:
         super().__init__(layer=2, speed_value=130, caster_stats=caster_stats,damage=20,range=160,mana_cost=20,stamina_cost=0,instant=False,cooldown=6,effect=None)
 

@@ -1,6 +1,5 @@
 from game_name.entities.enemies.enemy import *
 from io import open
-from random import choices
 
 spritesheet_path = ['assets/entities/enemies/ronin/ronin.png']
 
