@@ -2,7 +2,8 @@ from game_name.entities.power import *
 from game_name.game_map.structure import *
 from math import sin,cos
 
-spritesheet = ['assets/entities/player/powers/sprint.png']
+spritesheet = ['assets/entities/player/powers/sprint.png',
+               'assets/entities/player/powers/sprint_icon.png']
 
 class Sprint(Power):
     def __init__(self) -> None:
@@ -17,6 +18,11 @@ class Sprint(Power):
         self.speed_boost: float = 200
 
         self.parameter: float = 0
+
+        self.trigger_key: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('q', False) )
+        self.trigger_key_pressed: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('q', True) )
+
+        self.trigger_image: pg.surface.Surface = pg.image.load(spritesheet[1]).convert_alpha()
         
         self.initialize()
 
@@ -45,8 +51,17 @@ class Sprint(Power):
 
     def checkInputs(self, events: list[pg.event.Event]) -> None:
         for ev in events:
-            if ev.type == pg.KEYUP and ev.key == pg.K_LSHIFT:
+            if ev.type == pg.KEYUP and ev.key == 113: #ord('q')
                 self.turnOff()
+
+    def activeAndNotActiveBlitting(self) -> None:
+        
+        if not self.active and not self.in_cooldown and self.canUse():
+            Entity.blitter.addImage(Entity.blitter.lastLayer(), self.trigger_key, (135,50))
+        else:
+            Entity.blitter.addImage(Entity.blitter.lastLayer(), self.trigger_key_pressed, (135,50))
+
+        Entity.blitter.addImage(Entity.blitter.lastLayer(), self.trigger_image, (165,50))
 
     def update(self, events: list[pg.event.Event]) -> None:
         super().update()

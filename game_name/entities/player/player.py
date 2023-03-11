@@ -152,7 +152,7 @@ class Player( ent.Entity ):
                 elif ev.key == ent.pg.K_SPACE:
                     self.slide()
 
-                elif ev.key == ent.pg.K_LSHIFT:
+                elif ev.key == 113: #ord('q')
                     self.sprint()
             
             if ev.type == ent.pg.KEYUP:
