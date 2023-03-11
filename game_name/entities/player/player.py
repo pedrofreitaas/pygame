@@ -32,25 +32,12 @@ class Player( ent.Entity ):
 
         # player variables.
         self.slide_speed: ent.pg.math.Vector2 = ent.pg.math.Vector2(0,0)
-        self.setStatsSurfaces()
         self.meteor: meteor.Meteor = meteor.Meteor()
         self.hookax: Hookax = Hookax()
         self.Sprint: Sprint = Sprint()
 
     def __str__(self) -> str:
         return super().__str__()+'.player'
-
-    def setStatsSurfaces(self) -> None:
-        '''Sets the surface that represents the player's stats.\n'''
-
-        self.life_surface: ent.pg.surface.Surface = ent.pg.surface.Surface((self.stats.max_life,10))
-        self.life_surface.fill((200,0,0))
-
-        self.mana_surface: ent.pg.surface.Surface = ent.pg.surface.Surface((self.stats.max_mana, 6))
-        self.mana_surface.fill((0,0,180))
-
-        self.stamina_surface: ent.pg.surface.Surface = ent.pg.surface.Surface((self.stats.max_stamina, 8))
-        self.stamina_surface.fill((0,200,0))
 
 #
     def animationAction(self) -> None:
@@ -244,16 +231,16 @@ class Player( ent.Entity ):
            Life+Mana+Stamina.\n'''
 
         ent.Entity.blitter.addImage(ent.Entity.blitter.lastLayer(),
-                                           self.life_surface.subsurface((0,0), (self.stats.life, 10)),
-                                           self.getLifeSurfacePos())
+                                    self.stats.getStatSurface(1, 10),
+                                    self.getLifeSurfacePos())
 
         ent.Entity.blitter.addImage(ent.Entity.blitter.lastLayer(), 
-                                           self.mana_surface.subsurface((0,0), (self.stats.mana, 6)),
-                                           self.getManaSurfacePos())
+                                    self.stats.getStatSurface(2,8),
+                                    self.getManaSurfacePos())
 
         ent.Entity.blitter.addImage(ent.Entity.blitter.lastLayer(), 
-                                           self.stamina_surface.subsurface((0,0), (self.stats.stamina, 8)),
-                                           self.getStaminaSurfacePos())
+                                    self.stats.getStatSurface(3,8),
+                                    self.getStaminaSurfacePos())
 
     def damageSelf(self, attack: ent.Attack) -> None:
         '''Almost the same as the entity's procedure.\n

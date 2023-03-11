@@ -1,3 +1,5 @@
+from pygame.surface import Surface
+
 class Stats():
 
     def __init__(self, max_life: float, max_mana: float, max_stamina: float) -> None:
@@ -52,9 +54,17 @@ class Stats():
     def hasEnough(self, qnt: float, which: int) -> bool:
         '''Returns true if the instance has the according stat in the parameter quantity.\n
            which: 1->life, 2->mana, 3->stamina.\n'''
-        if which == 1: return self.life >= qnt
-        if which == 2: return self.mana >= qnt
-        if which == 3: return self.stamina >= qnt
+        if which == 1 and not self.life >= qnt: 
+            self.not_enough = 1
+            return False
+        if which == 2 and not self.mana >= qnt: 
+            self.not_enough = 2
+            return False 
+        if which == 3 and not self.stamina >= qnt:
+            self.not_enough = 3
+            return False 
+        
+        return True
 #
 
 #
@@ -72,6 +82,7 @@ class Stats():
             if self.life <= 0:
                 self.is_dying = True
                 self.life = 0
+                self.not_enough = 1
                 return False
             
             return True
@@ -81,6 +92,7 @@ class Stats():
 
             if self.mana < 0: 
                 self.mana = 0
+                self.not_enough = 2
                 return False
             
             return True
@@ -90,6 +102,7 @@ class Stats():
 
             if self.stamina < 0:
                 self.stamina = 0
+                self.not_enough = 3
                 return False
 
             return True
@@ -119,6 +132,24 @@ class Stats():
 
             return
 #
+
+    def getStatSurface(self, which: int, height: float) -> Surface:
+        '''Returns the surface corresponding to the which parameter.\n'''
+        
+        if which == 1:
+            surf = Surface( (self.life, height) )
+            surf.fill( (230,0,0) )
+            return surf
+        
+        if which == 2: 
+            surf = Surface( (self.mana, height) )
+            surf.fill( (0,0,230) )
+            return surf
+        
+        if which == 3:
+            surf = Surface( (self.stamina, height) )
+            surf.fill( (0,230,0) )
+            return surf
 
     def getPercentage(self, which: int) -> float:
         '''Returns the percentage of the corresponde which parameter stat.\n
