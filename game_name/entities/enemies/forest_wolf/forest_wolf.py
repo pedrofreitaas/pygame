@@ -43,6 +43,16 @@ class ForestWolf(Enemy):
         elif self.speed_dir[0] < 0: self.isLookingRight = True
 
 #
+    def activate(self) -> None:
+        self.alert_distance_squared = 700**2
+        return super().activate()
+    
+    def deactivate(self) -> None:
+        self.alert_distance_squared = 225**2
+        return super().deactivate()
+#
+
+#
     def setHitbox(self) -> None:
         '''Sets the damage infliction rect of the forest wolf according to it's action.\n
            Has special hitbox only for the idle bit attacks.\n'''

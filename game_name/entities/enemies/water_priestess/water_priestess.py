@@ -41,6 +41,16 @@ class WaterPriestess(en.Enemy):
         return super().__str__()+'.water_priestess'
 
 #
+    def activate(self) -> None:
+        self.alert_distance_squared = 600**2
+        return super().activate()
+    
+    def deactivate(self) -> None:
+        self.alert_distance_squared = 150**2
+        return super().deactivate()
+#
+
+#
     def controlCombat(self) -> None:
         '''Controls the water_priestess attack.\n'''
 
@@ -54,7 +64,7 @@ class WaterPriestess(en.Enemy):
         if self.stats.getPercentage(1) < 0.75 and rand < 50: 
             self.action = 7 #block action
             return
-        if rand < 30 and self.water_hurricane.canUse(self.center(), en.ent.Entity.player.center()):
+        if rand < 30 and self.water_hurricane.canUse(self.distance_to_player_squared):
             self.action = 6 #waterH
             return
         
@@ -118,7 +128,7 @@ class WaterPriestess(en.Enemy):
 
     def waterHurricaneAttack(self) -> None:
         '''Triggers the water hurricane attack.\n'''
-        self.water_hurricane.use(self.center(), en.ent.Entity.player.center())
+        self.water_hurricane.use(self.distance_to_player_squared)
         self.resetCombat()
 
     def controlAnimator(self) -> None:

@@ -41,15 +41,15 @@ class Power(Entity):
         '''By default powers don't take damage.\n'''
 
 #
-    def canUse(self, userCenter: pg.math.Vector2=pg.math.Vector2(0,0), targetCenter: pg.math.Vector2=pg.math.Vector2(0,0)) -> bool:
-        return self.current_attack.canUse(self.stats, userCenter, targetCenter) and not self.in_cooldown and not self.active
+    def canUse(self, distance_to_target_squared: float=0) -> bool:
+        return self.current_attack.canUse(self.stats, distance_to_target_squared) and not self.in_cooldown and not self.active
     
-    def use(self, userCenter: pg.math.Vector2=pg.math.Vector2(0,0), targetCenter: pg.math.Vector2=pg.math.Vector2(0,0)) -> bool:
+    def use(self, distance_to_target_squared: float=0) -> bool:
         '''Checks if attack can be used and uses it, returns true if so.\n
            The vector parameters are used to calculate the distance between user can target, to be compared with the power's attack's range.\n
            Applies the mana/stamina costs.\n
            Do nothing if power is in use.\n'''
-        if not self.canUse(userCenter, targetCenter): return False
+        if not self.canUse(distance_to_target_squared): return False
         
         self.stats.spend(1, self.current_attack.mana_cost, 2)
         self.stats.spend(1, self.current_attack.stamina_cost, 3)

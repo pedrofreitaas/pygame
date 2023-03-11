@@ -32,8 +32,8 @@ class WaterHurricane(Power):
         return super().__str__()+'.water_hurricane'
 
 #
-    def use(self, userCenter: pg.math.Vector2, targetCenter: pg.math.Vector2) -> bool:
-        if not super().use(userCenter, targetCenter): return
+    def use(self, distance_to_target_squared: float=0) -> bool:
+        if not super().use(distance_to_target_squared): return
         self.pos = Entity.player.pos - pg.math.Vector2(randint(30,80), randint(30,80))
 
     def controlAnimator(self) -> None:

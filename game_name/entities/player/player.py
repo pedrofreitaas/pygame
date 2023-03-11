@@ -226,6 +226,9 @@ class Player( ent.Entity ):
         return ent.pg.math.Vector2(5,28)
 #
 
+    def blitAbilities(self) -> None:
+        pass
+
     def blitStats(self) -> None:
         '''Blits player stats.\n
            Life+Mana+Stamina.\n'''
@@ -241,6 +244,10 @@ class Player( ent.Entity ):
         ent.Entity.blitter.addImage(ent.Entity.blitter.lastLayer(), 
                                     self.stats.getStatSurface(3,8),
                                     self.getStaminaSurfacePos())
+
+    def blit(self) -> None:
+        super().blit()
+        self.blitAbilities()
 
     def damageSelf(self, attack: ent.Attack) -> None:
         '''Almost the same as the entity's procedure.\n

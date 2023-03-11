@@ -2,6 +2,7 @@ import game_name.entities.entity as ent
 from random import randint, SystemRandom
 
 class Enemy(ent.Entity):
+    
     def __init__(self, pos: ent.pg.math.Vector2, layer: int, speed_value: float, max_life: float, max_mana: float, max_stamina: float) -> None:
         super().__init__(pos, layer, speed_value, max_life, max_mana, max_stamina)
         self.target: int = 2
@@ -77,21 +78,18 @@ class Enemy(ent.Entity):
         if self.speed_dir != ent.pg.math.Vector2(): self.speed_dir = self.speed_dir.normalize()
     
     def setSeekPlayerSpeed(self) -> None:
-        '''Sets the direction of movement to be towards the player.\n'''
-        distance = ent.Entity.player.center() - self.center()
- 
-        if distance.length_squared() > 100: self.speed_dir = distance.normalize()
+        '''Sets the direction of movement to be towards the player.\n'''        
+        if self.distance_to_player_squared > 100: self.speed_dir = self.distance_to_player_vec.normalize()
         else: self.speed_dir = ent.pg.math.Vector2()
 
     def setDistancePlayerSpeed(self) -> None:
         '''Sets the direction of movement to run to get far away from the player.\n'''
-        distance = self.center() - ent.Entity.player.center()
-        if distance != ent.pg.math.Vector2(): self.speed_dir = distance.normalize()
+        if self.distance_to_player_squared > 400: self.speed_dir = self.distance_to_player_vec.normalize()
         else: self.speed_dir = ent.pg.math.Vector2()
 
     def distancePlayerSquared(self) -> float:
         '''Returns the enemy's distance squared to the player.\n'''
-        return (self.center() - ent.Entity.player.center()).length_squared()
+        return self.distance_to_player_squared
 
     def move(self) -> None:
         '''Moves the enemy if movement isn't locked.\n'''
@@ -114,7 +112,7 @@ class Enemy(ent.Entity):
         '''If the attack can be used, sets it as current attack, applies it's cost and returns True.\n
            If attack can't be used, returns false.\n
            Sets the instance action with (index+1). Where the index represents the position of the attack in the list.\n'''
-        if attack.canUse(self.stats, self.center(), ent.Entity.player.center()):
+        if attack.canUse(self.stats, self.distance_to_player_squared):
             self.current_attack = attack
             self.action = self.attacks.index(self.current_attack)+1
 
@@ -156,6 +154,10 @@ class Enemy(ent.Entity):
         return super().die()
 
     def update(self) -> None:
+
+        self.distance_to_player_vec = ent.Entity.player.center()-self.center()
+        self.distance_to_player_squared = self.distance_to_player_vec.length_squared()
+
         if self.is_dead: return
 
         self.controlMovement()

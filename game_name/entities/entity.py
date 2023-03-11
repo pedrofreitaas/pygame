@@ -62,6 +62,9 @@ class Entity():
         self.active: bool = True
         self.stunned: bool = False
 
+        self.distance_to_player_vec: pg.math.Vector2 = pg.math.Vector2(0,0)
+        self.distance_to_player_squared: float = 0
+
     def __str__(self) -> str:
         return 'entity'
 
@@ -397,8 +400,6 @@ def updateEnemies() -> None:
     for en in Entity.enemies:
         en.update()
 
-        distance = (en.pos-Entity.player.pos).length_squared()
-
-        if distance <= en.alert_distance_squared: en.activate()
-        elif distance >= en.alert_distance_squared: en.deactivate()
+        if en.distance_to_player_squared <= en.alert_distance_squared: en.activate()
+        elif en.distance_to_player_squared >= en.alert_distance_squared: en.deactivate()
             

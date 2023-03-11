@@ -49,6 +49,8 @@ class Game():
                                  pg.font.Font('assets/font/PeaberryBase.ttf', 20),
                                  pg.font.Font('assets/font/PeaberryBase.ttf', 24),
                                  pg.font.Font('assets/font/PeaberryBase.ttf', 28)]
+    game_music = pg.mixer.Sound('assets/game/sounds/Celestial.mp3')
+    game_music.set_volume(0.05)
 
     def __init__(self) -> None:
         #dt
@@ -82,6 +84,8 @@ class Game():
         self.fpsSurface_blit_pos = pg.math.Vector2( self.blitter.displaySize()[0]-self.dtSurface.get_size()[0]-20,10+self.dtSurface.get_size()[1]+10 )
 
         self.game_timers.append(Timer(1, lambda: self.updateDtSurface(),-1))
+
+        Game.game_music.play(-1)
 
     def updateDtSurface(self) -> None:
         '''Updates the dt surface with the most recent value.\n'''
