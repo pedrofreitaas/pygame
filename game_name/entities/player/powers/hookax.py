@@ -8,7 +8,16 @@ class Hookax(Power):
     chain_link: pg.surface.Surface = pg.image.load(spritesheet[1]).convert_alpha()
     
     def __init__(self) -> None:
-        super().__init__(layer=1, speed_value=250, caster_stats=Entity.player.stats, damage=3, mana_cost=15, stamina_cost=0, range=0, instant=False, cooldown=3, effect=None)
+        super().__init__(layer=1, speed_value=250, caster_stats=Entity.player.stats, damage=3, mana_cost=25, stamina_cost=0, range=0, instant=False, cooldown=3, effect=None)
+
+        self.trigger_key: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('r', False) )
+        self.trigger_key_pressed: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('r', True) )
+
+        self.pull_key: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('e', False) )
+        self.pull_key_pressed: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('e', True) )
+
+        self.push_key: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('r', False) )
+        self.push_key_pressed: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('r', True) )
 
         self.animator = an.Animator( pg.image.load(spritesheet[0]).convert_alpha(),
                                      (80,80),
@@ -168,9 +177,27 @@ class Hookax(Power):
                 elif ev.key == 114:
                     self.pushing = False
 
+#
+    def activeAndNotActiveBlitting(self) -> None:
+        '''Blits the interface of the hookax.\n'''
+
+        if not self.active and not self.in_cooldown and self.canUse():
+            Entity.blitter.addImage(Entity.blitter.lastLayer(), self.trigger_key, (10,50) )
+    
+        elif self.active:
+            if not self.pulling: Entity.blitter.addImage(Entity.blitter.lastLayer(), self.pull_key, (10,40) )
+            else: Entity.blitter.addImage(Entity.blitter.lastLayer(), self.pull_key_pressed, (10,40) )
+
+            if not self.pushing: Entity.blitter.addImage(Entity.blitter.lastLayer(), self.push_key, (10,70) )
+            else: Entity.blitter.addImage(Entity.blitter.lastLayer(), self.push_key_pressed, (10,70) )
+
+        else:
+            Entity.blitter.addImage(Entity.blitter.lastLayer(), self.trigger_key_pressed, (10,50) )
+
+        Entity.blitter.addImage(Entity.blitter.lastLayer(), self.animator.image, (36,50) )
+     
     def blit(self) -> None:
         '''Makes the hookax spins and blits it.\n'''
-
         # rotating.
         if self.speed_dir == pg.math.Vector2(0,0) and not (self.pulling or self.pushing): 
             self.blit_angle = 0
@@ -180,6 +207,7 @@ class Hookax(Power):
         Entity.blitter.addLine(0, Entity.player.center(), self.center(), (40,80,30), 3)
 
         return super().blit()
+#
 
     def update(self, events: list[pg.event.Event]) -> None:
         super().update()

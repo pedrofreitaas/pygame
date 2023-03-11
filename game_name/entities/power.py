@@ -71,10 +71,14 @@ class Power(Entity):
         return super().deactivate()
 #
 
+    def activeAndNotActiveBlitting(self) -> None:
+        '''Blits even if the power isn't activated.\n'''
+
     def update(self) -> None:
         '''Also updates the cooldown timer.\n
            Does nothing if deactivated.\n'''
         updateTimers([self.cooldown_timer])
+        self.activeAndNotActiveBlitting()
         if not self.active: return
         return super().update()
 
