@@ -77,32 +77,32 @@ class Stats():
         elif qnt < 0: raise ValueError
            
         if which == 1:
-            self.life -= (qnt*dt)
+            self.life -= qnt*dt
+            self.is_taking_damage = True
 
             if self.life <= 0:
                 self.is_dying = True
                 self.life = 0
-                self.not_enough = 1
                 return False
             
             return True
 
         if which == 2:
             self.mana -= qnt*dt
+            self.is_using_mana = True
 
             if self.mana < 0: 
                 self.mana = 0
-                self.not_enough = 2
                 return False
             
             return True
 
         if which == 3:
             self.stamina -= qnt*dt
+            self.is_using_stamina = True
 
             if self.stamina < 0:
                 self.stamina = 0
-                self.not_enough = 3
                 return False
 
             return True
@@ -177,7 +177,7 @@ class Stats():
            Returns false if the instance is dead.\n'''
         if self.is_dying: return False
         
-        self.checkStats()
         self.regen(dt)
+        self.checkStats()
 
         return True

@@ -36,6 +36,10 @@ class Player( ent.Entity ):
         self.hookax: Hookax = Hookax()
         self.Sprint: Sprint = Sprint()
 
+        self.stats.setRegenFactor(3,1)
+        self.stats.setRegenFactor(4,2)
+        self.stats.setRegenFactor(15,3)
+
     def __str__(self) -> str:
         return super().__str__()+'.player'
 
