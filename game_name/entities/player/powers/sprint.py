@@ -6,8 +6,9 @@ spritesheet = ['assets/entities/player/powers/sprint.png',
                'assets/entities/player/powers/sprint_icon.png']
 
 class Sprint(Power):
+
     def __init__(self) -> None:
-        super().__init__(Entity.player.layer, speed_value=0, caster_stats=Entity.player.stats, damage=0, mana_cost=4, range=0, stamina_cost=15, instant=False, cooldown=4, effect=None)
+        super().__init__(Entity.player.layer, speed_value=0, caster_stats=Entity.player.stats, damage=0, mana_cost=8, range=0, stamina_cost=15, instant=False, cooldown=4, effect=None)
 
         self.animator = an.Animator( pg.image.load(spritesheet[0]).convert_alpha(),
                                      (48,48),
@@ -19,8 +20,8 @@ class Sprint(Power):
 
         self.parameter: float = 0
 
-        self.trigger_key: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('q', False) )
-        self.trigger_key_pressed: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('q', True) )
+        self.trigger_key: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getExtra(4, False) )
+        self.trigger_key_pressed: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getExtra(4, True) )
 
         self.trigger_image: pg.surface.Surface = pg.image.load(spritesheet[1]).convert_alpha()
         
@@ -51,7 +52,7 @@ class Sprint(Power):
 
     def checkInputs(self, events: list[pg.event.Event]) -> None:
         for ev in events:
-            if ev.type == pg.KEYUP and ev.key == 113: #ord('q')
+            if ev.type == pg.KEYUP and ev.key == pg.K_LSHIFT:
                 self.turnOff()
 
     def activeAndNotActiveBlitting(self) -> None:
@@ -61,7 +62,7 @@ class Sprint(Power):
         else:
             Entity.blitter.addImage(Entity.blitter.lastLayer(), self.trigger_key_pressed, (135,50))
 
-        Entity.blitter.addImage(Entity.blitter.lastLayer(), self.trigger_image, (165,50))
+        Entity.blitter.addImage(Entity.blitter.lastLayer(), self.trigger_image, (195,50))
 
     def update(self, events: list[pg.event.Event]) -> None:
         super().update()
