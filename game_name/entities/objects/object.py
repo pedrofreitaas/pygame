@@ -19,3 +19,25 @@ class Object(Entity):
 
     def move(self) -> None:
         '''Objects don't move.\n'''
+
+    def __del__(self) -> None:
+        dict = {
+            'x': self.pos[0],
+            'y': self.pos[1]
+        }
+
+        entInfos: dict = {}
+
+        with open('infos/game.json', 'r') as file:
+            entInfos = load(file)
+            entInfos[self.__str__()] = dict
+
+        with open('infos/game.json', 'w') as file:
+            file.write( dumps(entInfos, indent=2) )
+
+
+class Chest(Object):
+    def __init__(self, pos: pg.math.Vector2) -> None:
+        super().__init__(pos, Entity.player.layer)
+
+    
