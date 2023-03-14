@@ -47,6 +47,7 @@ class Sprint(Power):
         if self.parameter > 6.28: self.parameter = 0
     
     def turnOff(self) -> None:
+        if not self.active: return
         Entity.player.speed_value -= self.speed_boost
         self.deactivate()
 

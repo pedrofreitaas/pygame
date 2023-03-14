@@ -6,6 +6,8 @@ from random import choices
 spritesheet_path = ['assets/entities/enemies/waterpriestess/waterpriestess288x128.png']
 
 class WaterPriestess(en.Enemy):
+    river_sound = en.ent.pg.mixer.Sound('assets/entities/enemies/waterpriestess/theme.wav')
+    river_sound.set_volume(0.05)
     
     def __init__(self, pos: en.ent.pg.math.Vector2, layer: int=1, speed_value: float=100) -> None:
         super().__init__(pos, layer, speed_value, 120, 60, 70)
@@ -42,11 +44,19 @@ class WaterPriestess(en.Enemy):
 
 #
     def activate(self) -> None:
+        if self.active: return
+
+        if WaterPriestess.river_sound.get_num_channels() == 0: WaterPriestess.river_sound.play(-1)
         self.alert_distance_squared = 600**2
+
         return super().activate()
     
     def deactivate(self) -> None:
+        if not self.active: return
+
+        if WaterPriestess.river_sound.get_num_channels() > 0: WaterPriestess.river_sound.stop()
         self.alert_distance_squared = 150**2
+        
         return super().deactivate()
 #
 

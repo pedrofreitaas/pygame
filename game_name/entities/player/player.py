@@ -9,7 +9,7 @@ player_sounds_path = ['assets/entities/player/sounds/footsteps.ogg', 'assets/ent
 
 class Player( ent.Entity ):
     footstep_sound = ent.pg.mixer.Sound(player_sounds_path[0])
-    footstep_sound.set_volume(0.0125)
+    footstep_sound.set_volume(0.025)
 
     hit_sound = ent.pg.mixer.Sound(player_sounds_path[1])
     hit_sound.set_volume(0.08)
@@ -51,26 +51,36 @@ class Player( ent.Entity ):
         if self.action == 1: # attacking            
             if int(self.animator.index_image) in [9,12,16]:
                 # attack sound.
-                Player.hit_sound.play()
+                if Player.hit_sound.get_num_channels() == 0: Player.hit_sound.play()
 
                 # attack movement.
                 self.complementSpeed(self.speed_dir*self.speed_value)
                     
-            else: Player.hit_sound.stop()
+            else: 
+                if Player.hit_sound.get_num_channels() > 0: Player.hit_sound.stop()
 
-        elif self.action == 2: # defending
-            pass       
+            return
 
-        elif self.action == 3: # casting
+        if self.action == 2: # defending
+            return       
+
+        if self.action == 3: # casting
             self.animator.setEAP(lambda: self.launchMeteor())
+            return
         
-        elif self.action == 4: # sliding
+        if self.action == 4: # sliding
             self.complementSpeed(self.slide_speed)
             self.animator.changeUpdateCoeficient(self.animator.upd_coeficient*2)
             self.animator.setEAP(lambda: self.resetCombat())
+            return
         
-        if self.isMoving(): Player.footstep_sound.play()
-        else: Player.footstep_sound.stop()
+        if self.isMoving() and Player.footstep_sound.get_num_channels() == 0: 
+            Player.footstep_sound.play()
+            return
+        
+        if not self.isMoving() and Player.footstep_sound.get_num_channels() > 0:
+            Player.footstep_sound.stop()
+            return        
 
     def controlAnimator(self) -> None:
         '''Changes sprite animation based in the entity's behavior.\n'''

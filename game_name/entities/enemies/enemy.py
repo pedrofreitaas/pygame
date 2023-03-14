@@ -6,7 +6,6 @@ class Enemy(ent.Entity):
     def __init__(self, pos: ent.pg.math.Vector2, layer: int, speed_value: float, max_life: float, max_mana: float, max_stamina: float) -> None:
         super().__init__(pos, layer, speed_value, max_life, max_mana, max_stamina)
         self.target: int = 2
-        self.deactivate()
 
         self.alert_distance_squared: float = 400**2
 
@@ -24,6 +23,7 @@ class Enemy(ent.Entity):
 
         self.stats_blit_adjust: ent.pg.math.Vector2 = ent.pg.math.Vector2(0,0)
         
+        self.deactivate()
         ent.Entity.enemies.append(self)
     
     def __str__(self) -> str:
