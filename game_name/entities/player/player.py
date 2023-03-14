@@ -5,7 +5,9 @@ from game_name.entities.player.powers.hookax import *
 from io import open
 
 player_sprites_path = ['assets/entities/player/char_red_1.png', 'assets/entities/player/char_red_2.png' ]
-player_sounds_path = ['assets/entities/player/sounds/footsteps.ogg', 'assets/entities/player/sounds/hit.wav']
+player_sounds_path = ['assets/entities/player/sounds/footsteps.ogg',
+                       'assets/entities/player/sounds/hit.wav',
+                       'assets/entities/player/sounds/hurt.wav']
 
 class Player( ent.Entity ):
     footstep_sound = ent.pg.mixer.Sound(player_sounds_path[0])
@@ -13,8 +15,11 @@ class Player( ent.Entity ):
 
     hit_sound = ent.pg.mixer.Sound(player_sounds_path[1])
     hit_sound.set_volume(0.08)
+
+    hurt_sound = ent.pg.mixer.Sound(player_sounds_path[2])
+    hurt_sound.set_volume(0.09)
     
-    def __init__(self, pos: ent.pg.math.Vector2, layer: int=1, speed_value: float=160) -> None:
+    def __init__(self, pos: ent.pg.math.Vector2, layer: int=1, speed_value: float=120) -> None:
         super().__init__(pos, layer, speed_value, 80, 40, 120)
 
         self.animator: ent.an.Animator = ent.an.Animator( ent.pg.image.load(player_sprites_path[0]).convert_alpha(),
@@ -27,11 +32,13 @@ class Player( ent.Entity ):
 
         ent.Entity.player = self
         self.rect_adjust: tuple = [-30,-20]
-        self.attacks: list[ent.Attack] = [ ent.Attack(25, stamina_cost=20) ]
+        self.attacks: list[ent.Attack] = [ ent.Attack(damage=0, stamina_cost=20) ]
         self.target: int = 1
 
         # player variables.
         self.slide_speed: ent.pg.math.Vector2 = ent.pg.math.Vector2(0,0)
+
+        # powers
         self.meteor: meteor.Meteor = meteor.Meteor()
         self.hookax: Hookax = Hookax()
         self.Sprint: Sprint = Sprint()
@@ -39,6 +46,8 @@ class Player( ent.Entity ):
         self.stats.setRegenFactor(3,1)
         self.stats.setRegenFactor(4,2)
         self.stats.setRegenFactor(15,3)
+
+        self.speed_boost: float = 160
 
     def __str__(self) -> str:
         return super().__str__()+'.player'
@@ -48,16 +57,23 @@ class Player( ent.Entity ):
         '''Sets actions for the player according to the current animation stage.\n'''
         super().animationAction()
 
+        if self.stats.is_taking_damage and Player.hurt_sound.get_num_channels() == 0:
+            Player.hurt_sound.play()
+
         if self.action == 1: # attacking            
             if int(self.animator.index_image) in [9,12,16]:
                 # attack sound.
                 if Player.hit_sound.get_num_channels() == 0: Player.hit_sound.play()
+
+                self.current_attack.damage = 140
 
                 # attack movement.
                 self.complementSpeed(self.speed_dir*self.speed_value)
                     
             else: 
                 if Player.hit_sound.get_num_channels() > 0: Player.hit_sound.stop()
+
+                self.current_attack.damage = 0
 
             return
 
@@ -70,7 +86,6 @@ class Player( ent.Entity ):
         
         if self.action == 4: # sliding
             self.complementSpeed(self.slide_speed)
-            self.animator.changeUpdateCoeficient(self.animator.upd_coeficient*2)
             self.animator.setEAP(lambda: self.resetCombat())
             return
         
@@ -86,6 +101,8 @@ class Player( ent.Entity ):
         '''Changes sprite animation based in the entity's behavior.\n'''
 
         super().controlAnimator()
+
+        self.animator.changeUpdateCoeficient( self.animator.upd_coeficient + self.stats.getPercentage(3)*7 )
 
         if self.action == -1:
             self.animator.setRange( (43,54) )
@@ -126,6 +143,13 @@ class Player( ent.Entity ):
         self.animator.setRange( (0,5) )
 #
 
+    def getMovementSpeed(self) -> pg.math.Vector2:
+        '''Player movement gets faster while the player is running.\n'''
+        if self.speed_dir == pg.math.Vector2(0,0) or self.getLockMovement(): return super().getMovementSpeed()
+
+        self.stats.spend(Entity.dt, 1, 3)
+        return self.speed_dir.normalize()*self.speed_boost*self.stats.getPercentage(3)*Entity.dt + super().getMovementSpeed()
+    
     def checkInputs(self, events: list[ent.pg.event.Event]) -> None:
         '''Check keyboard and mouse inputs.\n'''
 
@@ -209,9 +233,9 @@ class Player( ent.Entity ):
             self.action = 4
             self.stats.spend(1, 20, 3)
 
-            if self.speed_dir == ent.pg.math.Vector2(): self.slide_speed = self.speed_dir
+            if self.speed_dir == ent.pg.math.Vector2(0,0): self.slide_speed = self.speed_dir
 
-            else: self.slide_speed = self.speed_dir.normalize()*self.speed_value*1.2
+            else: self.slide_speed = self.speed_dir.normalize()*self.speed_value*2.3
 #
 
     def setCurrentAttack(self, attack: ent.Attack) -> bool:

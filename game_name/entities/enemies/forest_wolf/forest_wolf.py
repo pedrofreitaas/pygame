@@ -3,8 +3,11 @@ from io import open
 from random import choices
 
 spritesheet = ['assets/entities/enemies/forestwolf/forestwolf96x96.png']
+sounds = ['assets/entities/enemies/forestwolf/sounds/theme.wav']
 
 class ForestWolf(Enemy):
+    wind_forest = ent.pg.mixer.Sound(sounds[0])
+    wind_forest.set_volume(0.15)
     
     def __init__(self, pos: ent.pg.math.Vector2, layer: int=1, speed_value: float=90, max_life: float=80, max_mana: float=0, max_stamina: float=200) -> None:
         super().__init__(pos, layer, speed_value, max_life, max_mana, max_stamina)
@@ -44,10 +47,16 @@ class ForestWolf(Enemy):
 
 #
     def activate(self) -> None:
+        if ForestWolf.wind_forest.get_num_channels() == 0:
+            ForestWolf.wind_forest.play(-1)
+
         self.alert_distance_squared = 700**2
         return super().activate()
     
     def deactivate(self) -> None:
+        if ForestWolf.wind_forest.get_num_channels() > 0:
+            ForestWolf.wind_forest.stop()
+
         self.alert_distance_squared = 225**2
         return super().deactivate()
 #
