@@ -19,9 +19,11 @@ class Player( ent.Entity ):
     hurt_sound = ent.pg.mixer.Sound(player_sounds_path[2])
     hurt_sound.set_volume(0.09)
 
+#
     def infoCode() -> str:
         return Entity.infoCode()+'.player'
-    
+#
+
     def __init__(self, pos: ent.pg.math.Vector2, layer: int=1, speed_value: float=120) -> None:
         super().__init__(pos, layer, speed_value, 80, 40, 120)
 

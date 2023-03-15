@@ -5,6 +5,11 @@ spritesheet_path = ['assets/entities/enemies/ronin/ronin.png']
 
 class Ronin( Enemy ):
 
+#
+    def infoCode() -> str:
+        return Enemy.infoCode()+'.ronin'
+#
+
     def __init__(self, pos: ent.pg.math.Vector2) -> None:
         super().__init__(pos, 1, speed_value=110, max_life=150, max_mana=60, max_stamina=110)
 
@@ -33,7 +38,7 @@ class Ronin( Enemy ):
         self.rect_adjust: tuple[int,int] = (-100,-45)
 
     def __str__(self) -> str:
-        return super().__str__()+'.ronin'
+        return Ronin.infoCode()
     
     def loadSprites(self) -> None:
         '''Loads ronin's animations.\n'''
@@ -162,22 +167,16 @@ class Ronin( Enemy ):
         
         self.animator.setRange( self.animations_range['idle'] )
 
-def handleJson() -> list[Ronin]:
-    '''Creates instances of Ronin based in the content of the json file.\n
-       Json syntax:\n
-       "ronin": {\n
-            "quantity": N,\n
-            "x": [x1, x2, x3, ..., xN],\n
-            "y": [y1, y2, y3, ..., yN]\n
-       }\n'''
+def handleJson():
+    '''Creates instances of Ronin based in the content of the json file.\n'''
     with open('infos/game.json', 'r') as file:
         entInfos = ent.load(file)
 
-        if 'ronin' not in entInfos:
-            return []
+        if Ronin.infoCode() not in entInfos:
+            Ronin.saveEmptyDict()
+            return
         
-        instances = []
-        for i in range(entInfos['ronin']['quantity']):
-            instances.append( Ronin(ent.pg.math.Vector2(entInfos['ronin']['x'][i], entInfos['ronin']['y'][i])) )
-        
-        return instances
+        for i in range(entInfos[Ronin.infoCode()]['quantity']):
+            Ronin(ent.pg.math.Vector2(entInfos[Ronin.infoCode()]['x'][i], entInfos[Ronin.infoCode()]['y'][i]))
+
+handleJson()

@@ -14,6 +14,27 @@ class Entity():
         def __init__(self, *args: object) -> None:
             super().__init__(*args)
 # ----------------- #
+
+# loading from Json.
+    def infoCode() -> str:
+        return 'entity'
+
+    @classmethod
+    def saveEmptyDict(cls: 'Entity') -> dict:
+        '''Saves an empty dict for the entity in the games_info json file.\n'''
+
+        with open('infos/game.json', 'r') as file:
+            entInfos = load(file)
+ 
+            emptyEntDict: dict = {
+                'x': 300,
+                'y': 300,
+            }
+
+            with open('infos/game.json', 'r') as file: entInfos[cls.infoCode()] = emptyEntDict
+            with open('infos/game.json', 'w') as file: file.write( dumps(entInfos, indent=2) )
+# ---------------------------- #
+
     map: Map = 0
 
     dt = 0
@@ -22,11 +43,6 @@ class Entity():
 
     blitter: blt.Blitter = 0
 
-#
-    def infoCode() -> str:
-        return 'entity'
-#
-    
     def __init__(self, pos: pg.math.Vector2, layer: int, speed_value: float, max_life: float, max_mana: float, max_stamina: float) -> None:
         self.pos: pg.math.Vector2 = pos
         self.speed_dir: pg.math.Vector2 = pg.math.Vector2()
@@ -71,7 +87,7 @@ class Entity():
         self.distance_to_player_squared: float = 0
 
     def __str__(self) -> str:
-        return 'entity'
+        return Entity.infoCode()
 
     def center(self) -> pg.math.Vector2:
         '''Returns the center of the current sprite.\n'''
@@ -407,4 +423,3 @@ def updateEnemies() -> None:
 
         if en.distance_to_player_squared <= en.alert_distance_squared: en.activate()
         elif en.distance_to_player_squared >= en.alert_distance_squared: en.deactivate()
-            

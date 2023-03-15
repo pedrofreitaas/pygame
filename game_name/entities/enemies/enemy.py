@@ -2,7 +2,28 @@ import game_name.entities.entity as ent
 from random import randint, SystemRandom
 
 class Enemy(ent.Entity):
-    
+
+#    
+    def infoCode() -> str:
+        return ent.Entity.infoCode()+'.enemy'
+
+    @classmethod
+    def saveEmptyDict(cls: 'Enemy') -> dict:
+        '''Saves an empty dict for the enemy in the games_info json file.\n'''
+
+        with open('infos/game.json', 'r') as file:
+            entInfos = ent.load(file)
+ 
+            emptyEntDict: dict = {
+                'quantity': 0,
+                'x': [],
+                'y': [],
+            }
+
+            with open('infos/game.json', 'r') as file: entInfos[cls.infoCode()] = emptyEntDict
+            with open('infos/game.json', 'w') as file: file.write( ent.dumps(entInfos, indent=2) )
+#
+
     def __init__(self, pos: ent.pg.math.Vector2, layer: int, speed_value: float, max_life: float, max_mana: float, max_stamina: float) -> None:
         super().__init__(pos, layer, speed_value, max_life, max_mana, max_stamina)
         self.target: int = 2

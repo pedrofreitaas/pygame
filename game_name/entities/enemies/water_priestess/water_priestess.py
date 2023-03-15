@@ -8,6 +8,9 @@ spritesheet_path = ['assets/entities/enemies/waterpriestess/waterpriestess288x12
 class WaterPriestess(en.Enemy):
     river_sound = en.ent.pg.mixer.Sound('assets/entities/enemies/waterpriestess/theme.wav')
     river_sound.set_volume(0.05)
+
+    def infoCode() -> str:
+        return en.Enemy.infoCode()+'.water_priestess'
     
     def __init__(self, pos: en.ent.pg.math.Vector2, layer: int=1, speed_value: float=100) -> None:
         super().__init__(pos, layer, speed_value, 120, 60, 70)
@@ -40,7 +43,7 @@ class WaterPriestess(en.Enemy):
         self.stats.setRegenFactor(8, 3)
 
     def __str__(self) -> str:
-        return super().__str__()+'.water_priestess'
+        return WaterPriestess.infoCode()
 
 #
     def activate(self) -> None:
@@ -213,22 +216,25 @@ class WaterPriestess(en.Enemy):
 
         return super().update()
 
-def handleJson() -> list[WaterPriestess]:
-    '''Creates instances of WaterPristess based in the content of the json file.\n
-       Json syntax:\n
-       "water_priestess": {\n
-            "quantity": N,\n
-            "x": [x1, x2, x3, ..., xN],\n
-            "y": [y1, y2, y3, ..., yN]\n
-       }\n'''
+def handleJson() -> None:
+    '''Creates instances of WaterPristess based in the content of the json file.\n'''
+    
     with open('infos/game.json', 'r') as file:
         entInfos = en.ent.load(file)
 
-        if 'water_priestess' not in entInfos:
-            return []
-        
-        instances = []
-        for i in range(entInfos['water_priestess']['quantity']):
-            instances.append( WaterPriestess(en.ent.pg.math.Vector2(entInfos['water_priestess']['x'][i], entInfos['water_priestess']['y'][i])) )
+        if WaterPriestess.infoCode() not in entInfos:
+            
+            emptyWaterPDict: dict = {
+                'quantity': 0,
+                'x': [],
+                'y': [],
+            }
 
-        return instances
+            with open('infos/game.json', 'r') as file: entInfos[WaterPriestess.infoCode()] = emptyWaterPDict
+            with open('infos/game.json', 'w') as file: file.write( en.ent.dumps(entInfos, indent=2) )         
+            
+            return
+        
+        for i in range(entInfos[WaterPriestess.infoCode()]['quantity']):
+            WaterPriestess(en.ent.pg.math.Vector2(entInfos[WaterPriestess.infoCode()]['x'][i], entInfos[WaterPriestess.infoCode()]['y'][i]))
+handleJson()
