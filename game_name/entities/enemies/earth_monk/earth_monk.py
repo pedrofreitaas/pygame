@@ -6,6 +6,11 @@ spritesheet_path = ['assets/entities/enemies/earthmonk/earthmonk288x128.png']
 
 class EarthMonk( Enemy ):
 
+#
+    def infoCode() -> str:
+        return Enemy.infoCode()+'.earth_monk'
+#
+
     def __init__(self, pos: ent.pg.math.Vector2) -> None:
         super().__init__(pos, 1, 60, 160, 120, 60)
         
@@ -53,6 +58,9 @@ class EarthMonk( Enemy ):
                                                       'block': (115,128),
                                                       'take_dmg': (128,134),
                                                       'death': (134,149) }
+
+    def __str__(self) -> str:
+        return EarthMonk.infoCode()
 
 #   
     def activate(self) -> None:
@@ -205,21 +213,15 @@ class EarthMonk( Enemy ):
 #
 
 def handleJson() -> list[EarthMonk]:
-    '''Creates instances of EarthMonk based in the content of the json file.\n
-       Json syntax:\n
-       "earth_monk": {\n
-            "quantity": N,\n
-            "x": [x1, x2, x3, ..., xN],\n
-            "y": [y1, y2, y3, ..., yN]\n
-       }\n'''
+    '''Creates instances of EarthMonk based in the content of the json file.\n'''
     with open('infos/game.json', 'r') as file:
         entInfos = ent.load(file)
 
-        if 'earth_monk' not in entInfos:
-            return []
+        if EarthMonk.infoCode() not in entInfos:
+            EarthMonk.saveEmptyDict()
+            return
         
-        instances = []
-        for i in range(entInfos['earth_monk']['quantity']):
-            instances.append( EarthMonk(ent.pg.math.Vector2(entInfos['earth_monk']['x'][i], entInfos['earth_monk']['y'][i])) )
-
-        return instances
+        for i in range(entInfos[EarthMonk.infoCode()]['quantity']):
+            EarthMonk(ent.pg.math.Vector2(entInfos[EarthMonk.infoCode()]['x'][i], entInfos[EarthMonk.infoCode()]['y'][i]))
+    
+handleJson()
