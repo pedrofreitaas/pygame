@@ -9,6 +9,11 @@ class ForestWolf(Enemy):
     wind_forest = ent.pg.mixer.Sound(sounds[0])
     wind_forest.set_volume(0.15)
     
+#
+    def infoCode() -> str:
+        return Enemy.infoCode()+'.forest_wolf'
+#  
+
     def __init__(self, pos: ent.pg.math.Vector2, layer: int=1, speed_value: float=90, max_life: float=80, max_mana: float=0, max_stamina: float=200) -> None:
         super().__init__(pos, layer, speed_value, max_life, max_mana, max_stamina)
         self.animator: ent.an.Animator = ent.an.Animator(ent.pg.image.load(spritesheet[0]).convert_alpha(),
@@ -37,7 +42,7 @@ class ForestWolf(Enemy):
         self.speed_booster: float = 95
         
     def __str__(self) -> str:
-        return super().__str__()+'forest_wolf'
+        return ForestWolf.infoCode()
     
     def setLookingDir(self) -> bool:
         '''The sprites of this entity are horizontally inverted in the png.\n
@@ -152,21 +157,15 @@ class ForestWolf(Enemy):
 #
 
 def handleJson() -> list[ForestWolf]:
-    '''Creates instances of ForestWolf based in the content of the json file.\n
-       Json syntax:\n
-       "forest_wolf": {\n
-            "quantity": N,\n
-            "x": [x1, x2, x3, ..., xN],\n
-            "y": [y1, y2, y3, ..., yN]\n
-       }\n'''
+    '''Creates instances of ForestWolf based in the content of the json file.\n'''
     with open('infos/game.json', 'r') as file:
         entInfos = ent.load(file)
 
-        if 'forest_wolf' not in entInfos:
-            return []
+        if ForestWolf.infoCode() not in entInfos:
+           ForestWolf.saveEmptyDict()
+           return
         
-        instances = []
-        for i in range(entInfos['forest_wolf']['quantity']):
-            instances.append( ForestWolf(ent.pg.math.Vector2(entInfos['forest_wolf']['x'][i], entInfos['forest_wolf']['y'][i])) )
-
-        return instances
+        for i in range(entInfos[ForestWolf.infoCode()]['quantity']):
+            ForestWolf(ent.pg.math.Vector2(entInfos[ForestWolf.infoCode()]['x'][i], entInfos[ForestWolf.infoCode()]['y'][i]))
+    
+handleJson()
