@@ -22,10 +22,22 @@ class Player( ent.Entity ):
 #
     def infoCode() -> str:
         return Entity.infoCode()+'.player'
+
+    @classmethod
+    def createInstanceWithDict(cls: 'Player', entInfos: dict) -> None:
+        '''Creates Player's instance based on the entity's info inside the dict.\n'''
+
+        Entity.player = cls( pg.math.Vector2(entInfos['x'], entInfos['y']) )
+
+    @classmethod
+    def saveEmptyDict() -> None:
+        '''Saves empty dict of player in game_info's file and creates a new player.\n'''
+        Entity.saveEmptyDict()
+        Entity.player = Player(pg.math.Vector2(20,20))
 #
 
-    def __init__(self, pos: ent.pg.math.Vector2, layer: int=1, speed_value: float=120) -> None:
-        super().__init__(pos, layer, speed_value, 80, 40, 120)
+    def __init__(self, pos: ent.pg.math.Vector2) -> None:
+        super().__init__(pos, 1, 120, 80, 40, 120)
 
         self.animator: ent.an.Animator = ent.an.Animator( ent.pg.image.load(player_sprites_path[0]).convert_alpha(),
                                                           [56,56],
@@ -338,17 +350,5 @@ class Player( ent.Entity ):
 
         with open('infos/game.json', 'w') as file:
             file.write( ent.dumps(entInfos, indent=2) )
-
-def handleJson() -> Player:
-    '''Creates the player according to json data and returns it.\n'''
-
-    with open('infos/game.json', 'r') as file:
-        entInfos: dict = ent.load(file)
-
-        if Player.infoCode() not in entInfos.keys():
-            Entity.player = Player(ent.pg.math.Vector2(20,20))
-            return
-        
-        Entity.player = Player( ent.pg.math.Vector2(entInfos[Player.infoCode()]['x'], entInfos[Player.infoCode()]['y']) )
     
-handleJson()
+Player.handleJson()

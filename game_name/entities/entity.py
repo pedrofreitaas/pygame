@@ -33,6 +33,25 @@ class Entity():
 
             with open('infos/game.json', 'r') as file: entInfos[cls.infoCode()] = emptyEntDict
             with open('infos/game.json', 'w') as file: file.write( dumps(entInfos, indent=2) )
+
+    @classmethod
+    def createInstanceWithDict(cls: 'Entity', entInfos: dict) -> 'Entity':
+        '''Creates and returns instance of the entity based on the entity's info inside the dict.\n'''
+
+        return cls.__init__( pg.math.Vector2(entInfos[cls.infoCode()]['x'], entInfos[cls.infoCode()]['y']) )
+
+    @classmethod
+    def handleJson(cls: 'Entity') -> None:
+        '''Creates the player according to json data and returns it.\n'''
+
+        with open('infos/game.json', 'r') as file:
+            entInfos: dict = load(file)
+
+            if cls.infoCode() not in entInfos.keys():
+                Entity.player = cls(pg.math.Vector2(20,20))
+                return
+            
+            cls.createInstanceWithDict(entInfos[cls.infoCode()])
 # ---------------------------- #
 
     map: Map = 0
@@ -43,7 +62,7 @@ class Entity():
 
     blitter: blt.Blitter = 0
 
-    def __init__(self, pos: pg.math.Vector2, layer: int, speed_value: float, max_life: float, max_mana: float, max_stamina: float) -> None:
+    def __init__(self, pos: pg.math.Vector2, layer: int=0, speed_value: float=0, max_life: float=0, max_mana: float=0, max_stamina: float=0) -> None:
         self.pos: pg.math.Vector2 = pos
         self.speed_dir: pg.math.Vector2 = pg.math.Vector2()
         self.speed_complement: pg.math.Vector2 = pg.math.Vector2()

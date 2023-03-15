@@ -212,16 +212,4 @@ class EarthMonk( Enemy ):
         self.animator.setRange( self.animaton_ranges['idle'] )
 #
 
-def handleJson() -> list[EarthMonk]:
-    '''Creates instances of EarthMonk based in the content of the json file.\n'''
-    with open('infos/game.json', 'r') as file:
-        entInfos = ent.load(file)
-
-        if EarthMonk.infoCode() not in entInfos:
-            EarthMonk.saveEmptyDict()
-            return
-        
-        for i in range(entInfos[EarthMonk.infoCode()]['quantity']):
-            EarthMonk(ent.pg.math.Vector2(entInfos[EarthMonk.infoCode()]['x'][i], entInfos[EarthMonk.infoCode()]['y'][i]))
-    
-handleJson()
+EarthMonk.handleJson()

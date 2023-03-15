@@ -167,16 +167,4 @@ class Ronin( Enemy ):
         
         self.animator.setRange( self.animations_range['idle'] )
 
-def handleJson():
-    '''Creates instances of Ronin based in the content of the json file.\n'''
-    with open('infos/game.json', 'r') as file:
-        entInfos = ent.load(file)
-
-        if Ronin.infoCode() not in entInfos:
-            Ronin.saveEmptyDict()
-            return
-        
-        for i in range(entInfos[Ronin.infoCode()]['quantity']):
-            Ronin(ent.pg.math.Vector2(entInfos[Ronin.infoCode()]['x'][i], entInfos[Ronin.infoCode()]['y'][i]))
-
-handleJson()
+Ronin.handleJson()

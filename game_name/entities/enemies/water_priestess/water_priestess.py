@@ -216,25 +216,4 @@ class WaterPriestess(en.Enemy):
 
         return super().update()
 
-def handleJson() -> None:
-    '''Creates instances of WaterPristess based in the content of the json file.\n'''
-    
-    with open('infos/game.json', 'r') as file:
-        entInfos = en.ent.load(file)
-
-        if WaterPriestess.infoCode() not in entInfos:
-            
-            emptyWaterPDict: dict = {
-                'quantity': 0,
-                'x': [],
-                'y': [],
-            }
-
-            with open('infos/game.json', 'r') as file: entInfos[WaterPriestess.infoCode()] = emptyWaterPDict
-            with open('infos/game.json', 'w') as file: file.write( en.ent.dumps(entInfos, indent=2) )         
-            
-            return
-        
-        for i in range(entInfos[WaterPriestess.infoCode()]['quantity']):
-            WaterPriestess(en.ent.pg.math.Vector2(entInfos[WaterPriestess.infoCode()]['x'][i], entInfos[WaterPriestess.infoCode()]['y'][i]))
-handleJson()
+WaterPriestess.handleJson()

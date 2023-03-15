@@ -156,16 +156,4 @@ class ForestWolf(Enemy):
         return super().setSeekPlayerSpeed()
 #
 
-def handleJson() -> list[ForestWolf]:
-    '''Creates instances of ForestWolf based in the content of the json file.\n'''
-    with open('infos/game.json', 'r') as file:
-        entInfos = ent.load(file)
-
-        if ForestWolf.infoCode() not in entInfos:
-           ForestWolf.saveEmptyDict()
-           return
-        
-        for i in range(entInfos[ForestWolf.infoCode()]['quantity']):
-            ForestWolf(ent.pg.math.Vector2(entInfos[ForestWolf.infoCode()]['x'][i], entInfos[ForestWolf.infoCode()]['y'][i]))
-    
-handleJson()
+ForestWolf.handleJson()
