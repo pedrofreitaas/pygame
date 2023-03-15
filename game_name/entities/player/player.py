@@ -30,7 +30,6 @@ class Player( ent.Entity ):
                                                           [56,56],
                                                           [8,2,8,4,4,8,2] )
 
-        ent.Entity.player = self
         self.rect_adjust: tuple = [-30,-20]
         self.attacks: list[ent.Attack] = [ ent.Attack(damage=0, stamina_cost=20) ]
         self.target: int = 1
@@ -38,17 +37,18 @@ class Player( ent.Entity ):
         # player variables.
         self.slide_speed: ent.pg.math.Vector2 = ent.pg.math.Vector2(0,0)
 
-        # powers
-        self.meteor: meteor.Meteor = meteor.Meteor()
-        self.hookax: Hookax = Hookax()
-        self.Sprint: Sprint = Sprint()
-
         self.stats.setRegenFactor(3,1)
         self.stats.setRegenFactor(4,2)
         self.stats.setRegenFactor(15,3)
 
         self.speed_boost: float = 160
+        ent.Entity.player = self
 
+        # powers
+        self.meteor: meteor.Meteor = meteor.Meteor()
+        self.hookax: Hookax = Hookax()
+        self.Sprint: Sprint = Sprint()
+        
     def __str__(self) -> str:
         return super().__str__()+'.player'
 
@@ -334,9 +334,6 @@ class Player( ent.Entity ):
         with open('infos/game.json', 'w') as file:
             file.write( ent.dumps(entInfos, indent=2) )
 
-def createPlayer( playerDict: dict ) -> Player:
-    return Player( ent.pg.math.Vector2(playerDict['x'], playerDict['y']) )
-
 def handleJson() -> Player:
     '''Creates the player according to json data and returns it.\n'''
 
@@ -344,6 +341,8 @@ def handleJson() -> Player:
         entInfos: dict = ent.load(file)
 
         if 'player' not in entInfos.keys():
-            return Player(ent.pg.math.Vector2(20,20))
+            Entity.player = Player(ent.pg.math.Vector2(20,20))
         
-        return createPlayer( entInfos['player'] )
+        Entity.player = Player( ent.pg.math.Vector2(entInfos['player']['x'], entInfos['player']['y']) )
+    
+handleJson()

@@ -21,6 +21,11 @@ class Entity():
     player: 'Entity' = 0
 
     blitter: blt.Blitter = 0
+
+#
+    def infoCode() -> str:
+        return 'entity'
+#
     
     def __init__(self, pos: pg.math.Vector2, layer: int, speed_value: float, max_life: float, max_mana: float, max_stamina: float) -> None:
         self.pos: pg.math.Vector2 = pos

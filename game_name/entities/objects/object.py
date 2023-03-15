@@ -8,6 +8,11 @@ class Object(Entity):
        -> Doesn't have stats.\n
        -> Can have animations, timers...\n'''
 
+# 
+    def infoCode() -> str:
+        return Entity.infoCode()+'.object'
+#
+
     def __init__(self, pos: pg.math.Vector2, layer: int) -> None:
         super().__init__(pos, layer, 0, 0, 0, 0)
 
@@ -21,7 +26,7 @@ class Object(Entity):
         '''Objects don't move.\n'''
 
     def __del__(self) -> None:
-        dict = {
+        entDict = {
             'x': self.pos[0],
             'y': self.pos[1]
         }
@@ -30,14 +35,8 @@ class Object(Entity):
 
         with open('infos/game.json', 'r') as file:
             entInfos = load(file)
-            entInfos[self.__str__()] = dict
+            entInfos[self.__str__()] = entDict
 
         with open('infos/game.json', 'w') as file:
             file.write( dumps(entInfos, indent=2) )
-
-
-class Chest(Object):
-    def __init__(self, pos: pg.math.Vector2) -> None:
-        super().__init__(pos, Entity.player.layer)
-
     

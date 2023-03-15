@@ -26,6 +26,10 @@ earth_monk.handleJson()
 
 import game_name.entities.enemies.forest_wolf.forest_wolf as frst_wolf
 frst_wolf.handleJson()
+
+#objects.
+import game_name.entities.objects.chest as chest
+
 # ------------------------- #
 
 import blitter as blt
@@ -74,7 +78,7 @@ class Game():
 
         self.game_timers: list[Timer] = []
 
-        self.player = pl.handleJson()
+        self.player = pl.Entity.player
         self.previous_player_pos = self.player.pos
 
         self.dtSurface = self.fonts[2].render(str(round(self.dt,4)), 1, pg.Color("black"))
