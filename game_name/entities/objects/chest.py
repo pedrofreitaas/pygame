@@ -23,13 +23,7 @@ class Chest(Object):
         Chest.chests.append(self)
 
 def handleJson() -> None:
-    '''Creates instances of chest based in the content of the json file.\n
-    Json syntax:\n
-    "Chest.__str__()": {\n
-        "quantity": N,\n
-        "x": [x1, x2, x3, ..., xN],\n
-        "y": [y1, y2, y3, ..., yN]\n
-    }\n'''
+    '''Creates instances of chest based in the content of the json file.\n'''
 
     with open('infos/game.json', 'r') as file:
         entInfos = load(file)

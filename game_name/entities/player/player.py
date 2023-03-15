@@ -18,6 +18,9 @@ class Player( ent.Entity ):
 
     hurt_sound = ent.pg.mixer.Sound(player_sounds_path[2])
     hurt_sound.set_volume(0.09)
+
+    def infoCode() -> str:
+        return Entity.infoCode()+'.player'
     
     def __init__(self, pos: ent.pg.math.Vector2, layer: int=1, speed_value: float=120) -> None:
         super().__init__(pos, layer, speed_value, 80, 40, 120)
@@ -329,7 +332,7 @@ class Player( ent.Entity ):
 
         with open('infos/game.json', 'r') as file:
             entInfos = ent.load(file)
-            entInfos['player'] = playerDict
+            entInfos[Player.infoCode()] = playerDict
 
         with open('infos/game.json', 'w') as file:
             file.write( ent.dumps(entInfos, indent=2) )
@@ -340,9 +343,10 @@ def handleJson() -> Player:
     with open('infos/game.json', 'r') as file:
         entInfos: dict = ent.load(file)
 
-        if 'player' not in entInfos.keys():
+        if Player.infoCode() not in entInfos.keys():
             Entity.player = Player(ent.pg.math.Vector2(20,20))
+            return
         
-        Entity.player = Player( ent.pg.math.Vector2(entInfos['player']['x'], entInfos['player']['y']) )
+        Entity.player = Player( ent.pg.math.Vector2(entInfos[Player.infoCode()]['x'], entInfos[Player.infoCode()]['y']) )
     
 handleJson()

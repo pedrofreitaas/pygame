@@ -13,19 +13,11 @@ sizeDisplay = [1120, 630]
 screen = pg.display.set_mode( (sizeDisplay[0],sizeDisplay[1]), flags )
 
 #importing entities.
-import game_name.entities.player.player as pl
-
-import game_name.entities.enemies.water_priestess.water_priestess as wtr_priest
-wtr_priest.handleJson()
-
-import game_name.entities.enemies.ronin.ronin as ronin
-ronin.handleJson()
-
-import game_name.entities.enemies.earth_monk.earth_monk as earth_monk
-earth_monk.handleJson()
-
-import game_name.entities.enemies.forest_wolf.forest_wolf as frst_wolf
-frst_wolf.handleJson()
+from game_name.entities.player.player import *
+from game_name.entities.enemies.water_priestess.water_priestess import *
+from game_name.entities.enemies.ronin.ronin import *
+from game_name.entities.enemies.earth_monk.earth_monk import *
+from game_name.entities.enemies.forest_wolf.forest_wolf import *
 
 #objects.
 import game_name.entities.objects.chest as chest
@@ -69,16 +61,16 @@ class Game():
 
         self.blitter: blt.Blitter = blt.Blitter(Game.display, 5)
         self.blitter.changeLayerCameraSensibility(self.blitter.lastLayer(), False)
-        pl.ent.Entity.blitter = self.blitter
+        Entity.blitter = self.blitter
 
         self.clock: pg.time.Clock = pg.time.Clock()
 
         self.map: Map = Map(self.blitter)
-        pl.ent.Entity.map: Map = self.map
+        ent.Entity.map: Map = self.map
 
         self.game_timers: list[Timer] = []
 
-        self.player = pl.Entity.player
+        self.player = Entity.player
         self.previous_player_pos = self.player.pos
 
         self.dtSurface = self.fonts[2].render(str(round(self.dt,4)), 1, pg.Color("black"))
@@ -132,12 +124,12 @@ class Game():
         '''Updates the delta time in all instances.\n'''
 
         self.dt = getDt()
-        pl.ent.Entity.dt = self.dt
+        Entity.dt = self.dt
 
         #if self.dt > 0.05: print('dt problem.\n')
 
     def pauseloop(self) -> None:
-        pl.ent.pauseTimers(throw=False)
+        pauseTimers(throw=False)
         
         unpauseButton = button.Button(pg.math.Vector2(500,500), lambda: self.UNpause(), 'unpause', Game.fonts[3], pg.color.Color('black'), True)
         
@@ -150,7 +142,7 @@ class Game():
 
             self.blitter.lightUpdate()
 
-        pl.ent.unpauseTimers(throw=False)
+        unpauseTimers(throw=False)
         self.updateDt()
 
     def blitDt(self) -> None:
@@ -170,12 +162,12 @@ class Game():
             self.treatEvents()
 
             self.player.update(self.events)
-            pl.ent.updateEnemies()
+            updateEnemies()
             
             self.map.update(self.blitter, self.dt)
 
             updateTimers(self.game_timers)
 
-            if self.blit_minimap: pl.ent.blitMinimap(self.fonts[3])
+            if self.blit_minimap: blitMinimap(self.fonts[3])
 
             self.blitter.update(self.dt, self.player.center())
