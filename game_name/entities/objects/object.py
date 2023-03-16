@@ -35,9 +35,22 @@ class Object(Entity):
 
     def __init__(self, pos: pg.math.Vector2, layer: int) -> None:
         super().__init__(pos, layer, 0, 1, 0, 0)
-        self.target: int = 0
+
+        self.interaction_key_ord: int = 0
+
+        self.target: float = 2
+
+        self.interation_distance_squared: float = 150**2
+        self.can_interact: bool = False
 
         Entity.objects.append(self)
+
+    def collidePlayer(self) -> None:
+        if (self.center()-Entity.player.center()).length_squared() > self.interation_distance_squared: 
+            self.can_interact = False
+            return
+
+        self.can_interact = True
 
     def __str__(self) -> str:
         return Object.infoCode()
@@ -47,4 +60,21 @@ class Object(Entity):
 
     def move(self) -> None:
         '''Objects don't move.\n'''
-    
+
+    def interact(self) -> bool:
+        '''Makes the object interaction.\n'''
+        return self.can_interact 
+
+    def checkInputs(self, events: list[pg.event.Event]) -> None:
+        '''Checks the mouse and keyboard inputs.\n'''
+
+        for ev in events:
+            if ev.type == pg.KEYDOWN:
+                if ev.key == self.interaction_key_ord:
+                    self.interact()
+
+    def update(self, events: list[pg.event.Event]) -> None:
+
+        if self.active: self.checkInputs(events)
+
+        return super().update() 

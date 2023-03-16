@@ -158,9 +158,9 @@ class Game():
             
             self.treatEvents()
 
+            updateObjects(self.events)
             Entity.player.update(self.events)
             updateEnemies()
-            updateObjects()
             
             self.map.update(self.blitter, self.dt)
 

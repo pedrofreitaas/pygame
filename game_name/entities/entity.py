@@ -454,7 +454,7 @@ def updateEnemies() -> None:
         if en.distance_to_player_squared <= en.alert_distance_squared: en.activate()
         elif en.distance_to_player_squared >= en.alert_distance_squared: en.deactivate()
 
-def updateObjects() -> None:
+def updateObjects(events: list[pg.event.Event]) -> None:
     '''Updates all the registered objects.\n'''
     for obj in Entity.objects:
-        obj.update()
+        obj.update(events)
