@@ -178,13 +178,11 @@ class Hookax(Power):
                 if ev.key == 101:
                     self.pulling = True
                 if ev.key == 114:
-                    self.pushing = True
+                    self.pushing = not self.pushing
 
             elif ev.type == pg.KEYUP:
                 if ev.key == 101:
                     self.pulling = False
-                elif ev.key == 114:
-                    self.pushing = False
 
 #
     def activeAndNotActiveBlitting(self) -> None:

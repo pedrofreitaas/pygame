@@ -127,8 +127,9 @@ class Player( ent.Entity ):
             return
         
         if self.action == -2:
-            self.animator.setRange( (22,26) )
-            self.animator.resizeRange(3,4)
+            self.animator.setRange( (23,26) )
+            if self.hookax.pushing: self.animator.resizeRange(2,3)
+            self.animator.setEAP( lambda: self.endPullingAnimation() )
             return
         
         if self.stats.is_taking_damage:
@@ -137,7 +138,7 @@ class Player( ent.Entity ):
             return
 
         if self.action == 1:
-            self.animator.setRange( (6,23) )
+            self.animator.setRange( (6,22) )
             self.animator.setEAP( lambda: self.resetCombat() )
             return
 
@@ -182,7 +183,10 @@ class Player( ent.Entity ):
                     self.defend()
 
             if ev.type == ent.pg.MOUSEBUTTONUP:
-                if ev.button in [1,3]:
+                if ev.button == 1:
+                    self.resetCombat()
+                
+                elif ev.button == 3:
                     self.resetCombat()
 
             if ev.type == ent.pg.KEYDOWN:
@@ -225,12 +229,12 @@ class Player( ent.Entity ):
                 elif ev.key == 100: #ord('d')
                     self.speed_dir[0] -= 1
 
-                elif ev.key in (101,114): #ord('e'),ord('r')
+                elif ev.key == 101: #ord('e')
                     self.resetCombat()
 
 #            
-    def resetCombat(self) -> None:
-        super().resetCombat()
+    def endPullingAnimation(self) -> None:
+        super().resetAction()
 
         if self.tried_to_attack_while_hookax_push:
             self.tried_to_attack_while_hookax_push = False
@@ -239,12 +243,12 @@ class Player( ent.Entity ):
     def attack(self) -> None:
         '''Toogles player's attack, if possible.\n'''
 
-        if self.hookax.pushing:
+        if self.hookax.pushing: 
             self.tried_to_attack_while_hookax_push = True
 
         if (self.action == 0 and not self.stats.is_taking_damage and self.attacks[0].canUse(self.stats)):
             self.action = 1
-            self.current_attack = self.attacks[0]
+            self.current_attack = self.attacks[0]        
 
     def defend(self) -> None:
         '''Toggles player's defense, if possible.\n'''

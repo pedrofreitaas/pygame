@@ -119,8 +119,6 @@ class Entity():
     @action.setter
     def action(self, value: int) -> None:
         if not isinstance(value, int): return
-        if value == 0 and self.action == 1:
-            pass
         self._action = value 
 
 # movement.
@@ -262,8 +260,6 @@ class Entity():
     
     def animationAction(self) -> None:
         '''Controls the entity's behavior based on the current action.\n'''
-        if self.action == -1: self.animator.setEAP(lambda: self.die())
-        if self.action == -2: self.animator.setEAP(lambda: self.resetAction())
 
     def controlAnimator(self) -> None:
         '''Flips the image based in the looking dir of the entitys.\n
@@ -272,6 +268,9 @@ class Entity():
 
         self.setLookingDir()
         if not self.isLookingRight: self.animator.flipHorizontally()
+        
+        if self.action == -1: self.animator.setEAP(lambda: self.die())
+        if self.action == -2: self.animator.setEAP(lambda: self.resetAction())
 # -------------------- #
 
 # effects.
