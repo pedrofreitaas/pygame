@@ -48,7 +48,7 @@ class Entity():
             entInfos: dict = load(file)
 
             if cls.infoCode() not in entInfos.keys():
-                Entity.player = cls(pg.math.Vector2(20,20))
+                cls.saveEmptyDict()
                 return
             
             cls.createInstanceWithDict(entInfos[cls.infoCode()])
@@ -58,6 +58,7 @@ class Entity():
 
     dt = 0
     enemies: list['Entity'] = []
+    objects: list['Entity'] = []
     player: 'Entity' = 0
 
     blitter: blt.Blitter = 0
@@ -430,6 +431,10 @@ def blitMinimap(font: pg.font.Font) -> None:
         minimap.blit( pg.transform.scale_by(en.animator.image, 0.5),
                       (en.pos[0]*scale_vec[0], en.pos[1]*scale_vec[1]) )
 
+    for obj in Entity.objects:
+        minimap.blit( pg.transform.scale_by(obj.animator.image, 0.5),
+                      (obj.pos[0]*scale_vec[0], obj.pos[1]*scale_vec[1]) )
+
     Entity.blitter.addImage(Entity.blitter.lastLayer(),
                             minimap,
                             pg.math.Vector2(0,0))
@@ -448,3 +453,8 @@ def updateEnemies() -> None:
 
         if en.distance_to_player_squared <= en.alert_distance_squared: en.activate()
         elif en.distance_to_player_squared >= en.alert_distance_squared: en.deactivate()
+
+def updateObjects() -> None:
+    '''Updates all the registered objects.\n'''
+    for obj in Entity.objects:
+        obj.update()

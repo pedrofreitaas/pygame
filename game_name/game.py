@@ -20,7 +20,7 @@ from game_name.entities.enemies.earth_monk.earth_monk import *
 from game_name.entities.enemies.forest_wolf.forest_wolf import *
 
 #objects.
-import game_name.entities.objects.chest as chest
+from game_name.entities.objects.chest import *
 
 # ------------------------- #
 
@@ -69,9 +69,6 @@ class Game():
         ent.Entity.map: Map = self.map
 
         self.game_timers: list[Timer] = []
-
-        self.player = Entity.player
-        self.previous_player_pos = self.player.pos
 
         self.dtSurface = self.fonts[2].render(str(round(self.dt,4)), 1, pg.Color("black"))
         self.fpsSurface = self.fonts[2].render(str(round(0)), 1, (0,0,0))
@@ -161,8 +158,9 @@ class Game():
             
             self.treatEvents()
 
-            self.player.update(self.events)
+            Entity.player.update(self.events)
             updateEnemies()
+            updateObjects()
             
             self.map.update(self.blitter, self.dt)
 
@@ -170,4 +168,4 @@ class Game():
 
             if self.blit_minimap: blitMinimap(self.fonts[3])
 
-            self.blitter.update(self.dt, self.player.center())
+            self.blitter.update(self.dt, Entity.player.center())

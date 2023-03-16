@@ -25,14 +25,12 @@ class Player( ent.Entity ):
 
     @classmethod
     def createInstanceWithDict(cls: 'Player', entInfos: dict) -> None:
-        '''Creates Player's instance based on the entity's info inside the dict.\n'''
-
+        '''Creates Player's instance based on the entity's info inside the dict.\n'''        
         Entity.player = cls( pg.math.Vector2(entInfos['x'], entInfos['y']) )
 
     @classmethod
-    def saveEmptyDict() -> None:
+    def saveEmptyDict(cls: 'Player') -> None:
         '''Saves empty dict of player in game_info's file and creates a new player.\n'''
-        Entity.saveEmptyDict()
         Entity.player = Player(pg.math.Vector2(20,20))
 #
 

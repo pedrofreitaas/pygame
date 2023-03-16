@@ -27,8 +27,7 @@ class Enemy(ent.Entity):
     def createInstanceWithDict(cls: 'Enemy', entInfos: dict) -> None:
         '''Creates enemy according to the infos in the json file.\n'''
         for i in range(entInfos['quantity']):
-            cls(ent.pg.math.Vector2(entInfos['x'][i], entInfos['y'][i]))
-    
+            cls(ent.pg.math.Vector2(entInfos['x'][i], entInfos['y'][i]))  
 #
 
     def __init__(self, pos: ent.pg.math.Vector2, layer: int, speed_value: float, max_life: float, max_mana: float, max_stamina: float) -> None:
