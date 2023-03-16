@@ -1,14 +1,12 @@
 from game_name.entities.power import *
 from game_name.game_map.structure import *
 
-spritesheet = ['assets/entities/player/powers/hookax.png',
-               'assets/entities/player/powers/chain_link.png']
+spritesheet = ['assets/entities/player/powers/hookax.png']
 
-class Hookax(Power):
-    chain_link: pg.surface.Surface = pg.image.load(spritesheet[1]).convert_alpha()
-    
+class Hookax(Power):    
+
     def __init__(self) -> None:
-        super().__init__(layer=1, speed_value=250, caster_stats=Entity.player.stats, damage=3, mana_cost=25, stamina_cost=0, range=0, instant=False, cooldown=3, effect=None)
+        super().__init__(layer=1, speed_value=400, caster_stats=Entity.player.stats, damage=3, mana_cost=25, stamina_cost=0, range=0, instant=False, cooldown=3, effect=None)
 
         self.trigger_key: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('r', False) )
         self.trigger_key_pressed: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('r', True) )
@@ -41,7 +39,7 @@ class Hookax(Power):
         self.active_time: float = 12
         self.timers.append( Timer(self.active_time, lambda: self.kill(), -1) )
 
-        self.rope_length: float = 450
+        self.rope_length: float = 1200
         self.traveled_distance_squared: float = 0
 
         self.initialize()
@@ -60,7 +58,7 @@ class Hookax(Power):
 
         self.pos = Entity.player.center()- (pg.math.Vector2( self.animator.currentSpriteSize() )/2)
         self.hit_pos = pg.mouse.get_pos()- Entity.blitter.camera.getPos()
-        self.speed_dir = (self.hit_pos-self.pos).normalize()
+        self.speed_dir = (self.hit_pos-self.center()).normalize()
 
 #
     def collidePlayer(self) -> None:
@@ -69,7 +67,7 @@ class Hookax(Power):
         if (self.center()-Entity.player.center()).length_squared() > 400: return
 
         self.stats.add(1, 10, 2)
-        Entity.player.resetCombat()
+        
         self.deactivate()
 
     def collideEnemies(self) -> None:
@@ -90,9 +88,15 @@ class Hookax(Power):
         '''If hookax hasn't collided yet and it's moving, verifies collision with structures.\n
            If collided, stops the instance.\n'''
         if self.hitted_entity != None: return
-        if not Entity.map.structExists(self.rect, 1): return
+        if self.speed_dir == pg.math.Vector2(0,0): return
 
-        self.speed_dir = pg.math.Vector2(0,0)
+        structs = Entity.map.getStructuresInRectInLayer(1,self.rect,(0,0))
+        for struct in structs:
+            if struct.mask.overlap_area(self.mask, struct.getPos()-self.pos) >= 40:
+                self.speed_dir = pg.math.Vector2(0,0)
+
+    def fitOutOfStructures(self) -> None:
+        return 
     
     def collisionUpdate(self) -> None:
         super().collisionUpdate()
@@ -148,6 +152,7 @@ class Hookax(Power):
         self.hitted_entity = None
         self.pulling = False
         self.pushing = False
+
         self.resetAction()
         return super().deactivate()
 
@@ -165,6 +170,10 @@ class Hookax(Power):
 
     def checkInputs(self, events: list[pg.event.Event]) -> None:
         for ev in events:
+            if ev.type == pg.MOUSEBUTTONDOWN:
+                if ev.button == 1:
+                    self.end_with_stab = True
+
             if ev.type == pg.KEYDOWN:
                 if ev.key == 101:
                     self.pulling = True

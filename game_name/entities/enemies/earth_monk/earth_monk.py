@@ -74,6 +74,7 @@ class EarthMonk( Enemy ):
 
     def defend(self) -> None:
         if self.action != 0: return
+        if self.stats.is_taking_damage: return
         if ent.Entity.player.action <= 0: return
 
         self.action = 6
@@ -82,6 +83,8 @@ class EarthMonk( Enemy ):
     def controlCombat(self) -> None:
         if self.action != 0: return
         if self.stats.is_taking_damage: return
+
+        if self.randomizer.randint(0,1000) < 100: return
 
         if self.stats.hasEnough(10,3) and self.randomizer.randint(0,1000) < 2:
             self.defend()
@@ -145,7 +148,7 @@ class EarthMonk( Enemy ):
 
         if self.action == 3:
             self.animator.changeUpdateCoeficient(12) 
-            if percentage > .7: self.current_attack.knockback = self.speed_dir*self.speed_value
+            if percentage > .7: self.current_attack.knockback = self.speed_dir*self.speed_value*4
             return
 
         if self.action == 4:

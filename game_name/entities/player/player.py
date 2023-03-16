@@ -65,6 +65,8 @@ class Player( ent.Entity ):
         self.meteor: meteor.Meteor = meteor.Meteor()
         self.hookax: Hookax = Hookax()
         self.Sprint: Sprint = Sprint()
+
+        self.tried_to_attack_while_hookax_push: bool = False
         
     def __str__(self) -> str:
         return super().__str__()+'.player'
@@ -77,7 +79,9 @@ class Player( ent.Entity ):
         if self.stats.is_taking_damage and Player.hurt_sound.get_num_channels() == 0:
             Player.hurt_sound.play()
 
-        if self.action == 1: # attacking            
+        if self.action == 1: # attacking
+            self.current_attack.damage = 1
+
             if int(self.animator.index_image) in [9,12,16]:
                 # attack sound.
                 if Player.hit_sound.get_num_channels() == 0: Player.hit_sound.play()
@@ -85,12 +89,9 @@ class Player( ent.Entity ):
                 self.current_attack.damage = 140
 
                 # attack movement.
-                self.complementSpeed(self.speed_dir*self.speed_value)
+                self.complementSpeed(self.speed_dir*self.speed_value*4)
                     
-            else: 
-                if Player.hit_sound.get_num_channels() > 0: Player.hit_sound.stop()
-
-                self.current_attack.damage = 0
+            elif Player.hit_sound.get_num_channels() > 0: Player.hit_sound.stop()
 
             return
 
@@ -129,7 +130,7 @@ class Player( ent.Entity ):
             self.animator.setRange( (22,26) )
             self.animator.resizeRange(3,4)
             return
-
+        
         if self.stats.is_taking_damage:
             self.animator.setRange( (90,93) )
             self.animator.resizeRange(2,3)
@@ -137,6 +138,7 @@ class Player( ent.Entity ):
 
         if self.action == 1:
             self.animator.setRange( (6,23) )
+            self.animator.setEAP( lambda: self.resetCombat() )
             return
 
         if self.action == 2:
@@ -202,7 +204,6 @@ class Player( ent.Entity ):
 
                 elif ev.key == 114: #ord('r')
                     self.launchHookax()
-                    self.action = 5
 
                 elif ev.key == ent.pg.K_SPACE:
                     self.slide()
@@ -228,11 +229,22 @@ class Player( ent.Entity ):
                     self.resetCombat()
 
 #            
+    def resetCombat(self) -> None:
+        super().resetCombat()
+
+        if self.tried_to_attack_while_hookax_push:
+            self.tried_to_attack_while_hookax_push = False
+            self.attack()
+
     def attack(self) -> None:
         '''Toogles player's attack, if possible.\n'''
-        if self.action == 0 and not self.stats.is_taking_damage:
+
+        if self.hookax.pushing:
+            self.tried_to_attack_while_hookax_push = True
+
+        if (self.action == 0 and not self.stats.is_taking_damage and self.attacks[0].canUse(self.stats)):
             self.action = 1
-            if self.attacks[0].canUse(self.stats): self.current_attack = self.attacks[0]
+            self.current_attack = self.attacks[0]
 
     def defend(self) -> None:
         '''Toggles player's defense, if possible.\n'''

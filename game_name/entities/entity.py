@@ -88,7 +88,7 @@ class Entity():
 
         self.alert_distance_squared: float = 0
 
-        self.action: int = 0
+        self._action: int = 0
 
         self.target: int = 0
         '''0-> no target.\n
@@ -111,6 +111,17 @@ class Entity():
     def center(self) -> pg.math.Vector2:
         '''Returns the center of the current sprite.\n'''
         return self.pos + pg.math.Vector2(self.animator.currentSpriteSize())*0.5
+
+    @property
+    def action(self) -> int:
+        return self._action
+    
+    @action.setter
+    def action(self, value: int) -> None:
+        if not isinstance(value, int): return
+        if value == 0 and self.action == 1:
+            pass
+        self._action = value 
 
 # movement.
     def complementSpeed(self, complement: pg.math.Vector2) -> None:
@@ -240,10 +251,6 @@ class Entity():
         if distance <= 10: return
 
         self.complementSpeed( distance_vec * speed_factor / distance )
-
-    def stopPull(self) -> None:
-        '''Stops entity's pulling.\n'''
-        self.resetAction()
 #
 
 # animation.

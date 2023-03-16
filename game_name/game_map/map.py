@@ -1,7 +1,6 @@
 from pytmx import load_pygame, TiledMap, TiledTileLayer, TiledObjectGroup, TiledObject
 import pygame as pg
 from game_name.game_map.structure import *
-from game_name.game_map.object import *
 import blitter as blt
 from math import ceil
 
@@ -46,13 +45,13 @@ class Layer():
         return structs
 
 class Map():
+
     def __init__(self, blitter: blt.Blitter) -> None:
         tmx: TiledMap = load_pygame('assets/map/map.tmx')
 
         blitter.camera.setMapSize( [tmx.width*tmx.tilewidth, tmx.height*tmx.tileheight] )
 
         self.layers: list[Layer] = []
-        self.objects: list[Object] = []
 
         self.map_size: tuple[float,float] = [tmx.width*tmx.tilewidth, tmx.height*tmx.tileheight]
         
@@ -61,7 +60,7 @@ class Map():
                 self.layers.append(Layer(layer, [tmx.width, tmx.height], [tmx.tilewidth, tmx.tileheight]))
             
             elif isinstance(layer, TiledObjectGroup):
-                for obj in layer: self.objects.append( Object(obj) )
+                pass
 
         self.miniature: pg.surface.Surface = pg.surface.Surface(self.map_size).convert()
         self.miniature.set_colorkey((0,0,0))
@@ -110,10 +109,6 @@ class Map():
             for struct in layer.getStructuresInRect(captureRect, [0,0]):
                 blitter.addImage(idx, struct.image, struct.getPos())
 
-        for obj in self.objects:
-            if captureRect.collidepoint( obj.pos ): obj.blit(blitter)
-
     def update(self, blitter: blt.Blitter, dt: float) -> None:
         self.blit(blitter)
-        updateObjs(dt)
     
