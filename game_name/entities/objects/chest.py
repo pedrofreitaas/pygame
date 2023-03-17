@@ -63,9 +63,11 @@ class Chest(Object):
     def __init__(self, pos: pg.math.Vector2, opened: bool=True, item_str: str='') -> None:
         super().__init__(pos, Entity.player.layer)
 
+        chest_sprites = ( (5,5), (0,0,5,5), (0,0,0,0,5,5) )
+
         self.animator = an.Animator( pg.image.load(spritesheets[0]).convert_alpha(),
                                      (48,32),
-                                     (5,5) )
+                                     choices(chest_sprites, (.33,.33,.33), k=1)[0] )
 
         self.interaction_key_ord: int = ord('c')
 

@@ -273,6 +273,7 @@ class Entity():
         
         if self.action == -1: self.animator.setEAP(lambda: self.die())
         if self.action == -2: self.animator.setEAP(lambda: self.resetAction())
+        if self.stats.is_taking_damage: self.resetAttack()
 # -------------------- #
 
 # effects.

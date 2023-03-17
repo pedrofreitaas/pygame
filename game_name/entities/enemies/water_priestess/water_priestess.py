@@ -12,8 +12,8 @@ class WaterPriestess(en.Enemy):
     def infoCode() -> str:
         return en.Enemy.infoCode()+'.water_priestess'
     
-    def __init__(self, pos: en.ent.pg.math.Vector2, layer: int=1, speed_value: float=100) -> None:
-        super().__init__(pos, layer, speed_value, 120, 60, 70)
+    def __init__(self, pos: en.ent.pg.math.Vector2, layer: int=1, speed_value: float=110) -> None:
+        super().__init__(pos, layer, speed_value, 120, 150, 100)
 
         self.animator = en.ent.an.Animator(en.ent.pg.image.load(spritesheet_path[0]).convert_alpha(),
                                            [288,128], 
@@ -203,6 +203,10 @@ class WaterPriestess(en.Enemy):
 
         self.animator.setRange( (0,7) )
 #
+
+    def die(self) -> None:
+        WaterPriestess.river_sound.stop()
+        return super().die()
 
     def damageSelf(self, attack: en.ent.Attack) -> None:
         if self.action == 7: #blocking

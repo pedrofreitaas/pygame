@@ -74,7 +74,9 @@ class Hookax(Power):
 
     def collideEnemies(self) -> None:
         '''If hookax hasn't collided yet and is moving, verifies enemy collision and sticks the hookax to the hitted enemy.\n'''
-        if self.hitted_entity != None: return
+        if self.hitted_entity != None: 
+            super().collideEnemies()
+            return
 
         for en in Entity.enemies:
             if self.damage_rect.colliderect(en.rect):
