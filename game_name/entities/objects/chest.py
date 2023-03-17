@@ -1,6 +1,17 @@
 from game_name.entities.objects.object import *
 from random import choices
 
+#items:
+from game_name.item import *
+from game_name.entities.player.powers.hookax import HookaxItem
+# ------------- #
+
+itemDict: dict[str:type] = {
+    '': Item,
+    'item': Item,
+    HookaxItem.infoCode(): HookaxItem
+}
+
 spritesheets = ['assets/entities/objects/chest/Chests.png']
 
 class Chest(Object):
@@ -41,7 +52,7 @@ class Chest(Object):
             entInfos[Chest.infoCode()]['x'].append(self.pos[0])
             entInfos[Chest.infoCode()]['y'].append(self.pos[1])
             entInfos[Chest.infoCode()]['opened'].append(self.isOpen())
-            entInfos[Chest.infoCode()]['item'].append(self.item)
+            entInfos[Chest.infoCode()]['item'].append(self.item.infoCode())
 
             with open('infos/game.json', 'w') as file: file.write( dumps(entInfos, indent=2) )
 #
@@ -49,7 +60,7 @@ class Chest(Object):
     def __str__(self) -> str:
         return Chest.infoCode()
 
-    def __init__(self, pos: pg.math.Vector2, opened: bool=True, item=None) -> None:
+    def __init__(self, pos: pg.math.Vector2, opened: bool=True, item_str: str='') -> None:
         super().__init__(pos, Entity.player.layer)
 
         self.animator = an.Animator( pg.image.load(spritesheets[0]).convert_alpha(),
@@ -67,9 +78,10 @@ class Chest(Object):
 
         self.interaction_key_surf_blit_pos: pg.math.Vector2 = self.pos + centroid1 - centroid2 - pg.math.Vector2(0, self.animator.image.get_size()[1])
 
-        self.item: None = item
-
         if opened: self.action = 2
+
+        try: self.item: Item = itemDict[item_str](self)
+        except KeyError: self.item: Item = Item(self)
 
     def controlAnimator(self) -> None:
         super().controlAnimator()
@@ -105,6 +117,8 @@ class Chest(Object):
         '''Finishes the opening animation and makes the chest stay opened.\n'''
         if self.action != 1: return
         self.action = 2
+
+        self.item.give(Entity.player)
 #
 
     def blit(self) -> None:

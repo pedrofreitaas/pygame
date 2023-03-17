@@ -61,11 +61,11 @@ class Player( ent.Entity ):
 
         # powers
         self.meteor: meteor.Meteor = meteor.Meteor()
-        self.hookax: Hookax = Hookax()
+        self.hookax: None|Hookax = None
         self.Sprint: Sprint = Sprint()
 
         self.tried_to_attack_while_hookax_push: bool = False
-        
+
     def __str__(self) -> str:
         return super().__str__()+'.player'
 
@@ -325,7 +325,8 @@ class Player( ent.Entity ):
     def update(self, events: list[ent.pg.event.Event]) -> None:
         self.meteor.update()
         self.Sprint.update(events)
-        self.hookax.update(events)
+
+        if self.hookax != None: self.hookax.update(events)
         
         super().update()
 
@@ -339,6 +340,8 @@ class Player( ent.Entity ):
         self.Sprint.use()
 
     def launchHookax(self) -> None:
+        if self.hookax == None: return
+
         if self.hookax.active: 
             self.cast()
             return

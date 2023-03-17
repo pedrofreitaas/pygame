@@ -1,5 +1,6 @@
 from game_name.entities.power import *
 from game_name.game_map.structure import *
+from game_name.item import *
 
 spritesheet = ['assets/entities/player/powers/hookax.png']
 
@@ -224,3 +225,25 @@ class Hookax(Power):
         self.pull()
         self.push()
         self.checkInputs(events)
+
+class HookaxItem(Item):
+    #exceptions:
+    class hookaxItemAlredyExists(ValueError): pass
+    # ---------- #
+    _count = 0
+
+    @classmethod
+    def infoCode(cls: 'HookaxItem') -> str:
+        return super().infoCode()+'.hookax'
+
+    def __init__(self, holder: Entity) -> None:
+        if HookaxItem._count != 0: raise HookaxItem.hookaxItemAlredyExists
+        super().__init__(holder)
+        HookaxItem._count += 1
+
+        if holder.isOpen(): Entity.player.hookax = Hookax()
+
+    def give(self, newHolder: Entity) -> None:
+        if not super().give(newHolder): return
+        if isinstance(newHolder, Entity.player.__class__):
+            Entity.player.hookax = Hookax()
