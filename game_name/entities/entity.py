@@ -1,6 +1,7 @@
 import pygame as pg
 import blitter as blt
 import animator as an
+from simpleAnimation import *
 from timer import *
 from game_name.extra import *
 from game_name.entities.stats import *
@@ -458,3 +459,12 @@ def updateObjects(events: list[pg.event.Event]) -> None:
     '''Updates all the registered objects.\n'''
     for obj in Entity.objects:
         obj.update(events)
+
+def updateAll(events: list[pg.event.Event], blit_minimap: bool, font: pg.font.Font) -> None:
+    updateEnemies()
+    updateObjects(events)
+    Entity.player.update(events)
+    
+    updateSimpleAnimations(Entity.dt)
+
+    if blit_minimap: blitMinimap(font)

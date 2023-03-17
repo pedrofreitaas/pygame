@@ -61,7 +61,9 @@ class Game():
 
         self.blitter: blt.Blitter = blt.Blitter(Game.display, 5)
         self.blitter.changeLayerCameraSensibility(self.blitter.lastLayer(), False)
+        
         Entity.blitter = self.blitter
+        SimpleAnimation.blitter = self.blitter
 
         self.clock: pg.time.Clock = pg.time.Clock()
 
@@ -158,14 +160,10 @@ class Game():
             
             self.treatEvents()
 
-            updateObjects(self.events)
-            Entity.player.update(self.events)
-            updateEnemies()
-            
+            updateAll(self.events, self.blit_minimap, self.fonts[3])
+
             self.map.update(self.blitter, self.dt)
 
             updateTimers(self.game_timers)
-
-            if self.blit_minimap: blitMinimap(self.fonts[3])
 
             self.blitter.update(self.dt, Entity.player.center())

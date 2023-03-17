@@ -3,6 +3,7 @@ from game_name.game_map.structure import *
 from game_name.item import *
 
 spritesheet = ['assets/entities/player/powers/hookax.png']
+sounds_path = ['assets/entities/player/powers/sounds/hookax_get.wav']
 
 class Hookax(Power):    
 
@@ -227,6 +228,9 @@ class Hookax(Power):
         self.checkInputs(events)
 
 class HookaxItem(Item):
+    get_sound: pg.mixer.Sound = pg.mixer.Sound(sounds_path[0])
+    get_sound.set_volume(0.3)
+
     #exceptions:
     class hookaxItemAlredyExists(ValueError): pass
     # ---------- #
@@ -243,7 +247,19 @@ class HookaxItem(Item):
 
         if holder.isOpen(): Entity.player.hookax = Hookax()
 
+        self.player_get_animation: SimpleAnimation = SimpleAnimation(self.holder.pos-pg.math.Vector2(0,20),
+                                                                     1,
+                                                                     pg.image.load(spritesheet[0]).convert_alpha(),
+                                                                     (80,80),
+                                                                     (1,5),
+                                                                     3,
+                                                                     (30,30))
+
     def give(self, newHolder: Entity) -> None:
         if not super().give(newHolder): return
+        
         if isinstance(newHolder, Entity.player.__class__):
+            self.player_get_animation.start()
+            HookaxItem.get_sound.play()
             Entity.player.hookax = Hookax()
+        
