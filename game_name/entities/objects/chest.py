@@ -17,7 +17,8 @@ class Chest(Object):
                 'quantity': 0,
                 'x': [],
                 'y': [],
-                'opened': []
+                'opened': [],
+                'item': []
             }
 
             with open('infos/game.json', 'w') as file: file.write( dumps(entInfos, indent=2) )
@@ -25,7 +26,7 @@ class Chest(Object):
     @classmethod
     def createInstanceWithDict(cls: 'Object', chestInfo: dict) -> 'Object':
         for i in range(chestInfo['quantity']):
-            cls(pg.math.Vector2( chestInfo['x'][i], chestInfo['y'][i]), chestInfo['opened'][i] )
+            cls(pg.math.Vector2( chestInfo['x'][i], chestInfo['y'][i]), chestInfo['opened'][i], chestInfo['item'][i] )
 
     @classmethod
     def handleJson(cls: 'Entity') -> None:
@@ -39,7 +40,8 @@ class Chest(Object):
             entInfos[Chest.infoCode()]['quantity'] += 1
             entInfos[Chest.infoCode()]['x'].append(self.pos[0])
             entInfos[Chest.infoCode()]['y'].append(self.pos[1])
-            entInfos[Chest.infoCode()]['opened'].append(self.action==2)
+            entInfos[Chest.infoCode()]['opened'].append(self.isOpen())
+            entInfos[Chest.infoCode()]['item'].append(self.item)
 
             with open('infos/game.json', 'w') as file: file.write( dumps(entInfos, indent=2) )
 #
@@ -47,7 +49,7 @@ class Chest(Object):
     def __str__(self) -> str:
         return Chest.infoCode()
 
-    def __init__(self, pos: pg.math.Vector2, opened: bool=True) -> None:
+    def __init__(self, pos: pg.math.Vector2, opened: bool=True, item=None) -> None:
         super().__init__(pos, Entity.player.layer)
 
         self.animator = an.Animator( pg.image.load(spritesheets[0]).convert_alpha(),
@@ -64,6 +66,8 @@ class Chest(Object):
         centroid2 = pg.math.Vector2( pg.mask.from_surface(self.interaction_key_surf).centroid() )
 
         self.interaction_key_surf_blit_pos: pg.math.Vector2 = self.pos + centroid1 - centroid2 - pg.math.Vector2(0, self.animator.image.get_size()[1])
+
+        self.item: None = item
 
         if opened: self.action = 2
 
@@ -82,30 +86,32 @@ class Chest(Object):
 
         self.animator.setRange((0,1))
 
-    def open(self) -> None:
-        if self.action != 0: return
-        self.action = 1
-
-    def end(self) -> None:
-        if self.action != 1: return
-        self.action = 2
-
     def interact(self) -> bool:
         if not super().interact(): return
 
         self.open()
 
+#
+    def isOpen(self) -> bool:
+        '''Returns true if the chest has passed to opening animation and is open.\n'''
+        return self.action==2
+
+    def open(self) -> None:
+        '''Starts the opening animation.\n'''
+        if self.action != 0: return
+        self.action = 1
+
+    def end(self) -> None:
+        '''Finishes the opening animation and makes the chest stay opened.\n'''
+        if self.action != 1: return
+        self.action = 2
+#
+
     def blit(self) -> None:
+        '''Blits both the chest and the interaction key interface.\n'''
         if self.can_interact and self.action == 0:
             Entity.blitter.addImage(self.layer, self.interaction_key_surf, self.interaction_key_surf_blit_pos)
 
         return super().blit()
     
-    def getInfoDict(self) -> dict:
-        return {
-            'x': self.pos[0],
-            'y': self.pos[1],
-            'opened': self.action==2
-        }
-
 Chest.handleJson()
