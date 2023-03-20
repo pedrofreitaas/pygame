@@ -15,6 +15,7 @@ itemDict: dict[str:type] = {
 spritesheets = ['assets/entities/objects/chest/Chests.png']
 
 class Chest(Object):
+    dict_is_cleared: bool = False
 #
     def infoCode() -> str:
         return Object.infoCode()+'.chest'
@@ -39,12 +40,11 @@ class Chest(Object):
         for i in range(chestInfo['quantity']):
             cls(pg.math.Vector2( chestInfo['x'][i], chestInfo['y'][i]), chestInfo['opened'][i], chestInfo['item'][i] )
 
-    @classmethod
-    def handleJson(cls: 'Entity') -> None:
-        super().handleJson()
-        Chest.saveEmptyDict()
-
     def __del__(self) -> None:
+        if not Chest.dict_is_cleared:
+            Chest.saveEmptyDict()
+            Chest.dict_is_cleared = True
+
         with open('infos/game.json', 'r') as file:
             entInfos = load(file)
 
