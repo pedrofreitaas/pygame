@@ -54,7 +54,7 @@ class Player( ent.Entity ):
 
         self.stats.setRegenFactor(3,1)
         self.stats.setRegenFactor(4,2)
-        self.stats.setRegenFactor(15,3)
+        self.stats.setRegenFactor(22,3)
 
         self.speed_boost: float = 160
         ent.Entity.player = self
@@ -73,6 +73,8 @@ class Player( ent.Entity ):
     def animationAction(self) -> None:
         '''Sets actions for the player according to the current animation stage.\n'''
         super().animationAction()
+
+        if not self.isMoving(): Player.footstep_sound.stop()
 
         if self.stats.is_taking_damage and Player.hurt_sound.get_num_channels() == 0:
             Player.hurt_sound.play()
@@ -108,10 +110,6 @@ class Player( ent.Entity ):
         if self.isMoving() and Player.footstep_sound.get_num_channels() == 0: 
             Player.footstep_sound.play()
             return
-        
-        if not self.isMoving() and Player.footstep_sound.get_num_channels() > 0:
-            Player.footstep_sound.stop()
-            return        
 
     def controlAnimator(self) -> None:
         '''Changes sprite animation based in the entity's behavior.\n'''
@@ -165,7 +163,7 @@ class Player( ent.Entity ):
         '''Player movement gets faster while the player is running.\n'''
         if self.speed_dir == pg.math.Vector2(0,0) or self.getLockMovement(): return super().getMovementSpeed()
 
-        self.stats.spend(Entity.dt, 1, 3)
+        self.stats.spend(Entity.dt, .25, 3)
         return self.speed_dir.normalize()*self.speed_boost*self.stats.getPercentage(3)*Entity.dt + super().getMovementSpeed()
     
     def checkInputs(self, events: list[ent.pg.event.Event]) -> None:
@@ -241,7 +239,7 @@ class Player( ent.Entity ):
     def attack(self) -> None:
         '''Toogles player's attack, if possible.\n'''
 
-        if self.hookax.pushing: 
+        if self.hookax != None and self.hookax.pushing: 
             self.tried_to_attack_while_hookax_push = True
 
         if (self.action == 0 and not self.stats.is_taking_damage and self.attacks[0].canUse(self.stats)):
