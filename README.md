@@ -22,8 +22,6 @@ This is a game made in python, with the help of pygame library.
 
 ![](https://imgur.com/a/7Im2p4w)
 
-![](https://imgur.com/VoHtPEI)
-![](https://imgur.com/w93lnzF)
-![](https://imgur.com/r1JDL8I)
-![](https://imgur.com/r1JDL8I)
+![Alt Text](https://imgur.com/5WbWYTf)
+
 
