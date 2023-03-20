@@ -22,6 +22,4 @@ This is a game made in python, with the help of pygame library.
 
 ![](https://imgur.com/a/7Im2p4w)
 
-![Alt Text](https://imgur.com/5WbWYTf)
-
-
+![Alt text](https://i.imgur.com/5WbWYTf.png "Earth Monk and player")
