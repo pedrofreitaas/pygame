@@ -30,6 +30,7 @@ class Sprint(Power):
     def use(self) -> bool:
         if not super().use(): return
         Entity.player.speed_value += self.speed_boost
+        self.pos = Entity.player.pos + pg.math.Vector2(Entity.player.mask.centroid()) - (pg.math.Vector2(self.animator.currentSpriteSize())/2)
     
     def controlAnimator(self) -> None:
         super().controlAnimator()

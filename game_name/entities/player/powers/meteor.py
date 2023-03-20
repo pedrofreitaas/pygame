@@ -40,8 +40,8 @@ class Meteor(Power):
         self.pos_explode_timer_index: int = len(self.timers)
         self.timers.append(Timer(self.explode_time, lambda: self.deactivate(), -1))
 
-        self.trigger_key: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('e', False) )
-        self.trigger_key_pressed: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('e', True) )
+        self.trigger_key: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('t', False) )
+        self.trigger_key_pressed: pg.surface.Surface = pg.transform.scale2x( keyboardIcons.getLetter('t', True) )
 
         self.trigger_image: pg.surface.Surface = pg.image.load(meteor_icon_path).convert_alpha()
 

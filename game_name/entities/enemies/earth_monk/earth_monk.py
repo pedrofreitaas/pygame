@@ -1,5 +1,6 @@
 from game_name.entities.enemies.enemy import *
 from io import open
+from game_name.entities.enemies.earth_monk.bulldoze import *
 from random import choices
 
 spritesheet_path = ['assets/entities/enemies/earthmonk/earthmonk288x128.png']
@@ -35,6 +36,9 @@ class EarthMonk( Enemy ):
         self.stats.setRegenFactor(1.2, 1)
         self.stats.setRegenFactor(4, 2)
         self.stats.setRegenFactor(7, 3)
+
+        #powers
+        self.bulldoze: Bulldoze = Bulldoze(self.stats)
 
     def loadSprites(self) -> None:
         '''Loads entity's sprites.\n'''
@@ -84,7 +88,11 @@ class EarthMonk( Enemy ):
         if self.action != 0: return
         if self.stats.is_taking_damage: return
 
-        if self.randomizer.randint(0,1000) < 100: return
+        if self.randomizer.randint(0,1000) < 250: return
+
+        if self.bulldoze.canUse(self.distance_to_player_squared):
+            self.action = 7
+            return
 
         if self.stats.hasEnough(10,3) and self.randomizer.randint(0,1000) < 2:
             self.defend()
@@ -166,6 +174,10 @@ class EarthMonk( Enemy ):
             if not self.stats.hasEnough(5, 3) or self.randomizer.randint(0,1000) < 2: self.resetCombat()
             return
 
+        if self.action == 7:
+            if percentage > .4: self.animator.changeUpdateCoeficient( self.animator.upd_coeficient*.5)
+            return
+
     def controlAnimator(self) -> None:
         super().controlAnimator()
         self.animationAction()
@@ -208,11 +220,24 @@ class EarthMonk( Enemy ):
             self.animator.resizeRange(4,9)
             return
         
+        if self.action == 7:
+            self.animator.setRange( self.animaton_ranges['meditate'] )
+            self.animator.setEAP(lambda: self.launchBulldoze())
+            return
+        
         if self.isMoving():
             self.animator.setRange( self.animaton_ranges['run'] )
             return
 
         self.animator.setRange( self.animaton_ranges['idle'] )
-#
+
+    def launchBulldoze(self) -> None:
+        '''Launches bulldoze attack.\n'''
+        self.bulldoze.use(self.center(), self.distance_to_player_squared)
+        self.resetAction()
+
+    def update(self) -> None:
+        self.bulldoze.update()
+        return super().update()
 
 EarthMonk.handleJson()

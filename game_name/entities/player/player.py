@@ -201,7 +201,7 @@ class Player( ent.Entity ):
                 elif ev.key == 100: #ord('d')
                     self.speed_dir[0] += 1
 
-                elif ev.key == 101: #ord('e')
+                elif ev.key == 116: #ord('t')
                     self.cast()
 
                 elif ev.key == 114: #ord('r')
@@ -227,7 +227,7 @@ class Player( ent.Entity ):
                 elif ev.key == 100: #ord('d')
                     self.speed_dir[0] -= 1
 
-                elif ev.key == 101: #ord('e')
+                elif ev.key == 116: #ord('e')
                     self.resetCombat()
 
 #            
