@@ -1,0 +1,96 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Ubuntu', sans-serif;
+}
+
+body {
+    background-color: #e0e0cbe4;
+}
+
+#main_title {
+    margin: 10px;
+    top: 80px;
+    text-align: center;
+    font-weight: normal;
+    font-size: 24px;
+}
+
+#sprites_claim {
+    width: 100%;
+    font-weight: normal;
+    font-size: 18px;
+    text-align: right;
+    margin: 10px;
+}
+
+#all_powers {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    max-width: 1800px;
+}
+
+.power_show {
+    width: 400px; height: 350px;
+    padding-top: 20px; padding-left: 20px;
+    border-radius: 9px;
+    margin: 10px;
+    background-color: #FFFFFF;
+    text-align: justify;
+    box-shadow: 10px 10px #969695;
+    backdrop-filter: blur(2px);
+}
+
+.power_show_paragraph {
+    margin: 10px;
+}
+
+#power_description {
+    text-align: justify;
+    left: 20px;
+    max-width: 350px;
+    line-height: 1.5;
+    font-weight: 350;
+    font-size: 16px;
+    margin: 10px;
+}
+
+#game_show{
+    display: flex;
+}
+
+#meteor_gif, #hookax_gif, #animations_gif, #sprint_gif {
+    width: 300px;
+    border-radius: 5px;
+    margin: 10px;
+}
+
+#meteor_gif:hover, #hookax_gif:hover, #animations_gif:hover, #sprint_gif:hover {
+    transform: scale(2.5) translate(150px, 0px);
+    border: 2px black solid; 
+}
+
+#minimap_img {
+    position: relative;
+    width: 800px; height: 600px;
+    top: 300px; left: 50px;
+    z-index: -1;
+}
+
+#sup_border, #inf_border {
+    width: 100%; height: 50px;
+    background-color: #121694d7;
+}
+
+#sup_border {
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+#inf_border {
+    bottom: 100%;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}

@@ -9,7 +9,7 @@ pg.mixer.init(1000, 0, 16, 2048)
 
 #Display.
 flags = pg.SCALED | pg.DOUBLEBUF
-sizeDisplay = [1120, 630]
+sizeDisplay = (1366, 768) #[1120, 630]
 screen = pg.display.set_mode( (sizeDisplay[0],sizeDisplay[1]), flags )
 
 #importing entities.
