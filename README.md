@@ -8,8 +8,8 @@ This is a game made in python, with the help of pygame library.
 
 ## 🛠 Languages:
 ![](https://img.shields.io/badge/-python-white?logo=python&logoColor=blue&style=flat)
-![](https://img.shields.io/badge/-python-white?logo=html&logoColor=blue&style=flat)
-![](https://img.shields.io/badge/-python-white?logo=css&logoColor=blue&style=flat)
+![](https://img.shields.io/badge/-HTML-white?logo=html5&logoColor=orange&style=flat)
+![](https://img.shields.io/badge/-CSS-white?logo=css3&logoColor=blue&style=flat)
 
 
 ## 🔗 Gameplay DEMO Links
